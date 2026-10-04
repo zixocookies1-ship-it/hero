@@ -30,11 +30,10 @@ export default function Home() {
           <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-6">
             The New Age of Indian Jaggery
           </p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-[var(--dark-text)] leading-tight mb-6">
-            Experience Authentic
-            <span className="text-[var(--jaggery-brown)]">Jaggery</span>
-            Like Never Before
-          </h1>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-[var(--dark-text)] leading-tight mb-6">
+              Experience Authentic
+              <span className="block text-[var(--jaggery-brown)]">Indian Jaggery</span>
+            </h1>
           <p className="text-lg md:text-xl text-[var(--dark-text)]/80 max-w-2xl mx-auto mb-8 leading-relaxed">
             Premium, naturally processed jaggery from the finest Indian sugarcane farms. 
             A modern twist on tradition, crafted for everyday enjoyment.

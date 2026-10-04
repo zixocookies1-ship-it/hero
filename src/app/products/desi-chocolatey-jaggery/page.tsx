@@ -15,7 +15,7 @@ export default function ProductPage() {
                 className="rounded-2xl object-cover mb-6"
               />
             </div>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--dark-text)]">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-[var(--dark-text)]">
               Desi Chocolatey Jaggery
             </h1>
             <p className="text-[var(--ginger-terracotta)] text-sm font-medium uppercase mb-4">
