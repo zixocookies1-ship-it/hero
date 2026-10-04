@@ -1,11 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
     --background: #F7F1E7;
     --foreground: #24211D;
+    --jaggery-brown: #5A321F;
+    --ginger-terracotta: #C87945;
+    --warm-cream: #F7F1E7;
+    --natural-green: #314C38;
+    --dark-text: #24211D;
+    --white: #FFFFFF;
   }
 
   @theme inline {
@@ -22,9 +26,56 @@
     --font-body: "Inter", "Manrope", sans-serif;
   }
 
+  * {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl xl:text-7xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+
+  img {
+    @apply max-w-full h-auto;
+  }
+
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  button {
+    @apply transition-all duration-200 ease-in-out;
   }
 }

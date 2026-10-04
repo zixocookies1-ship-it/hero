@@ -4,8 +4,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-2 md:col-span-1">
-            <h3 className="text-xl font-serif font-bold text-[var(--white)] mb-6">
-              Nature's Choice
+            <h3 className="text-xl font-heading font-bold text-[var(--white)] mb-6">
+              Nature's Choice Jaggery
             </h3>
             <p className="text-[var(--white)]/80 text-base leading-relaxed">
               Premium, naturally processed jaggery from the finest Indian sugarcane farms. 
@@ -29,18 +29,21 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-serif font-bold text-[var(--white)] mb-5">
+            <h4 className="text-lg font-heading font-bold text-[var(--white)] mb-5 tracking-wide uppercase">
               Company
             </h4>
             <ul className="space-y-3 text-[var(--white)]/70 text-sm">
               <li className="hover:text-[var(--ginger-terracotta)] transition-colors">
-                About Us
+                <a href="/">HOME</a>
               </li>
               <li className="hover:text-[var(--ginger-terracotta)] transition-colors">
-                Our Story
+                <a href="/about">ABOUT</a>
               </li>
               <li className="hover:text-[var(--ginger-terracotta)] transition-colors">
-                Sourcing
+                <a href="/contact">CONTACT</a>
+              </li>
+              <li className="hover:text-[var(--ginger-terracotta)] transition-colors">
+                <a href="/cart">CART</a>
               </li>
             </ul>
           </div>
