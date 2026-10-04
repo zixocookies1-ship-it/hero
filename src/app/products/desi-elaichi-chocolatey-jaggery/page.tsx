@@ -22,7 +22,7 @@ export default function ProductPage() {
               Jaggery × Chocolate × Green Cardamom
             </p>
             <p className="text-[var(--dark-text)]/80 text-base leading-relaxed mb-6">
-              Aromatic blend of jaggery, chocolate and green cardamom. Made using 
+              Desi Elaichi Chocolatey Jaggery Gud, Gur | Pure, Natural & Organic Sweetener | Gluten-Free Energy Booster | Nature's Candy | No Preservatives, No Chemicals (Desi Elaichi & Sonth Chocolatey Gud, Pack of 1). Made using 
               the gold-kettle method in pure clay pots.
             </p>
             <div className="grid grid-cols-2 gap-4 mb-8">
@@ -84,6 +84,7 @@ export default function ProductPage() {
     </main>
   );
 }
+
 
 
 
