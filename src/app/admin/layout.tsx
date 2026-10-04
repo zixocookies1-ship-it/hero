@@ -3,9 +3,5 @@
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang='en'>
-      <body className='bg-gray-50'>{children}</body>
-    </html>
-  );
+  return <div className="min-h-screen bg-gray-50">{children}</div>;
 }
