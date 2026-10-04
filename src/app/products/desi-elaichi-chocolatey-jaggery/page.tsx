@@ -8,21 +8,21 @@ export default function ProductPage() {
           <div>
             <div className="mb-6">
               <Image
-                src="/images/product1/01.jpeg"
-                alt="Desi Chocolatey Jaggery 500g"
+                src="/images/product 2/01.jpeg"
+                alt="Desi Elaichi Chocolatey Jaggery 500g"
                 width={600}
                 height={400}
                 className="rounded-2xl object-cover mb-6"
               />
             </div>
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--dark-text)]">
-              Desi Chocolatey Jaggery
+              Desi Elaichi Chocolatey Jaggery
             </h1>
             <p className="text-[var(--ginger-terracotta)] text-sm font-medium uppercase mb-4">
-              Classic Deep Brown
+              Jaggery × Chocolate × Green Cardamom
             </p>
             <p className="text-[var(--dark-text)]/80 text-base leading-relaxed mb-6">
-              Rich, traditional flavour with notes of caramel and molasses. Made using 
+              Aromatic blend of jaggery, chocolate and green cardamom. Made using 
               the gold-kettle method in pure clay pots.
             </p>
             <div className="grid grid-cols-2 gap-4 mb-8">
@@ -48,7 +48,7 @@ export default function ProductPage() {
             <div>
               <p className="text-[var(--ginger-terracotta)] font-medium">Description</p>
               <p className="text-[var(--dark-text)]/80 text-base leading-relaxed">
-                Our Desi Chocolatey Jaggery is the epitome of traditional Indian sweetness. 
+                Our Desi Elaichi Chocolatey Jaggery is the epitome of traditional Indian sweetness. 
                 Made from organically grown sugarcane in the fertile fields of Maharashtra, 
                 this jaggery is processed using the ancient gold-kettle method in pure. 
                 clay pots over natural wood fire, which preserves the natural molasses and 
@@ -84,6 +84,7 @@ export default function ProductPage() {
     </main>
   );
 }
+
 
 
 
