@@ -32,7 +32,7 @@ export default function Featured() {
                 Our most popular blend - rich and authentic.
               </p>
               <p className="text-[var(--jaggery-brown)] font-medium">
-                â‚¹239
+                ₹239
               </p>
             </div>
           </div>
@@ -56,7 +56,7 @@ export default function Featured() {
                 Cardamom-infused sweetness.
               </p>
               <p className="text-[var(--jaggery-brown)] font-medium">
-                â‚¹239
+                ₹239
               </p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function Featured() {
                 Sesame-enriched goodness.
               </p>
               <p className="text-[var(--jaggery-brown)] font-medium">
-                â‚¹239
+                ₹239
               </p>
             </div>
           </div>
@@ -89,6 +89,8 @@ export default function Featured() {
     </section>
   );
 }
+
+
 
 
 

@@ -25,7 +25,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹239</p>
+                <p className="text-[var(--jaggery-brown)] font-medium">₹239</p>
               </div>
             </div>
 
@@ -45,7 +45,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹239</p>
+                <p className="text-[var(--jaggery-brown)] font-medium">₹239</p>
               </div>
             </div>
 
@@ -65,7 +65,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹239</p>
+                <p className="text-[var(--jaggery-brown)] font-medium">₹239</p>
               </div>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between text-sm text-[var(--dark-text)]/80">
               <span>Subtotal</span>
-              <span>â‚¹657</span>
+              <span>₹657</span>
             </div>
             <div className="flex justify-between text-sm font-medium text-[var(--dark-text)]">
               <span>Shipping</span>
@@ -85,7 +85,7 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between font-bold text-2xl text-[var(--jaggery-brown)]">
               <span>Total</span>
-              <span>â‚¹657</span>
+              <span>₹657</span>
             </div>
           </div>
         </div>
@@ -101,6 +101,8 @@ export default function CartPage() {
     </main>
   );
 }
+
+
 
 
 

@@ -21,23 +21,23 @@ export default function TrioBundle() {
                 <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-3">Desi Chocolatey</p>
                 <h3 className="text-xl font-serif text-[var(--white)]">Classic Deep Brown</h3>
                 <p className="text-[var(--white)]/80 text-base">500g Ã— 1</p>
-                <p className="text-[var(--white)] font-medium text-3xl">â‚¹239</p>
+                <p className="text-[var(--white)] font-medium text-3xl">₹239</p>
               </div>
               <div className="border border-border-style rounded-xl p-6 bg-[var(--white)] hover:shadow-lg transition-shadow">
                 <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-3">Desi Elaichi</p>
                 <h3 className="text-xl font-serif text-[var(--white)]">Cardamom Infused</h3>
                 <p className="text-[var(--white)]/80 text-base">500g Ã— 1</p>
-                <p className="text-[var(--white)] font-medium text-3xl">â‚¹239</p>
+                <p className="text-[var(--white)] font-medium text-3xl">₹239</p>
               </div>
               <div className="border border-border-style rounded-xl p-6 bg-[var(--white)] hover:shadow-lg transition-shadow">
                 <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-3">Desi Til</p>
                 <h3 className="text-xl font-serif text-[var(--white)]">Nutty Sesame</h3>
                 <p className="text-[var(--white)]/80 text-base">500g Ã— 1</p>
-                <p className="text-[var(--white)] font-medium text-3xl">â‚¹239</p>
+                <p className="text-[var(--white)] font-medium text-3xl">₹239</p>
               </div>
             </div>
             <div className="mt-8 pt-8 border-t border-border-style">
-              <p className="text-[var(--white)]/70 text-base mb-4">You Save: â‚¹45</p>
+              <p className="text-[var(--white)]/70 text-base mb-4">You Save: ₹45</p>
               <a
                 href="/cart"
                 className="bg-[var(--ginger-terracotta)] text-[var(--white)] px-8 py-4 rounded-full text-lg font-semibold transition-colors hover-opacity-90"
@@ -60,6 +60,8 @@ export default function TrioBundle() {
     </section>
   );
 }
+
+
 
 
 

@@ -28,7 +28,7 @@ export default function ProductPage() {
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div>
                 <p className="text-[var(--ginger-terracotta)] font-medium">Price</p>
-                <p className="text-3xl font-bold text-[var(--jaggery-brown)]">â‚¹239</p>
+                <p className="text-3xl font-bold text-[var(--jaggery-brown)]">₹239</p>
               </div>
               <div>
                 <p className="text-[var(--ginger-terracotta)] font-medium">Weight</p>
@@ -84,6 +84,8 @@ export default function ProductPage() {
     </main>
   );
 }
+
+
 
 
 

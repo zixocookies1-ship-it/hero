@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 
 export default function ProductsPage() {
@@ -25,7 +25,7 @@ export default function ProductsPage() {
             <div className="p-6">
               <p className="text-[var(--ginger-terracotta)] text-xs font-medium uppercase mb-2">Desi Chocolatey Gud</p>
               <h2 className="text-lg font-serif font-bold text-[var(--dark-text)] mb-2">Desi Chocolatey Jaggery</h2>
-              <p className="text-[var(--dark-text)]/70 text-sm mb-4">500g • Pack of 1</p>
+              <p className="text-[var(--dark-text)]/70 text-sm mb-4">500g â€¢ Pack of 1</p>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xl font-bold text-[var(--jaggery-brown)]">₹239</span>
                 <span className="text-sm line-through text-gray-500">₹299</span>
@@ -48,7 +48,7 @@ export default function ProductsPage() {
             <div className="p-6">
               <p className="text-[var(--ginger-terracotta)] text-xs font-medium uppercase mb-2">Desi Elaichi &amp; Sonth Chocolatey Gud</p>
               <h2 className="text-lg font-serif font-bold text-[var(--dark-text)] mb-2">Desi Elaichi Chocolatey Jaggery</h2>
-              <p className="text-[var(--dark-text)]/70 text-sm mb-4">500g • Pack of 1</p>
+              <p className="text-[var(--dark-text)]/70 text-sm mb-4">500g â€¢ Pack of 1</p>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xl font-bold text-[var(--jaggery-brown)]">₹239</span>
                 <span className="text-sm line-through text-gray-500">₹299</span>
@@ -71,7 +71,7 @@ export default function ProductsPage() {
             <div className="p-6">
               <p className="text-[var(--ginger-terracotta)] text-xs font-medium uppercase mb-2">Desi Til Chocolatey Gud</p>
               <h2 className="text-lg font-serif font-bold text-[var(--dark-text)] mb-2">Desi Til Chocolatey Jaggery</h2>
-              <p className="text-[var(--dark-text)]/70 text-sm mb-4">500g • Pack of 1</p>
+              <p className="text-[var(--dark-text)]/70 text-sm mb-4">500g â€¢ Pack of 1</p>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xl font-bold text-[var(--jaggery-brown)]">₹239</span>
                 <span className="text-sm line-through text-gray-500">₹299</span>
@@ -87,3 +87,5 @@ export default function ProductsPage() {
     </main>
   );
 }
+
+
