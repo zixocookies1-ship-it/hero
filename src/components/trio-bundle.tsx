@@ -21,13 +21,13 @@ export default function TrioBundle() {
                 <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-3">Desi Chocolatey</p>
                 <h3 className="text-xl font-serif text-[var(--white)]">Classic Deep Brown</h3>
                 <p className="text-[var(--white)]/80 text-base">500g Ã— 1</p>
-                <p className="text-[var(--white)] font-medium text-3xl">â‚¹199</p>
+                <p className="text-[var(--white)] font-medium text-3xl">â‚¹239</p>
               </div>
               <div className="border border-border-style rounded-xl p-6 bg-[var(--white)] hover:shadow-lg transition-shadow">
                 <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-3">Desi Elaichi</p>
                 <h3 className="text-xl font-serif text-[var(--white)]">Cardamom Infused</h3>
                 <p className="text-[var(--white)]/80 text-base">500g Ã— 1</p>
-                <p className="text-[var(--white)] font-medium text-3xl">â‚¹219</p>
+                <p className="text-[var(--white)] font-medium text-3xl">â‚¹239</p>
               </div>
               <div className="border border-border-style rounded-xl p-6 bg-[var(--white)] hover:shadow-lg transition-shadow">
                 <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-3">Desi Til</p>
@@ -60,3 +60,7 @@ export default function TrioBundle() {
     </section>
   );
 }
+
+
+
+

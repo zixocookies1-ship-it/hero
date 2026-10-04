@@ -25,7 +25,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹199</p>
+                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹239</p>
               </div>
             </div>
 
@@ -45,7 +45,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹219</p>
+                <p className="text-[var(--jaggery-brown)] font-medium">â‚¹239</p>
               </div>
             </div>
 
@@ -101,3 +101,6 @@ export default function CartPage() {
     </main>
   );
 }
+
+
+
