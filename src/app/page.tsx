@@ -19,7 +19,7 @@ export default function Home() {
       {/* 1. HERO */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[var(--warm-cream)] to-[var(--white)]">
         <Image
-          src="/images/product1/01.jpeg"
+          src="/images/hero banner.png"
           alt="Nature's Choice Jaggery premium product"
           width={800}
           height={600}
@@ -97,4 +97,5 @@ export default function Home() {
     </main>
   );
 }
+
 
