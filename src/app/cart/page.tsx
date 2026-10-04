@@ -13,7 +13,7 @@ export default function CartPage() {
             <div className="flex items-center justify-between border-b border-border-style pb-4 last:border-0">
               <div className="flex items-center gap-4">
                 <Image
-                  src="/desi-chocolatey-jaggery-02.jpeg"
+                  src="/images/product1/02.jpeg"
                   alt="Desi Chocolatey Jaggery"
                   width={80}
                   height={80}
@@ -33,7 +33,7 @@ export default function CartPage() {
             <div className="flex items-center justify-between border-b border-border-style pb-4 last:border-0">
               <div className="flex items-center gap-4">
                 <Image
-                  src="/desi-elaichi-chocolatey-jaggery-02.jpeg"
+                  src="/images/product 2/02.jpeg"
                   alt="Desi Elaichi Jaggery"
                   width={80}
                   height={80}
@@ -53,7 +53,7 @@ export default function CartPage() {
             <div className="flex items-center justify-between border-b border-border-style pb-4 last:border-0">
               <div className="flex items-center gap-4">
                 <Image
-                  src="/desi-til-chocolatey-jaggery-02.jpeg"
+                  src="/images/product 3/11.jpg.jpeg"
                   alt="Desi Til Jaggery"
                   width={80}
                   height={80}
@@ -101,6 +101,7 @@ export default function CartPage() {
     </main>
   );
 }
+
 
 
 

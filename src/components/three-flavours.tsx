@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 
 export default function ThreeFlavours() {
   return (
@@ -15,7 +15,7 @@ export default function ThreeFlavours() {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
           <div className='group hover:translate-y-[-10px] transition-transform duration-300 border border-border-style rounded-2xl overflow-hidden bg-[var(--warm-cream)]'>
             <Image
-              src='/desi-chocolatey-jaggery-01.jpeg'
+              src='/images/product1/01.jpeg'
               alt='Desi chocolatey jaggery'
               width={400}
               height={300}
@@ -35,7 +35,7 @@ export default function ThreeFlavours() {
           </div>
           <div className='group hover:translate-y-[-10px] transition-transform duration-300 border border-border-style rounded-2xl overflow-hidden bg-[var(--warm-cream)]'>
             <Image
-              src='/desi-elaichi-chocolatey-jaggery-01.jpeg'
+              src='/images/product 2/01.jpeg'
               alt='Desi elaichi jaggery'
               width={400}
               height={300}
@@ -55,7 +55,7 @@ export default function ThreeFlavours() {
           </div>
           <div className='group hover:translate-y-[-10px] transition-transform duration-300 border border-border-style rounded-2xl overflow-hidden bg-[var(--warm-cream)]'>
             <Image
-              src='/desi-til-chocolatey-jaggery-01.jpeg'
+              src='/images/product 3/01 (1).jpeg'
               alt='Desi til jaggery'
               width={400}
               height={300}
@@ -78,3 +78,4 @@ export default function ThreeFlavours() {
     </section>
   );
 }
+

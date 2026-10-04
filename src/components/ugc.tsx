@@ -16,7 +16,7 @@ export default function UGC() {
           <div className="border border-border-style rounded-2xl p-6 bg-white hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
               <Image
-                src="/desi-chocolatey-jaggery-02.jpeg"
+                src="/images/product1/02.jpeg"
                 alt="UGC post 1"
                 width={80}
                 height={80}
@@ -38,7 +38,7 @@ export default function UGC() {
           <div className="border border-border-style rounded-2xl p-6 bg-white hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
               <Image
-                src="/desi-elaichi-chocolatey-jaggery-02.jpeg"
+                src="/images/product 2/02.jpeg"
                 alt="UGC post 2"
                 width={80}
                 height={80}
@@ -60,7 +60,7 @@ export default function UGC() {
           <div className="border border-border-style rounded-2xl p-6 bg-white hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
               <Image
-                src="/desi-til-chocolatey-jaggery-02.jpeg"
+                src="/images/product 3/11.jpg.jpeg"
                 alt="UGC post 3"
                 width={80}
                 height={80}
@@ -83,3 +83,4 @@ export default function UGC() {
     </section>
   );
 }
+

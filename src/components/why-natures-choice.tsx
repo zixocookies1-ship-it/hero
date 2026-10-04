@@ -45,7 +45,7 @@ export default function WhyNaturesChoice() {
           </div>
           <div className="relative">
             <Image
-              src="/desi-chocolatey-jaggery-03.jpeg"
+              src="/images/product1/03.jpeg"
               alt="Premium jaggery products"
               width={600}
               height={400}
@@ -57,3 +57,4 @@ export default function WhyNaturesChoice() {
     </section>
   );
 }
+

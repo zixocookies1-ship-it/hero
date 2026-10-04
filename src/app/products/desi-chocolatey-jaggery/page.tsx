@@ -8,7 +8,7 @@ export default function ProductPage() {
           <div>
             <div className="mb-6">
               <Image
-                src="/desi-chocolatey-jaggery-01.jpeg"
+                src="/images/product1/01.jpeg"
                 alt="Desi Chocolatey Jaggery 500g"
                 width={600}
                 height={400}
@@ -84,6 +84,7 @@ export default function ProductPage() {
     </main>
   );
 }
+
 
 
 

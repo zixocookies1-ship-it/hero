@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import TrustStrip from "@/components/trust-strip";
 import ThreeFlavours from "@/components/three-flavours";
 import WhyNaturesChoice from "@/components/why-natures-choice";
@@ -19,7 +19,7 @@ export default function Home() {
       {/* 1. HERO */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[var(--warm-cream)] to-[var(--white)]">
         <Image
-          src="/desi-chocolatey-jaggery-01.jpeg"
+          src="/images/product1/01.jpeg"
           alt="Nature's Choice Jaggery premium product"
           width={800}
           height={600}
@@ -97,3 +97,4 @@ export default function Home() {
     </main>
   );
 }
+

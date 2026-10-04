@@ -48,7 +48,7 @@ export default function TrioBundle() {
           </div>
           <div className="relative">
             <Image
-              src="/desi-chocolatey-jaggery-05.jpeg"
+              src="/images/product1/05.jpeg"
               alt="Trio bundle"
               width={600}
               height={400}
@@ -60,6 +60,7 @@ export default function TrioBundle() {
     </section>
   );
 }
+
 
 
 

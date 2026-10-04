@@ -15,7 +15,7 @@ export default function Featured() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="border border-border-style rounded-2xl overflow-hidden bg-white hover:shadow-lg transition-shadow">
             <Image
-              src="/desi-chocolatey-jaggery-04.jpeg"
+              src="/images/product1/04.jpeg"
               alt="Best seller jaggery"
               width={400}
               height={300}
@@ -39,7 +39,7 @@ export default function Featured() {
 
           <div className="border border-border-style rounded-2xl overflow-hidden bg-white hover:shadow-lg transition-shadow">
             <Image
-              src="/desi-elaichi-chocolatey-jaggery-03.jpeg"
+              src="/images/product 2/03.jpeg"
               alt="Elaichi jaggery"
               width={400}
               height={300}
@@ -63,7 +63,7 @@ export default function Featured() {
 
           <div className="border border-border-style rounded-2xl overflow-hidden bg-white hover:shadow-lg transition-shadow">
             <Image
-              src="/desi-til-chocolatey-jaggery-03.jpeg"
+              src="/images/product 3/2-01.jpg.jpeg"
               alt="Til jaggery"
               width={400}
               height={300}
@@ -89,6 +89,7 @@ export default function Featured() {
     </section>
   );
 }
+
 
 
 

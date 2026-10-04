@@ -35,7 +35,7 @@ export default function OurStoryPreview() {
           </div>
           <div className="relative">
             <Image
-              src="/desi-elaichi-chocolatey-jaggery-06.jpeg"
+              src="/images/product 2/06.jpeg"
               alt="Founder story"
               width={600}
               height={400}
@@ -47,3 +47,4 @@ export default function OurStoryPreview() {
     </section>
   );
 }
+

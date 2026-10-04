@@ -58,7 +58,7 @@ export default function FarmToJar() {
           </div>
           <div className="relative">
             <Image
-              src="/desi-chocolatey-jaggery-06.jpeg"
+              src="/images/product1/06.jpeg"
               alt="Farm to jar process"
               width={600}
               height={400}
@@ -70,3 +70,4 @@ export default function FarmToJar() {
     </section>
   );
 }
+
