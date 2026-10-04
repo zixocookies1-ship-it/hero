@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id                String      @id @default(cuid())
+  name              String
+  slug              String      @unique
+  shortDescription  String
+  fullDescription   String
+  price             Decimal
+  compareAtPrice    Decimal?
+  weight            String
+  sku               String      @unique
+  stockQuantity     Int         @default(0)
+  lowStockThreshold Int         @default(5)
+  images            String
+  ingredients       String
+  nutritionInfo     String
+  storageInfo       String
+  shelfLife         String
+  howToUse          String
+  faq               String
+  status            String      @default("active")
+  featured          Boolean     @default(false)
+  bestSeller        Boolean     @default(false)
+  sortOrder         Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  orderItems        OrderItem[]
+}
+
+model Coupon {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  discountType      String   // "percentage" | "fixed"
+  discountValue     Decimal
+  minimumOrderAmount Decimal?
+  usageLimit        Int?
+  usedCount         Int      @default(0)
+  expiresAt         DateTime?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  orders            Order[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderId         String      @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  address         String
+  city            String
+  state           String
+  postalCode      String
+  country         String      @default("India")
+  items           OrderItem[]
+  subtotal        Decimal
+  discount        Decimal     @default(0)
+  deliveryFee     Decimal     @default(0)
+  total           Decimal
+  paymentStatus   String      @default("pending") // pending, paid, failed, refunded
+  orderStatus     String      @default("pending")  // pending, confirmed, processing, packed, shipped, out_for_delivery, delivered, cancelled
+  deliveryStatus  String      @default("pending")
+  trackingNumber  String?
+  deliveryNotes   String?
+  paymentMethod   String      @default("razorpay")
+  paymentId       String?
+  razorpayOrderId String?
+  couponCode      String?
+  coupon          Coupon?     @relation(fields: [couponCode], references: [code])
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Decimal
+  quantity  Int
+  image     String?
+}

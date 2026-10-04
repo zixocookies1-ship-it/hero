@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #F7F1E7;
+    --foreground: #24211D;
+  }
+
+  @theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-jaggery-brown: var(--jaggery-brown);
+    --color-ginger-terracotta: var(--ginger-terracotta);
+    --color-warm-cream: var(--warm-cream);
+    --color-natural-green: var(--natural-green);
+    --color-dark-text: var(--dark-text);
+    --color-white: var(--white);
+    
+    --font-heading: "DM Serif Display", "Playfair Display", serif;
+    --font-body: "Inter", "Manrope", sans-serif;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+  }
+}
