@@ -45,13 +45,31 @@ export default function Navbar() {
             ABOUT
           </Link>
           <Link
+            href="/products"
+            className="text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase"
+          >
+            PRODUCTS
+          </Link>
+          <Link
             href="/contact"
             className="text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase"
           >
             CONTACT
           </Link>
-          <Link href="/cart" className="relative inline-flex items-center text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase">
-            CART
+          <Link href="/cart" className="relative inline-flex items-center text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors">
+            <svg
+              className="h-6 w-6 text-[var(--jaggery-brown)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h10"
+              />
+            </svg>
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-[var(--ginger-terracotta)] text-[var(--white)] text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                 {cartCount}
@@ -104,6 +122,7 @@ export default function Navbar() {
           <div className="px-4 py-3 space-y-1">
             <Link href="/" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">HOME</Link>
             <Link href="/about" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">ABOUT</Link>
+            <Link href="/products" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">PRODUCTS</Link>
             <Link href="/contact" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">CONTACT</Link>
             <Link href="/cart" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">CART</Link>
           </div>
