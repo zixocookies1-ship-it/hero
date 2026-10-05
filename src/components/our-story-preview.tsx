@@ -17,18 +17,19 @@ export default function OurStoryPreview() {
               Our story
             </p>
             <h2 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
-              Old technique, modern standards
+              Traditional at heart. New in taste.
             </h2>
             <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/70">
-              Nature&apos;s Choice began with a simple observation: the jaggery
-              most families buy no longer tastes like the jaggery they grew up
-              with. So we went back to the gold-kettle method - pure clay pots,
-              natural wood fire, no shortcuts.
+              It started with one simple thought — why should jaggery always taste
+              the same? We wanted to keep the goodness and familiarity of
+              traditional jaggery, but give it a new twist that today&apos;s
+              generation would genuinely enjoy.
             </p>
             <p className="mt-4 text-base leading-relaxed text-[var(--dark-text)]/70">
-              That traditional process is still how every jar we make is
-              produced today, while modern hygiene and batch testing make sure it
-              reaches you consistently.
+              That simple idea became Nature&apos;s Choice Jaggery — traditional
+              Indian jaggery with a delicious chocolatey twist. What started as an
+              idea is slowly becoming a brand we&apos;re truly proud of. And
+              honestly, this is just the beginning.
             </p>
 
             <dl className="mt-8 grid grid-cols-3 gap-4">

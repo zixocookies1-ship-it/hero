@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BRAND, whatsappLink } from "@/lib/brand";
+import { products } from "@/lib/products";
+import Founders from "@/components/founders";
 import SocialLinks from "@/components/social-links";
 
 export const metadata: Metadata = {
   title: "About - Nature's Choice Jaggery",
   description:
-    "The story behind Nature's Choice Jaggery - traditional gold-kettle cooking, partner farms in Uttar Pradesh, and three authentic flavours.",
+    "The story behind Nature's Choice Jaggery - a traditional Indian jaggery brand from Azamgarh, Uttar Pradesh, and its three chocolatey flavours.",
 };
 
 const process = [
@@ -63,18 +65,22 @@ export default function AboutPage() {
               Our story
             </p>
             <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--jaggery-brown)]">
-              From farm to family
+              Why should jaggery always taste the same?
             </h2>
             <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/75">
-              Nature&apos;s Choice Jaggery started with a gap between what jaggery
-              used to taste like and what was easy to buy. So we went back to the
-              gold-kettle method that our families had used for generations - pure
-              clay pots, natural wood fire, and enough time for the sweetness to
-              develop properly.
+              It started with one simple thought — why should jaggery always taste
+              the same?
             </p>
             <p className="mt-4 text-base leading-relaxed text-[var(--dark-text)]/75">
-              That process has not changed. What we added is modern hygiene and
-              batch testing, so the jar you receive tastes the same every time.
+              We wanted to keep the goodness and familiarity of traditional
+              jaggery, but give it a new twist that today&apos;s generation would
+              genuinely enjoy.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-[var(--dark-text)]/75">
+              That simple idea became <strong>Nature&apos;s Choice Jaggery</strong> —
+              bringing together traditional Indian jaggery and delicious chocolatey
+              flavours. What started as an idea is slowly becoming a brand
+              we&apos;re truly proud of. And honestly, this is just the beginning.
             </p>
 
             <dl className="mt-8 grid grid-cols-3 gap-4">
@@ -115,6 +121,42 @@ export default function AboutPage() {
               className="h-full w-full rounded-xl object-cover"
             />
           </div>
+        </section>
+
+        <Founders />
+
+        <section className="mt-20">
+          <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+            From an idea to chocolatey jaggery
+          </p>
+          <h2 className="mt-3 text-2xl font-bold text-[var(--dark-text)]">
+            Today, that little idea has grown into three unique flavours
+          </h2>
+
+          <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {products.map((product) => (
+              <li key={product.slug}>
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="block h-full rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-colors hover:border-[var(--ginger-terracotta)]/40"
+                >
+                  <span className="block font-serif text-base font-bold text-[var(--dark-text)]">
+                    {product.name}
+                  </span>
+                  <span className="mt-1.5 block text-sm italic text-[var(--dark-text)]/60">
+                    {product.flavourNote}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-8 font-serif text-xl font-bold text-[var(--jaggery-brown)]">
+            Nature&apos;s Choice Jaggery
+          </p>
+          <p className="mt-1 text-base text-[var(--dark-text)]/70">
+            Traditional at heart. New in taste.
+          </p>
         </section>
 
         <section className="mt-20">
