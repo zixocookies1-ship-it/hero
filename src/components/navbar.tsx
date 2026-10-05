@@ -48,18 +48,15 @@ export default function Navbar() {
   return (
     <nav className="fixed inset-x-0 top-0 z-50 border-b border-black/5 bg-[var(--warm-cream)]/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3" aria-label="Nature's Choice Jaggery home">
+        <Link href="/" aria-label="Nature's Choice Jaggery home">
           <Image
             src="/images/logo.png"
-            alt="Nature's Choice Jaggery"
+            alt=""
             width={44}
             height={44}
             className="h-10 w-10 object-contain"
             priority
           />
-          <span className="hidden font-heading text-base font-bold tracking-tight text-[var(--jaggery-brown)] sm:inline">
-            Nature&apos;s Choice Jaggery
-          </span>
         </Link>
 
         <div className="hidden items-center gap-6 lg:gap-8 md:flex">
