@@ -11,15 +11,20 @@ Copy `.env.example` to `.env.local` and fill in:
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | yes | PostgreSQL connection string (Vercel Postgres / Neon) |
-| `RAZORPAY_KEY_ID` | yes | Razorpay key, **Test** mode while developing |
+| `RAZORPAY_KEY_ID` | yes | Razorpay key id. **Test** mode while developing; `rzp_live_` takes real money |
 | `RAZORPAY_KEY_SECRET` | yes | Server-only. Never prefix with `NEXT_PUBLIC_` |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | yes | Same value as `RAZORPAY_KEY_ID`; loaded by Checkout.js |
 | `ORDER_SIGNING_SECRET` | recommended | `openssl rand -hex 32`. Signs admin cookies and receipt links |
 | `ADMIN_EMAIL` | yes | Admin login handle |
 | `ADMIN_PASSWORD` | yes | Admin password, 8 characters or more |
+| `DELHIVERY_API_KEY` | no | Delhivery API key, only if a delivery integration is wired up |
+
+The Razorpay key id reaches the browser in the `create-order` response, so there is
+no `NEXT_PUBLIC_RAZORPAY_KEY_ID` to set. Do not add one: a second copy of the key
+can drift from `RAZORPAY_KEY_ID` and the checkout would then fail at payment time.
 
 Admin session cookies and receipt links are both signed with `ORDER_SIGNING_SECRET`.
 Rotating that secret invalidates every existing admin session and receipt link.
+
 | `SHIPPING_FEE_INR` | optional | Delivery charge, defaults to `49` |
 | `FREE_SHIPPING_THRESHOLD_INR` | optional | Waive delivery above this subtotal; blank always charges |
 
