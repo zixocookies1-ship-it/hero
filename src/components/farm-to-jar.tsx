@@ -1,10 +1,10 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 
 const steps = [
   {
     title: "Sugarcane Harvest",
-    body: "Fresh sugarcane sourced from partner farms in Maharashtra.",
+    body: "Fresh sugarcane sourced from partner farms in Uttar Pradesh.",
   },
   {
     title: "Gold-Kettle Cooking",
@@ -43,7 +43,7 @@ export default function FarmToJar() {
               A shorter, clearer journey
             </h2>
             <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/70">
-              We trace every batch from sugarcane farms in Maharashtra to your
+              We trace every batch from sugarcane farms in Uttar Pradesh to your
               kitchen. The gold-kettle method keeps the natural character of the
               sugarcane that industrial refining strips away.
             </p>

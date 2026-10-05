@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { BRAND, whatsappLink } from "@/lib/brand";
+import SocialLinks from "@/components/social-links";
 
 export const metadata: Metadata = {
   title: "About - Nature's Choice Jaggery",
   description:
-    "The story behind Nature's Choice Jaggery - traditional gold-kettle cooking, partner farms in Maharashtra, and three authentic flavours.",
+    "The story behind Nature's Choice Jaggery - traditional gold-kettle cooking, partner farms in Uttar Pradesh, and three authentic flavours.",
 };
 
 const process = [
   {
     title: "Sugarcane Harvest",
-    body: "Fresh sugarcane from partner farms in Maharashtra, cut close to the season.",
+    body: "Fresh sugarcane from partner farms in Uttar Pradesh, cut close to the season.",
   },
   {
     title: "Gold-Kettle Cooking",
@@ -38,7 +40,7 @@ const values = [
   },
   {
     title: "Sustainable Sourcing",
-    body: "Partner farms in Maharashtra, using farming practices that protect the soil.",
+    body: "Partner farms in Uttar Pradesh, using farming practices that protect the soil.",
   },
 ];
 
@@ -187,6 +189,88 @@ export default function AboutPage() {
           >
             REQUEST LICENCE DETAILS
           </Link>
+        </section>
+
+        <section className="mt-20 rounded-2xl border border-black/5 bg-[var(--warm-cream)] p-8 shadow-sm">
+          <h2 className="text-xl font-bold text-[var(--dark-text)]">
+            Come say hello
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--dark-text)]/70">
+            Our workshop and packing unit sits in Azamgarh, Uttar Pradesh. If you
+            are nearby, come through for a taste. If you are far away, we are only
+            a message or a call away.
+          </p>
+
+          <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                Address
+              </p>
+              <address className="mt-2 text-sm not-italic leading-relaxed text-[var(--dark-text)]">
+                {BRAND.address.line1}
+                <br />
+                {BRAND.address.line2}
+                <br />
+                {BRAND.address.cityState} {BRAND.address.pincode}
+                <br />
+                {BRAND.address.country}
+              </address>
+            </div>
+
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                Talk to us
+              </p>
+              <div className="mt-2 flex flex-col gap-1.5 text-sm">
+                <a
+                  href={whatsappLink("Hi, I saw your website and have a question.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[var(--natural-green)] transition-colors hover:text-[var(--ginger-terracotta)]"
+                >
+                  WhatsApp {BRAND.phoneDisplay}
+                </a>
+                <a
+                  href={`tel:${BRAND.phoneDial}`}
+                  className="text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
+                >
+                  Call {BRAND.phoneDisplay}
+                </a>
+                <a
+                  href={`mailto:${BRAND.email}`}
+                  className="text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
+                >
+                  {BRAND.email}
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                Follow us
+              </p>
+              <div className="mt-3">
+                <SocialLinks withLabels />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <a
+              href={whatsappLink("Hi, I would like to place an order.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-full bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              ORDER ON WHATSAPP
+            </a>
+            <Link
+              href="/contact"
+              className="inline-block rounded-full border border-[var(--jaggery-brown)] px-6 py-3 text-sm font-semibold text-[var(--jaggery-brown)] transition-colors hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]"
+            >
+              CONTACT US
+            </Link>
+          </div>
         </section>
       </div>
     </main>

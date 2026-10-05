@@ -1,7 +1,8 @@
 ﻿import type { Metadata } from "next";
-import { BRAND, whatsappLink } from "@/lib/brand";
+import { BRAND, addressLine, whatsappLink } from "@/lib/brand";
 import ContactForm from "./contact-form";
 import FAQPreview from "@/components/faq-preview";
+import SocialLinks from "@/components/social-links";
 
 export const metadata: Metadata = {
   title: "Contact - Nature's Choice Jaggery",
@@ -13,7 +14,7 @@ const contactDetails = [
   { label: "WhatsApp", value: BRAND.phoneDisplay, href: whatsappLink("Hi, I have a question about your jaggery.") },
   { label: "Phone", value: BRAND.phoneDisplay, href: `tel:${BRAND.phoneDial}` },
   { label: "Email", value: BRAND.email, href: `mailto:${BRAND.email}` },
-  { label: "Office", value: BRAND.officeAddress, href: undefined },
+  { label: "Address", value: addressLine(), href: undefined },
 ];
 
 export default function ContactPage() {
@@ -61,13 +62,22 @@ export default function ContactPage() {
             <div className="overflow-hidden rounded-2xl border border-black/5 bg-[var(--white)] shadow-sm">
               <iframe
                 title="Nature's Choice Jaggery location"
-                src="https://www.google.com/maps?q=Mumbai,Maharashtra,India&output=embed"
+                src="https://www.google.com/maps?q=316+Puranapul,+Harbanshpur,+Azamgarh,+Uttar+Pradesh+276001&output=embed"
                 className="h-72 w-full"
                 style={{ border: 0 }}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
+            </div>
+
+            <div className="rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                Follow us
+              </p>
+              <div className="mt-3">
+                <SocialLinks withLabels />
+              </div>
             </div>
           </div>
 

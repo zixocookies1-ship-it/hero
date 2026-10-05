@@ -21,8 +21,8 @@ const items = [
   },
   {
     eyebrow: "Sourcing",
-    title: "Maharashtra Farms",
-    body: "Sugarcane sourced directly from partner farms in Maharashtra, India.",
+    title: "Uttar Pradesh Farms",
+    body: "Sugarcane sourced directly from partner farms in Uttar Pradesh, India.",
   },
 ];
 

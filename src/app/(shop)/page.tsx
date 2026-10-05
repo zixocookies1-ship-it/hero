@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { products } from "@/lib/products";
@@ -7,6 +7,7 @@ import ProductCard from "@/components/product-card";
 import WhyNaturesChoice from "@/components/why-natures-choice";
 import FarmToJar from "@/components/farm-to-jar";
 import OurStoryPreview from "@/components/our-story-preview";
+import ContactBar from "@/components/contact-bar";
 
 export const metadata: Metadata = {
   title: "Nature's Choice Jaggery",
@@ -42,7 +43,7 @@ export default function Home() {
               <p className="mt-5 max-w-lg text-base leading-relaxed text-[var(--dark-text)]/80">
                 Slow-cooked in pure clay pots over natural wood fire. No
                 preservatives, no chemicals, just honest sweetness from
-                sugarcane farms in Maharashtra.
+                sugarcane farms in Uttar Pradesh.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -97,6 +98,8 @@ export default function Home() {
       <FarmToJar />
 
       <OurStoryPreview />
+
+      <ContactBar />
     </>
   );
 }

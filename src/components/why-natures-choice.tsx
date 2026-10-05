@@ -1,8 +1,4 @@
-﻿import Image from "next/image";
-import Link from "next/link";
-import { products } from "@/lib/products";
-import PriceDisplay from "@/components/price-display";
-import ProductActions from "@/components/product-actions";
+import Image from "next/image";
 
 const reasons = [
   {
@@ -19,7 +15,7 @@ const reasons = [
   },
   {
     title: "Direct from Farms",
-    body: "Sugarcane sourced from partner farms in Maharashtra, India.",
+    body: "Sugarcane sourced from partner farms in Uttar Pradesh, India.",
   },
 ];
 
@@ -67,69 +63,7 @@ export default function WhyNaturesChoice() {
           </div>
         </div>
 
-        <div className="mt-20">
-          <div className="text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
-              Three authentic flavours
-            </p>
-            <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--white)]">
-              Discover your favourite
-            </h2>
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <article
-                key={product.slug}
-                className="flex flex-col overflow-hidden rounded-2xl bg-[var(--warm-cream)]"
-              >
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="relative aspect-square w-full bg-[var(--white)] p-6"
-                >
-                  <Image
-                    src={product.images[0]}
-                    alt={`${product.name} ${product.weight}`}
-                    fill
-                    sizes="(max-width: 768px) 90vw, 320px"
-                    className="object-contain"
-                  />
-                </Link>
-
-                <div className="flex flex-1 flex-col p-6">
-                  <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
-                    {product.shortName}
-                  </p>
-                  <h3 className="mt-2 font-serif text-lg font-bold text-[var(--dark-text)]">
-                    <Link href={`/products/${product.slug}`} className="hover:text-[var(--ginger-terracotta)]">
-                      {product.name}
-                    </Link>
-                  </h3>
-                  <p className="mt-1.5 text-sm italic text-[var(--dark-text)]/60">
-                    {product.flavourNote}
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--dark-text)]/70">
-                    {product.highlights[0]}
-                  </p>
-
-                  <div className="mt-4">
-                    <PriceDisplay
-                      size="sm"
-                      sellingPrice={product.sellingPrice}
-                      mrp={product.mrp}
-                      discountPercent={product.discountPercent}
-                    />
-                  </div>
-
-                  <div className="mt-5 flex-1" />
-
-                  <ProductActions product={product} layout="row" />
-                </div>
-              </article>
-            ))}
-          </div>
         </div>
-      </div>
     </section>
   );
 }

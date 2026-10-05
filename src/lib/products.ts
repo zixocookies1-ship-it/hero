@@ -30,7 +30,7 @@ export const products: Product[] = [
     shortName: "Desi Chocolatey",
     flavourNote: "Classic Deep Brown",
     description:
-      "Our classic take on traditional Indian jaggery, cooked slowly in pure clay pots over natural wood fire. The result is a deep, malty sweetness with notes of caramel and molasses, exactly the way jaggery has always been made in Maharashtra.",
+      "Our classic take on traditional Indian jaggery, cooked slowly in pure clay pots over natural wood fire. The result is a deep, malty sweetness with notes of caramel and molasses, exactly the way jaggery has always been made in Uttar Pradesh.",
     ingredients:
       "Organic sugarcane juice, jaggery, cocoa, natural colour.",
     highlights: [

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BRAND, whatsappLink } from "@/lib/brand";
 import { products } from "@/lib/products";
+import SocialLinks from "@/components/social-links";
 
 export default function Footer() {
   return (
@@ -23,8 +24,8 @@ export default function Footer() {
             </div>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--white)]/80">
               Premium, naturally processed jaggery from sugarcane farms in
-              Maharashtra. Slow-cooked in pure clay pots over natural wood fire,
-              with no preservatives and no chemicals.
+              Uttar Pradesh. Slow-cooked in pure clay pots over natural wood
+              fire, with no preservatives and no chemicals.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -53,6 +54,16 @@ export default function Footer() {
               >
                 Email us
               </a>
+            </div>
+
+            <address className="mt-6 text-xs not-italic leading-relaxed text-[var(--white)]/60">
+              {BRAND.address.line1}, {BRAND.address.line2},{" "}
+              {BRAND.address.cityState} {BRAND.address.pincode},{" "}
+              {BRAND.address.country}
+            </address>
+
+            <div className="mt-4">
+              <SocialLinks tone="dark" />
             </div>
           </div>
 
@@ -110,7 +121,7 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-[var(--white)]/10 pt-6 text-xs text-[var(--white)]/60 sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} Nature&apos;s Choice Jaggery. All rights reserved.</p>
-          <p>Made with care in Maharashtra, India.</p>
+          <p>Made with care in Azamgarh, Uttar Pradesh, India.</p>
         </div>
       </div>
     </footer>
