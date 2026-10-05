@@ -36,7 +36,7 @@ export const hasEnv = (name: string): boolean => read(name) !== undefined;
 export const razorpayConfigured = (): boolean =>
   hasEnv("RAZORPAY_KEY_ID") && hasEnv("RAZORPAY_KEY_SECRET");
 
-export const databaseConfigured = (): boolean => hasEnv("DATABASE_URL");
+export const databaseConfigured = (): boolean => hasEnv("MONGODB_URI");
 
 /** True when a signing key is available. Admin sessions and receipt links both
  *  need one; without it `signingSecret()` throws rather than falling open. */

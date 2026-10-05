@@ -50,7 +50,7 @@ export default async function AdminOrdersPage() {
         <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-6">
           <p className="font-semibold text-red-800">The order database is not reachable.</p>
           <p className="mt-2 text-sm text-red-700">
-            Set <code className="font-mono">DATABASE_URL</code> and run{" "}
+            Set <code className="font-mono">MONGODB_URI</code> and run{" "}
             <code className="font-mono">npm run db:deploy</code>, then reload this page.
           </p>
         </div>

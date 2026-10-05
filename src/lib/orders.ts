@@ -19,27 +19,58 @@ export class OrderError extends Error {
   }
 }
 
-const prismaUniqueViolation = "P2002";
+/**
+ * Allocates the daily order sequence from the Counter collection.
+ *
+ * MongoDB has no autoincrement, so the number is handed out by an atomic
+ * findAndModify with upsert. Two concurrent checkouts therefore receive
+ * different numbers; there is no read-then-write race, which is what the old
+ * database sequence was doing for us.
+ */
+async function nextOrderSequence(when: Date): Promise<number> {
+  const year = when.getFullYear();
+  const month = String(when.getMonth() + 1).padStart(2, "0");
+  const day = String(when.getDate()).padStart(2, "0");
 
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    (error as { code?: string }).code === prismaUniqueViolation
-  );
+  const result = await prisma.$runCommandRaw({
+    findAndModify: "Counter",
+    query: { _id: `order-${year}${month}${day}` },
+    update: { $inc: { value: 1 } },
+    new: true,
+    upsert: true,
+  });
+
+  // $runCommandRaw is intentionally untyped, and MongoDB returns the document
+  // either as `value` or nested under `lastErrorObject.value` depending on the
+  // server version, so both shapes are unwrapped defensively.
+  const raw = result as { value?: unknown; lastErrorObject?: { value?: unknown } } | null;
+  const document = (raw?.value ?? raw?.lastErrorObject?.value) as
+    | { value?: unknown }
+    | null
+    | undefined;
+  const sequence = Number(document?.value);
+
+  if (!Number.isInteger(sequence) || sequence < 1) {
+    throw new OrderError("Could not allocate an order number.", "unknown");
+  }
+
+  return sequence;
 }
 
 /**
  * Inserts an order in the pending state before any payment is attempted, so a
  * Razorpay order id always has a local row to attach to. The human order number
- * is built from the sequence Postgres assigns, which is why the row is inserted
- * with a null orderId and updated straight afterwards.
+ * is built from an atomically allocated sequence and written in the same insert,
+ * so the row is never briefly visible without its order number.
  */
 export async function createPendingOrder(params: {
   pricing: Pricing;
   details: CheckoutDetails;
 }) {
   const { pricing, details } = params;
+  const createdAt = new Date();
+  const sequence = await nextOrderSequence(createdAt);
+  const orderId = buildOrderId(sequence, createdAt);
 
   const items: Prisma.OrderItemCreateWithoutOrderInput[] = pricing.lines.map((line) => ({
     productSlug: line.slug,
@@ -53,6 +84,8 @@ export async function createPendingOrder(params: {
 
   const created = await prisma.order.create({
     data: {
+      orderId,
+      sequence,
       customerName: details.fullName,
       customerPhone: details.phone,
       customerEmail: details.email || null,
@@ -69,14 +102,7 @@ export async function createPendingOrder(params: {
       orderStatus: "pending",
       items: { create: items },
     },
-    select: { id: true, sequence: true, createdAt: true },
-  });
-
-  const orderId = buildOrderId(created.sequence, created.createdAt);
-
-  await prisma.order.update({
-    where: { id: created.id },
-    data: { orderId },
+    select: { id: true, sequence: true, orderId: true, createdAt: true },
   });
 
   return { id: created.id, orderId, sequence: created.sequence };
@@ -132,8 +158,13 @@ export type ConfirmResult = {
  * Marks an order paid, but only after the caller has verified the Razorpay
  * signature. This function is idempotent: replaying the same payment, or opening
  * the success page again, returns the original order instead of creating a
- * second one. Uniqueness of razorpay_payment_id in Postgres is the last line of
- * defence behind the explicit status check.
+ * second one.
+ *
+ * One payment id may settle exactly one order. That used to be a unique index on
+ * Order.paymentId, but MongoDB stores an unset field as null and a plain unique
+ * index tolerates only one null, which would have capped the shop at a single
+ * pending order. The check below is therefore explicit rather than delegated to
+ * the database.
  */
 export async function confirmPaidOrder(params: {
   razorpayOrderId: string;
@@ -142,7 +173,7 @@ export async function confirmPaidOrder(params: {
 }): Promise<ConfirmResult> {
   const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = params;
 
-  const existing = await prisma.order.findUnique({
+  const existing = await prisma.order.findFirst({
     where: { razorpayOrderId },
     select: {
       id: true,
@@ -175,47 +206,46 @@ export async function confirmPaidOrder(params: {
     );
   }
 
-  try {
-    const updated = await prisma.order.update({
-      where: { id: existing.id },
-      data: {
-        paymentStatus: "paid",
-        paymentVerified: true,
-        paymentId: razorpayPaymentId,
-        razorpaySignature,
-        orderStatus: "confirmed",
-        deliveryStatus: "processing",
-        status: "closed",
-      },
+  // This payment id already settled a different order. Return the winner so the
+  // customer still lands on a valid receipt instead of seeing an error.
+  if (!existing.paymentId) {
+    const winner = await prisma.order.findFirst({
+      where: { paymentId: razorpayPaymentId, NOT: { id: existing.id } },
       select: { orderId: true, paymentStatus: true, orderStatus: true },
     });
 
-    if (!updated.orderId) throw new OrderError("Order number missing.", "unknown");
-
-    return {
-      orderId: updated.orderId,
-      paymentStatus: updated.paymentStatus,
-      orderStatus: updated.orderStatus,
-      alreadyPaid: false,
-    };
-  } catch (error) {
-    if (isUniqueViolation(error)) {
-      // Another request settled a payment with this id first. Return that order.
-      const winner = await prisma.order.findFirst({
-        where: { paymentId: razorpayPaymentId },
-        select: { orderId: true, paymentStatus: true, orderStatus: true },
-      });
-      if (winner?.orderId) {
-        return {
-          orderId: winner.orderId,
-          paymentStatus: winner.paymentStatus,
-          orderStatus: winner.orderStatus,
-          alreadyPaid: true,
-        };
-      }
+    if (winner?.orderId) {
+      return {
+        orderId: winner.orderId,
+        paymentStatus: winner.paymentStatus,
+        orderStatus: winner.orderStatus,
+        alreadyPaid: true,
+      };
     }
-    throw error;
   }
+
+  const updated = await prisma.order.update({
+    where: { id: existing.id },
+    data: {
+      paymentStatus: "paid",
+      paymentVerified: true,
+      paymentId: razorpayPaymentId,
+      razorpaySignature,
+      orderStatus: "confirmed",
+      deliveryStatus: "processing",
+      status: "closed",
+    },
+    select: { orderId: true, paymentStatus: true, orderStatus: true },
+  });
+
+  if (!updated.orderId) throw new OrderError("Order number missing.", "unknown");
+
+  return {
+    orderId: updated.orderId,
+    paymentStatus: updated.paymentStatus,
+    orderStatus: updated.orderStatus,
+    alreadyPaid: false,
+  };
 }
 
 export async function findOrderByOrderId(orderId: string) {
@@ -226,7 +256,9 @@ export async function findOrderByOrderId(orderId: string) {
 }
 
 export async function findOrderByRazorpayOrderId(razorpayOrderId: string) {
-  return prisma.order.findUnique({ where: { razorpayOrderId } });
+  // Not findUnique: razorpayOrderId is deliberately not a unique index, because
+  // every pending order starts with it unset.
+  return prisma.order.findFirst({ where: { razorpayOrderId } });
 }
 
 export type OrderCounts = { paid: number; pending: number; failed: number; total: number };

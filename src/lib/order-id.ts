@@ -1,5 +1,5 @@
 /**
- * Order numbers are built from the Postgres sequence on the Order row, so two
+ * Order numbers are built from a per-day counter on the Order row, so two
  * orders can never collide: NCJ-YYYYMMDD-000123
  */
 export function buildOrderId(sequence: number, when: Date = new Date()): string {

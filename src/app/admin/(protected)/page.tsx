@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { getShippingPolicy } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +43,7 @@ export default async function AdminOverviewPage() {
     { label: "Paid", value: String(stats.paid) },
     { label: "Awaiting payment", value: String(stats.pending) },
     { label: "Failed", value: String(stats.failed) },
-    { label: "Revenue", value: `₹${stats.revenue.toLocaleString("en-IN")}` },
+    { label: "Revenue", value: `?${stats.revenue.toLocaleString("en-IN")}` },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default async function AdminOverviewPage() {
             The order database is not reachable, so these figures are zeros, not real totals.
           </p>
           <p className="mt-2 text-sm text-red-700">
-            Set <code className="font-mono">DATABASE_URL</code> and run{" "}
+            Set <code className="font-mono">MONGODB_URI</code> and run{" "}
             <code className="font-mono">npm run db:deploy</code>, then reload this page.
           </p>
         </div>
@@ -76,9 +76,9 @@ export default async function AdminOverviewPage() {
       <div className="mt-8 rounded-lg bg-white p-6 shadow">
         <h3 className="text-sm font-semibold text-[var(--dark-text)]">Delivery configuration</h3>
         <p className="mt-2 text-sm text-gray-600">
-          Shipping is charged at ₹{policy.feeInr}
+          Shipping is charged at ?{policy.feeInr}
           {policy.freeAboveInr
-            ? `, and free above ₹${policy.freeAboveInr.toLocaleString("en-IN")}`
+            ? `, and free above ?${policy.freeAboveInr.toLocaleString("en-IN")}`
             : " with no free-shipping threshold"}
           . These values come from the SHIPPING_FEE_INR and FREE_SHIPPING_THRESHOLD_INR
           environment variables, and the server applies them to every order.

@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
 // Next.js hot-reloads server modules in development, which would otherwise open
-// a new connection pool on every edit until Postgres refuses more connections.
+// a new connection pool on every edit until the server refuses more connections.
+
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };

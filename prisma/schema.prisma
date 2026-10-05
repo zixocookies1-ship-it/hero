@@ -1,14 +1,21 @@
+// MongoDB datasource.
+//
+// Prisma does not support `prisma migrate` against MongoDB, so the schema is
+// applied with `prisma db push` (see package.json). MongoDB also has no
+// autoincrement: Order.sequence is allocated from the Counter collection using
+// an atomic findAndModify in src/lib/orders.ts.
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   password  String
   name      String
@@ -18,13 +25,15 @@ model User {
 }
 
 model Product {
-  id                String      @id @default(cuid())
+  id                String      @id @default(auto()) @map("_id") @db.ObjectId
   name              String
   slug              String      @unique
   shortDescription  String
   fullDescription   String
-  price             Decimal
-  compareAtPrice    Decimal?
+  // Money is stored as whole rupees. Every price in this catalogue is an
+  // integer, and Int avoids the Decimal128 conversion surprises of Decimal.
+  price             Int
+  compareAtPrice    Int?
   weight            String
   sku               String      @unique
   stockQuantity     Int         @default(0)
@@ -46,11 +55,11 @@ model Product {
 }
 
 model Coupon {
-  id                 String   @id @default(cuid())
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
   code               String   @unique
   discountType       String // "percentage" | "fixed"
-  discountValue      Decimal
-  minimumOrderAmount Decimal?
+  discountValue      Int
+  minimumOrderAmount Int?
   usageLimit         Int?
   usedCount          Int      @default(0)
   expiresAt          DateTime?
@@ -60,15 +69,28 @@ model Coupon {
   orders             Order[]
 }
 
-model Order {
-  id String @id @default(cuid())
+// Replaces the Postgres sequence. Each document is a named counter whose value
+// is incremented atomically by MongoDB itself, so concurrent checkouts can never
+// be handed the same number.
+model Counter {
+  // A plain string key, so the document id can be "order-2026-10-05" rather than
+  // an ObjectId. @map("_id") is still required for MongoDB.
+  id        String   @id @map("_id")
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
 
-  // Human-facing order number. Left null while the row is still being created so
-  // Postgres assigns the sequence first, then we build NCJ-YYYYMMDD-000123 from
-  // it. Postgres unique constraints guarantee no two orders share an ID.
-  orderId  String? @unique
-  sequence Int     @unique @default(autoincrement())
-  status   String  @default("open")
+model Order {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Human-facing order number, built from the sequence counter and written in the
+  // same insert, so the row is never visible without it. Required rather than
+  // optional: MongoDB stores a missing field as null, and a plain unique index
+  // only tolerates one such document, so a nullable unique id would break the
+  // second pending order outright.
+  orderId  String @unique
+  sequence Int    @unique
+  status   String @default("open")
 
   // Customer. Email is deliberately optional: checkout does not require it.
   customerName   String
@@ -82,17 +104,22 @@ model Order {
 
   items OrderItem[]
 
-  subtotal    Decimal
-  discount    Decimal  @default(0)
-  deliveryFee Decimal  @default(0)
-  total       Decimal
+  subtotal    Int
+  discount    Int @default(0)
+  deliveryFee Int @default(0)
+  total       Int
 
   // Payment
   paymentMethod      String  @default("razorpay")
   paymentStatus      String  @default("pending") // pending | paid | failed | refunded
   paymentVerified    Boolean @default(false)
-  paymentId          String? @unique
-  razorpayOrderId    String? @unique
+  // paymentId and razorpayOrderId are deliberately NOT @unique. Both start unset
+  // on a pending order, and a MongoDB unique index treats every absent field as
+  // null, so a unique index here would allow exactly one pending order in the
+  // whole database. Uniqueness of paymentId is enforced in confirmPaidOrder
+  // instead, which is the only place that sets it.
+  paymentId          String?
+  razorpayOrderId    String?
   razorpaySignature  String?
   paymentFailureCode String?
 
@@ -102,8 +129,12 @@ model Order {
   trackingNumber String?
   deliveryNotes  String?
 
+  // The applied code is kept verbatim for the receipt. MongoDB relations can only
+  // target an @id field, so the link to Coupon points at ObjectId while couponCode
+  // preserves what the customer actually typed.
   couponCode String?
-  coupon     Coupon? @relation(fields: [couponCode], references: [code])
+  couponId   String? @db.ObjectId
+  coupon     Coupon? @relation(fields: [couponId], references: [id])
   notes      String?
 
   createdAt DateTime @default(now())
@@ -113,23 +144,25 @@ model Order {
   @@index([paymentStatus])
   @@index([orderStatus])
   @@index([customerPhone])
+  @@index([razorpayOrderId])
+  @@index([paymentId])
 }
 
 model OrderItem {
-  id      String @id @default(cuid())
-  orderId String
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId String @db.ObjectId
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   // Product catalogue is currently code-owned (src/lib/products.ts), so the
   // stable slug is what we persist. productId stays optional for when the
-  // catalogue moves into Postgres.
-  productId   String?
-  product     Product? @relation(fields: [productId], references: [id])
+  // catalogue moves into the database.
+  productId   String?   @db.ObjectId
+  product     Product?  @relation(fields: [productId], references: [id])
   productSlug String
   name        String
   image       String?
   quantity    Int
-  mrp         Decimal
-  unitPrice   Decimal
-  lineTotal   Decimal
+  mrp         Int
+  unitPrice   Int
+  lineTotal   Int
 }
