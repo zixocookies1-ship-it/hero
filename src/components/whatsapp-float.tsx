@@ -1,4 +1,4 @@
-import { BRAND, whatsappLink } from "@/lib/brand";
+import { whatsappLink } from "@/lib/brand";
 
 const prefilled = "Hi, I have a question about your jaggery.";
 
@@ -6,7 +6,7 @@ export default function WhatsAppFloat() {
   return (
     <div className="pointer-events-none fixed bottom-5 right-5 z-40">
 <a
-              href={whatsappLink("Hi, I have a question about your jaggery.")}
+              href={whatsappLink(prefilled)}
               target="_blank"
               rel="noopener noreferrer"
               className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"

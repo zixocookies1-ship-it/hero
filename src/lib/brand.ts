@@ -34,3 +34,28 @@ export const whatsappLink = (message?: string) => {
     ? `${base}?text=${encodeURIComponent(message)}`
     : base;
 };
+
+/**
+ * Builds a WhatsApp message from the contact form fields. Lines are omitted
+ * entirely when left blank so an optional phone number never leaves a stray
+ * "Phone:" heading in the chat.
+ */
+export type ContactEnquiry = {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+};
+
+export const contactEnquiryMessage = (enquiry: ContactEnquiry): string => {
+  const lines = [
+    enquiry.name.trim() && `Name: ${enquiry.name.trim()}`,
+    enquiry.phone.trim() && `Phone: ${enquiry.phone.trim()}`,
+    enquiry.email.trim() && `Email: ${enquiry.email.trim()}`,
+    enquiry.subject.trim() && `Subject: ${enquiry.subject.trim()}`,
+    enquiry.message.trim() && `Message: ${enquiry.message.trim()}`,
+  ].filter((line): line is string => Boolean(line));
+
+  return lines.join("\n");
+};

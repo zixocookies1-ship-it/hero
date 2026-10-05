@@ -14,9 +14,9 @@ export default function Footer() {
               <Image
                 src="/images/logo.png"
                 alt="Nature's Choice Jaggery"
-                width={48}
-                height={48}
-                className="h-11 w-11 object-contain"
+                width={80}
+                height={80}
+                className="h-[74px] w-[74px] object-contain"
               />
               <span className="font-heading text-lg font-bold">
                 Nature&apos;s Choice Jaggery
@@ -49,7 +49,7 @@ export default function Footer() {
                     href={whatsappLink("Hi, I have a question about your jaggery.")}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                    className="inline-block whitespace-nowrap transition-colors hover:text-[var(--ginger-terracotta)]"
                   >
                     WhatsApp {BRAND.phoneDisplay}
                   </a>
@@ -57,7 +57,7 @@ export default function Footer() {
                 <li>
                   <a
                     href={`tel:${BRAND.phoneDial}`}
-                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                    className="inline-block whitespace-nowrap transition-colors hover:text-[var(--ginger-terracotta)]"
                   >
                     Call {BRAND.phoneDisplay}
                   </a>
@@ -65,7 +65,7 @@ export default function Footer() {
                 <li>
                   <a
                     href={`mailto:${BRAND.email}`}
-                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                    className="inline-block break-all transition-colors hover:text-[var(--ginger-terracotta)]"
                   >
                     {BRAND.email}
                   </a>

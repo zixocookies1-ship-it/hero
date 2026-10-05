@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { type Product } from "@/lib/products";
+
 
 export default function ProductGallery({
   images,

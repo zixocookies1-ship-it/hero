@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { contactEnquiryMessage, whatsappLink } from "@/lib/brand";
 
 type FieldName = "name" | "email" | "phone" | "subject" | "message";
 
-type Status =
-  | { state: "idle" }
-  | { state: "submitting" }
-  | { state: "success"; message: string }
-  | { state: "error"; message: string; errors: Partial<Record<FieldName, string>> };
+type FieldErrors = Partial<Record<FieldName, string>>;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHONE_PATTERN = /^[0-9+\-\s()]{7,20}$/;
 
 const initialForm = {
   name: "",
@@ -19,67 +19,99 @@ const initialForm = {
   website: "",
 };
 
+const validate = (form: typeof initialForm): FieldErrors => {
+  const errors: FieldErrors = {};
+  if (form.name.trim().length < 2) errors.name = "Please enter your name.";
+  if (!EMAIL_PATTERN.test(form.email.trim())) {
+    errors.email = "Please enter a valid email address.";
+  }
+  if (form.phone.trim() && !PHONE_PATTERN.test(form.phone.trim())) {
+    errors.phone = "Please enter a valid phone number.";
+  }
+  if (form.subject.trim().length < 2) errors.subject = "Please add a subject.";
+  if (form.message.trim().length < 10) {
+    errors.message = "Please add a message of at least 10 characters.";
+  }
+  return errors;
+};
+
 export default function ContactForm() {
   const [form, setForm] = useState(initialForm);
-  const [status, setStatus] = useState<Status>({ state: "idle" });
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [sent, setSent] = useState(false);
 
   const update = (field: keyof typeof initialForm) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
+    // Only the visible fields have errors; the honeypot has none to clear.
+    if (field === "website") return;
+    setErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  // Validated here rather than server-side because the enquiry now leaves through
+  // the customer's own WhatsApp link; nothing is posted to our API.
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setStatus({ state: "submitting" });
 
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await response.json();
+    // Honeypot: hidden from real users, so a filled field means a bot.
+    if (form.website.trim()) return;
 
-      if (!response.ok || !data.ok) {
-        setStatus({
-          state: "error",
-          message: data.message ?? "Something went wrong. Please try again.",
-          errors: data.errors ?? {},
-        });
-        return;
-      }
-
-      setForm(initialForm);
-      setStatus({ state: "success", message: data.message });
-    } catch {
-      setStatus({
-        state: "error",
-        message: "Network error. Please check your connection and try again.",
-        errors: {},
-      });
+    const fieldErrors = validate(form);
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      setSent(false);
+      return;
     }
+
+    const message = contactEnquiryMessage({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      subject: form.subject,
+      message: form.message,
+    });
+
+    window.open(whatsappLink(message), "_blank", "noopener,noreferrer");
+    setSent(true);
   };
 
   const fieldClass = (field: FieldName) =>
     `w-full rounded-xl border bg-[var(--white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--ginger-terracotta)] ${
-      status.state === "error" && status.errors[field]
-        ? "border-red-400"
-        : "border-black/10"
+      errors[field] ? "border-red-400" : "border-black/10"
     }`;
 
+  const errorFor = (field: FieldName) =>
+    errors[field] ? (
+      <p id={`${field}-error`} role="alert" className="mt-1 text-xs text-red-600">
+        {errors[field]}
+      </p>
+    ) : null;
+
+  const labelClass = "mb-1.5 block text-sm font-medium text-[var(--dark-text)]";
+
   return (
-    <form onSubmit={handleSubmit} noValidate className="rounded-2xl border border-black/5 bg-[var(--white)] p-6 shadow-sm sm:p-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rounded-2xl border border-black/5 bg-[var(--white)] p-6 shadow-sm sm:p-8"
+    >
       <h2 className="font-serif text-xl font-bold text-[var(--dark-text)]">
         Send us a message
       </h2>
       <p className="mt-2 text-sm text-[var(--dark-text)]/60">
-        We usually reply within one business day.
+        Send a message and continue in WhatsApp. We usually reply within one
+        business day.
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-[var(--dark-text)]">
+          <label htmlFor="name" className={labelClass}>
             Full name
           </label>
           <input
@@ -87,17 +119,18 @@ export default function ContactForm() {
             name="name"
             type="text"
             autoComplete="name"
+            required
             value={form.name}
             onChange={update("name")}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "name-error" : undefined}
             className={fieldClass("name")}
           />
-          {status.state === "error" && status.errors.name && (
-            <p className="mt-1 text-xs text-red-600">{status.errors.name}</p>
-          )}
+          {errorFor("name")}
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[var(--dark-text)]">
+          <label htmlFor="email" className={labelClass}>
             Email
           </label>
           <input
@@ -105,66 +138,70 @@ export default function ContactForm() {
             name="email"
             type="email"
             autoComplete="email"
+            required
             value={form.email}
             onChange={update("email")}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "email-error" : undefined}
             className={fieldClass("email")}
           />
-          {status.state === "error" && status.errors.email && (
-            <p className="mt-1 text-xs text-red-600">{status.errors.email}</p>
-          )}
+          {errorFor("email")}
         </div>
 
         <div>
-          <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-[var(--dark-text)]">
+          <label htmlFor="phone" className={labelClass}>
             Phone <span className="text-[var(--dark-text)]/40">(optional)</span>
           </label>
           <input
             id="phone"
             name="phone"
             type="tel"
+            inputMode="tel"
             autoComplete="tel"
             value={form.phone}
             onChange={update("phone")}
+            aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "phone-error" : undefined}
             className={fieldClass("phone")}
           />
-          {status.state === "error" && status.errors.phone && (
-            <p className="mt-1 text-xs text-red-600">{status.errors.phone}</p>
-          )}
+          {errorFor("phone")}
         </div>
 
         <div>
-          <label htmlFor="subject" className="mb-1.5 block text-sm font-medium text-[var(--dark-text)]">
+          <label htmlFor="subject" className={labelClass}>
             Subject
           </label>
           <input
             id="subject"
             name="subject"
             type="text"
+            required
             value={form.subject}
             onChange={update("subject")}
+            aria-invalid={Boolean(errors.subject)}
+            aria-describedby={errors.subject ? "subject-error" : undefined}
             className={fieldClass("subject")}
           />
-          {status.state === "error" && status.errors.subject && (
-            <p className="mt-1 text-xs text-red-600">{status.errors.subject}</p>
-          )}
+          {errorFor("subject")}
         </div>
       </div>
 
       <div className="mt-5">
-        <label htmlFor="message" className="mb-1.5 block text-sm font-medium text-[var(--dark-text)]">
+        <label htmlFor="message" className={labelClass}>
           Message
         </label>
         <textarea
           id="message"
           name="message"
           rows={5}
+          required
           value={form.message}
           onChange={update("message")}
+          aria-invalid={Boolean(errors.message)}
+          aria-describedby={errors.message ? "message-error" : undefined}
           className={fieldClass("message")}
         />
-        {status.state === "error" && status.errors.message && (
-          <p className="mt-1 text-xs text-red-600">{status.errors.message}</p>
-        )}
+        {errorFor("message")}
       </div>
 
       <div className="absolute -left-[9999px]" aria-hidden="true">
@@ -180,23 +217,31 @@ export default function ContactForm() {
         />
       </div>
 
-      {status.state === "success" && (
-        <p className="mt-5 rounded-xl bg-[var(--natural-green)]/10 px-4 py-3 text-sm text-[var(--natural-green)]">
-          {status.message}
+      {Object.keys(errors).length > 0 && (
+        <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          Please check the highlighted fields.
         </p>
       )}
-      {status.state === "error" && (
-        <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-          {status.message}
+
+      {sent && (
+        <p className="mt-5 rounded-xl bg-[var(--natural-green)]/10 px-4 py-3 text-sm text-[var(--natural-green)]">
+          WhatsApp should have opened with your message ready to send. If it did
+          not open, email us at{" "}
+          <a
+            href="mailto:support@natureschoicejaggery.com"
+            className="underline underline-offset-4"
+          >
+            support@natureschoicejaggery.com
+          </a>
+          .
         </p>
       )}
 
       <button
         type="submit"
-        disabled={status.state === "submitting"}
-        className="mt-6 w-full rounded-full bg-[var(--jaggery-brown)] px-6 py-3.5 text-sm font-semibold text-[var(--white)] transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-6 w-full rounded-full bg-[var(--jaggery-brown)] px-6 py-3.5 text-sm font-semibold text-[var(--white)] transition-colors hover:bg-[var(--ginger-terracotta)]"
       >
-        {status.state === "submitting" ? "SENDING..." : "SEND MESSAGE"}
+        SEND ON WHATSAPP
       </button>
     </form>
   );
