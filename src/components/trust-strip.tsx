@@ -1,63 +1,68 @@
+const items = [
+  {
+    eyebrow: "Pure & Natural",
+    title: "Nothing Added",
+    body: "No preservatives, no chemicals, no artificial colouring. Just sugarcane, slow-cooked.",
+  },
+  {
+    eyebrow: "Traditional Method",
+    title: "Gold-Kettle Cooking",
+    body: "Slow-cooked in pure clay pots over natural wood fire, the way jaggery has always been made.",
+  },
+  {
+    eyebrow: "Quality Checked",
+    title: "Batch Testing",
+    body: "Every batch is checked for purity, moisture content and consistency before packing.",
+  },
+  {
+    eyebrow: "Freshness",
+    title: "18-Month Shelf Life",
+    body: "Packed without additives, so it keeps well in an airtight container.",
+  },
+  {
+    eyebrow: "Sourcing",
+    title: "Maharashtra Farms",
+    body: "Sugarcane sourced directly from partner farms in Maharashtra, India.",
+  },
+];
+
 export default function TrustStrip() {
   return (
-    <section className="py-12 bg-[var(--warm-cream)]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-          <div>
-            <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-4">
-              Verified by Our Suppilers
-            </p>
-            <h3 className="text-2xl font-serif text-[var(--dark-text)]">
-              Pure & Natural
-            </h3>
-            <p className="text-[var(--dark-text)]/70 text-base">
-              Sourced directly from organic sugarcane farms in Maharashtra, India.
-            </p>
-          </div>
-          <div>
-            <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-4">
-              Quality Assured
-            </p>
-            <h3 className="text-2xl font-serif text-[var(--dark-text)]">
-              Laboratory Tested
-            </h3>
-            <p className="text-[var(--dark-text)]/70 text-base">
-              Every batch tested for purity, moisture content, and safety standards.
-            </p>
-          </div>
-          <div>
-            <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-4">
-              Traditional Process
-            </p>
-            <h3 className="text-2xl font-serif text-[var(--dark-text)]">
-              Gold-Kettle Method
-            </h3>
-            <p className="text-[var(--dark-text)]/70 text-base">
-              Time-honored technique using pure clay pots and natural wood fire.
-            </p>
-          </div>
-          <div>
-            <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-4">
-              Freshness Guaranteed
-            </p>
-            <h3 className="text-2xl font-serif text-[var(--dark-text)]">
-              18-Month Shelf Life
-            </h3>
-            <p className="text-[var(--dark-text)]/70 text-base">
-              No preservatives, no additives - just natural goodness.
-            </p>
-          </div>
-          <div>
-            <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-4">
-              Sustainable Farming
-            </p>
-            <h3 className="text-2xl font-serif text-[var(--dark-text)]">
-              Earth-Friendly
-            </h3>
-            <p className="text-[var(--dark-text)]/70 text-base">
-              Regenerative agriculture practices that protect the land and communities.
-            </p>
-          </div>
+    <section className="bg-[var(--warm-cream)] py-14">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {items.map((item) => (
+            <div
+              key={item.title}
+              className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ginger-terracotta)]/10 text-[var(--ginger-terracotta)]">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </span>
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                {item.eyebrow}
+              </p>
+              <h3 className="mt-1.5 font-serif text-base font-bold leading-snug text-[var(--dark-text)]">
+                {item.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--dark-text)]/65">
+                {item.body}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

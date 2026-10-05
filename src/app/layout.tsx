@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/navbar";
+import { CartProvider } from "@/context/cart-context";
 
-export const metadata = {
-  title: "Nature's Choice Jaggery - The New Age of Indian Jaggery",
-  description: "Premium Indian jaggery brand - authentic, natural, and modern",
+export const metadata: Metadata = {
+  title: "Nature's Choice Jaggery",
+  description:
+    "Premium Indian jaggery - traditional gold-kettle method, no preservatives, three authentic flavours.",
 };
 
 export default function RootLayout({
@@ -13,9 +15,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-full bg-[var(--background)] text-[var(--foreground)]">
-        <Navbar />
-        <main className="flex-1">{children}</main>
+      <body className="flex min-h-screen flex-col bg-[var(--background)] text-[var(--foreground)]">
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );

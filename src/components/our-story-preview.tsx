@@ -1,45 +1,70 @@
-﻿import Image from 'next/image';
+﻿import Image from "next/image";
+import Link from "next/link";
+
+const highlights = [
+  { value: "3", label: "authentic flavours" },
+  { value: "100%", label: "no preservatives" },
+  { value: "Clay pot", label: "gold-kettle method" },
+];
 
 export default function OurStoryPreview() {
   return (
-    <section className="py-16 bg-[var(--warm-cream)]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <section className="bg-[var(--warm-cream)] py-16">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div>
-            <p className="text-[var(--ginger-terracotta)] text-sm font-medium tracking-widest uppercase mb-4">
-              Our Story
+            <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+              Our story
             </p>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-[var(--dark-text)]">
-              The New Age of Indian Jaggery
+            <h2 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
+              Old technique, modern standards
             </h2>
-            <p className="text-[var(--dark-text)]/80 text-base leading-relaxed mb-6">
-              Founded with a vision to redefine jaggery for the modern era, Nature's Choice 
-              Jaggery brings together ancient wisdom and contemporary taste. Our journey 
-              began in the fertile fields of Maharashtra, where sugarcane has been cultivated 
-              for centuries using traditional, sustainable methods.
+            <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/70">
+              Nature&apos;s Choice began with a simple observation: the jaggery
+              most families buy no longer tastes like the jaggery they grew up
+              with. So we went back to the gold-kettle method - pure clay pots,
+              natural wood fire, no shortcuts.
             </p>
-            <p className="text-[var(--dark-text)]/80 text-base leading-relaxed mb-6">
-              What started as a family tradition of gold-kettle jaggery making has grown into 
-              a brand trusted by thousands of households. We remain committed to transparency, 
-              quality, and preserving India's rich culinary heritage while making it accessible 
-              for everyday enjoyment.
+            <p className="mt-4 text-base leading-relaxed text-[var(--dark-text)]/70">
+              That traditional process is still how every jar we make is
+              produced today, while modern hygiene and batch testing make sure it
+              reaches you consistently.
             </p>
-            <div className="flex gap-3">
-              <span className="bg-[var(--jaggery-brown)] text-[var(--white)] px-4 py-2 rounded-full text-sm font-medium">
-                10+ Years of Excellence
-              </span>
-              <span className="bg-[var(--ginger-terracotta)] text-[var(--white)] px-4 py-2 rounded-full text-sm font-medium">
-                50,000+ Happy Customers
-              </span>
-            </div>
+
+            <dl className="mt-8 grid grid-cols-3 gap-4">
+              {highlights.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-black/5 bg-[var(--white)] p-4 text-center"
+                >
+                  <dt className="sr-only">{item.label}</dt>
+                  <dd>
+                    <span className="block font-serif text-xl font-bold text-[var(--jaggery-brown)]">
+                      {item.value}
+                    </span>
+                    <span className="mt-1 block text-xs text-[var(--dark-text)]/60">
+                      {item.label}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            <Link
+              href="/about"
+              className="mt-8 inline-block rounded-full border border-[var(--jaggery-brown)] px-7 py-3.5 text-sm font-semibold text-[var(--jaggery-brown)] transition-colors hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]"
+            >
+              READ OUR STORY
+            </Link>
           </div>
-          <div className="relative">
+
+          <div className="overflow-hidden rounded-2xl bg-[var(--white)] p-6 shadow-sm">
             <Image
-              src="/images/product 2/06.jpeg"
-              alt="Founder story"
-              width={600}
-              height={400}
-              className="rounded-2xl object-cover transition-transform hover:scale-[1.02] duration-300"
+              src="/images/hero-banner.png"
+              alt="Nature's Choice Jaggery"
+              width={1200}
+              height={800}
+              className="h-full w-full rounded-xl object-cover"
             />
           </div>
         </div>
@@ -47,4 +72,3 @@ export default function OurStoryPreview() {
     </section>
   );
 }
-

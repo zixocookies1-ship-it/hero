@@ -1,135 +1,133 @@
 ﻿"use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useCart } from "@/context/cart-context";
+
+const links = [
+  { href: "/", label: "HOME" },
+  { href: "/about", label: "ABOUT" },
+  { href: "/products", label: "PRODUCTS" },
+  { href: "/contact", label: "CONTACT" },
+];
+
+function CartIcon({ count }: { count: number }) {
+  return (
+    <span className="relative inline-flex items-center">
+      <svg
+        className="h-6 w-6 text-[var(--jaggery-brown)]"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h10"
+        />
+      </svg>
+      {count > 0 && (
+        <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--ginger-terracotta)] text-[10px] font-semibold text-[var(--white)] shadow-sm">
+          {count}
+        </span>
+      )}
+      <span className="sr-only">
+        Cart{count > 0 ? `, ${count} item${count === 1 ? "" : "s"}` : ", empty"}
+      </span>
+    </span>
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-
-  useEffect(() => {
-    const updateCartCount = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-        const count = cart.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
-        setCartCount(count);
-      } catch {
-        setCartCount(0);
-      }
-    };
-    updateCartCount();
-    window.addEventListener("storage", updateCartCount);
-    return () => window.removeEventListener("storage", updateCartCount);
-  }, []);
+  const { itemCount } = useCart();
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-[var(--warm-cream)]/95 backdrop-blur-sm border-b border-gray-200/40 shadow-sm"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4 flex items-center justify-between">
-        <Link href="/" className="font-heading text-lg sm:text-xl md:text-2xl font-bold text-[var(--jaggery-brown)] tracking-tight">
-          Nature's Choice Jaggery
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-black/5 bg-[var(--warm-cream)]/95 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-3" aria-label="Nature's Choice Jaggery home">
+          <Image
+            src="/images/logo.png"
+            alt="Nature's Choice Jaggery"
+            width={44}
+            height={44}
+            className="h-10 w-10 object-contain"
+            priority
+          />
+          <span className="hidden font-heading text-base font-bold tracking-tight text-[var(--jaggery-brown)] sm:inline">
+            Nature&apos;s Choice Jaggery
+          </span>
         </Link>
-        
-        <div className="hidden md:flex items-center gap-6 lg:gap-8">
-          <Link
-            href="/"
-            className="text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase"
-          >
-            HOME
-          </Link>
-          <Link
-            href="/about"
-            className="text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase"
-          >
-            ABOUT
-          </Link>
-          <Link
-            href="/products"
-            className="text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase"
-          >
-            PRODUCTS
-          </Link>
-          <Link
-            href="/contact"
-            className="text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors text-sm font-medium tracking-wide uppercase"
-          >
-            CONTACT
-          </Link>
-          <Link href="/cart" className="relative inline-flex items-center text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] transition-colors">
-            <svg
-              className="h-6 w-6 text-[var(--jaggery-brown)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+
+        <div className="hidden items-center gap-6 lg:gap-8 md:flex">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium uppercase tracking-wide text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h10"
-              />
-            </svg>
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[var(--ginger-terracotta)] text-[var(--white)] text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                {cartCount}
-              </span>
-            )}
+              {link.label}
+            </Link>
+          ))}
+          <Link href="/cart" className="transition-colors hover:opacity-70">
+            <CartIcon count={itemCount} />
           </Link>
         </div>
 
-        <div className="md:hidden flex items-center gap-3">
-          <Link href="/cart" className="relative">
-            <svg
-              className="h-6 w-6 text-[var(--jaggery-brown)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h10"
-              />
-            </svg>
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[var(--ginger-terracotta)] text-[var(--white)] text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                {cartCount}
-              </span>
-            )}
+        <div className="flex items-center gap-3 md:hidden">
+          <Link href="/cart" className="transition-colors hover:opacity-70">
+            <CartIcon count={itemCount} />
           </Link>
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-[var(--jaggery-brown)] hover:bg-gray-100/60 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--jaggery-brown)]"
-            aria-expanded="false"
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--dark-text)] transition-colors hover:bg-black/5"
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
-            <span className="sr-only">Open main menu</span>
-            {!isOpen ? (
-              <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            <span className="sr-only">Toggle main menu</span>
+            {isOpen ? (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             ) : (
-              <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
           </button>
         </div>
       </div>
+
       {isOpen && (
-        <div className="md:hidden border-t border-gray-200/40 bg-[var(--warm-cream)]/95 backdrop-blur-sm shadow-sm">
-          <div className="px-4 py-3 space-y-1">
-            <Link href="/" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">HOME</Link>
-            <Link href="/about" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">ABOUT</Link>
-            <Link href="/products" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">PRODUCTS</Link>
-            <Link href="/contact" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">CONTACT</Link>
-            <Link href="/cart" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--dark-text)] hover:text-[var(--ginger-terracotta)] uppercase tracking-wide">CART</Link>
-          </div>
+        <div
+          id="mobile-menu"
+          className="border-t border-black/5 bg-[var(--warm-cream)] md:hidden"
+        >
+          <nav className="space-y-1 px-4 py-3">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-base font-medium uppercase tracking-wide text-[var(--dark-text)] transition-colors hover:bg-black/5"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/cart"
+              onClick={() => setIsOpen(false)}
+              className="block rounded-lg px-3 py-2.5 text-base font-medium uppercase tracking-wide text-[var(--dark-text)] transition-colors hover:bg-black/5"
+            >
+              Cart ({itemCount})
+            </Link>
+          </nav>
         </div>
       )}
     </nav>
   );
 }
-
-
