@@ -1,0 +1,152 @@
+import { getProductBySlug, type Product } from "@/lib/products";
+
+/**
+ * A cart line is stored as { slug, quantity } and nothing else.
+ *
+ * `slug` is the stable product identifier and the only identity used. Name,
+ * image, price, weight and pack are deliberately NOT persisted: they are derived
+ * from the catalogue at render time, so a stale price can never be shown to a
+ * customer and can never reach the payment API. The server reprices the cart from
+ * the catalogue again before creating a Razorpay order.
+ *
+ * This catalogue has one pack size per flavour (500g / Pack of 1), so there is no
+ * variant axis today. If one is added, a variant needs its own slug rather than
+ * being folded into display text, otherwise two sizes of one flavour would merge
+ * into a single cart line.
+ */
+export type CartLine = {
+  slug: string;
+  quantity: number;
+};
+
+export const MAX_QUANTITY = 99;
+
+export type CartDetail = {
+  product: Product;
+  quantity: number;
+  lineTotal: number;
+};
+
+/** Clamps to a whole number in [1, MAX_QUANTITY]. NaN and Infinity fall back to 1. */
+export const clampQuantity = (value: unknown, fallback = 1): number => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(MAX_QUANTITY, Math.max(1, Math.floor(parsed)));
+};
+
+/**
+ * Parses persisted lines defensively. Malformed entries are dropped rather than
+ * trusted, duplicates collapse to the first occurrence, and slugs that no longer
+ * exist in the catalogue are discarded so a deleted product cannot poison the cart.
+ */
+export const parseStoredLines = (raw: string | null): CartLine[] => {
+  if (!raw) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+
+  if (!Array.isArray(parsed)) return [];
+
+  const seen = new Set<string>();
+  const lines: CartLine[] = [];
+
+  for (const entry of parsed) {
+    if (!entry || typeof entry !== "object") continue;
+
+    const record = entry as Record<string, unknown>;
+    const slug = record.slug;
+    const quantity = Number(record.quantity);
+
+    if (typeof slug !== "string" || !slug) continue;
+    if (!Number.isFinite(quantity)) continue;
+    if (!getProductBySlug(slug)) continue;
+    if (seen.has(slug)) continue;
+
+    seen.add(slug);
+    lines.push({ slug, quantity: clampQuantity(quantity) });
+  }
+
+  return lines;
+};
+
+/**
+ * Adds `quantity` to the line for `slug`, appending it when absent.
+ *
+ * This is the reducer form: the next array is derived purely from `lines`, so
+ * repeated calls inside one tick cannot read a stale snapshot.
+ */
+export const addLine = (lines: CartLine[], slug: string, quantity = 1): CartLine[] => {
+  if (!getProductBySlug(slug)) return lines;
+
+  const step = clampQuantity(quantity);
+  const existing = lines.find((line) => line.slug === slug);
+
+  if (!existing) return [...lines, { slug, quantity: step }];
+
+  return lines.map((line) =>
+    line.slug === slug ? { ...line, quantity: clampQuantity(line.quantity + step) } : line
+  );
+};
+
+/**
+ * Sets an absolute quantity. Zero, a negative value, NaN or Infinity removes the
+ * line instead of storing an unusable row.
+ */
+export const setLineQuantity = (
+  lines: CartLine[],
+  slug: string,
+  quantity: number
+): CartLine[] => {
+  if (!getProductBySlug(slug)) return lines;
+
+  const requested = Number(quantity);
+  if (!Number.isFinite(requested) || requested <= 0) {
+    return lines.filter((line) => line.slug !== slug);
+  }
+
+  const safeQuantity = clampQuantity(requested);
+  const exists = lines.some((line) => line.slug === slug);
+
+  if (!exists) return [...lines, { slug, quantity: safeQuantity }];
+
+  return lines.map((line) =>
+    line.slug === slug ? { ...line, quantity: safeQuantity } : line
+  );
+};
+
+export const removeLine = (lines: CartLine[], slug: string): CartLine[] =>
+  lines.filter((line) => line.slug !== slug);
+
+export const clearLines = (): CartLine[] => [];
+
+export const quantityOfLine = (lines: CartLine[], slug: string): number =>
+  lines.find((line) => line.slug === slug)?.quantity ?? 0;
+
+/** Joins each line to its catalogue product. Unknown slugs are dropped. */
+export const detailedLines = (lines: CartLine[]): CartDetail[] =>
+  lines.flatMap((line) => {
+    const product = getProductBySlug(line.slug);
+    if (!product) return [];
+    return [{ product, quantity: line.quantity, lineTotal: product.sellingPrice * line.quantity }];
+  });
+
+export const itemCount = (lines: CartLine[]): number =>
+  lines.reduce((sum, line) => sum + line.quantity, 0);
+
+export const subtotal = (details: CartDetail[]): number =>
+  details.reduce((sum, detail) => sum + detail.lineTotal, 0);
+
+export const savings = (details: CartDetail[]): number =>
+  details.reduce(
+    (sum, detail) =>
+      sum + (detail.product.mrp - detail.product.sellingPrice) * detail.quantity,
+    0
+  );
+
+/** Product ids in cart order, for the server to reprice. */
+export const cartPayload = (lines: CartLine[]) =>
+  lines.map((line) => ({ slug: line.slug, quantity: line.quantity }));

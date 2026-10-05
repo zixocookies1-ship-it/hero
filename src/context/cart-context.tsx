@@ -7,12 +7,28 @@ import {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { getProductBySlug, type Product } from "@/lib/products";
+import { getProductBySlug } from "@/lib/products";
+import {
+  addLine,
+  clearLines,
+  detailedLines as detailLines,
+  itemCount as countLines,
+  parseStoredLines,
+  quantityOfLine,
+  removeLine,
+  savings as totalSavings,
+  setLineQuantity,
+  subtotal as sumLines,
+  type CartDetail,
+  type CartLine,
+} from "@/lib/cart";
 
-export type CartLine = {
-  slug: string;
-  quantity: number;
-};
+export type { CartLine } from "@/lib/cart";
+export { MAX_QUANTITY } from "@/lib/cart";
+
+export type AddResult =
+  | { ok: true; quantity: number }
+  | { ok: false; error: string };
 
 type CartContextValue = {
   lines: CartLine[];
@@ -20,42 +36,28 @@ type CartContextValue = {
   itemCount: number;
   subtotal: number;
   savings: number;
-  addItem: (slug: string, quantity?: number) => void;
+  addItem: (slug: string, quantity?: number) => AddResult;
   setQuantity: (slug: string, quantity: number) => void;
   removeItem: (slug: string) => void;
   clearCart: () => void;
-  detailedLines: Array<{ product: Product; quantity: number; lineTotal: number }>;
+  quantityOf: (slug: string) => number;
+  detailedLines: CartDetail[];
 };
 
+/**
+ * localStorage is the single source of truth for this project's guest cart. The
+ * one provider in the app root layout makes header, product cards, cart page,
+ * checkout and buy-now all read the same state.
+ */
 const STORAGE_KEY = "cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
 const EMPTY: CartLine[] = [];
 
-const parseStoredLines = (raw: string | null): CartLine[] => {
-  try {
-    if (!raw) return EMPTY;
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return EMPTY;
-
-    return parsed.flatMap((entry): CartLine[] => {
-      if (!entry || typeof entry !== "object") return [];
-      const slug = (entry as Record<string, unknown>).slug;
-      const quantity = Number((entry as Record<string, unknown>).quantity);
-      if (typeof slug !== "string" || !Number.isFinite(quantity)) return [];
-      if (!getProductBySlug(slug)) return [];
-      const safeQuantity = Math.min(99, Math.max(1, Math.floor(quantity)));
-      return [{ slug, quantity: safeQuantity }];
-    });
-  } catch {
-    return EMPTY;
-  }
-};
-
 /**
  * useSyncExternalStore requires a referentially stable snapshot, so the parsed
- * result is cached against the exact raw string. Same storage contents must
- * return the same array instance or React would re-render in a loop.
+ * result is cached against the exact raw string. Identical storage contents must
+ * return the same array instance or React re-renders in a loop.
  */
 let cachedRaw: string | null = null;
 let cachedLines: CartLine[] = EMPTY;
@@ -77,17 +79,11 @@ const readStoredLines = (): CartLine[] => {
   return cachedLines;
 };
 
-/**
- * localStorage is treated as the source of truth and read through
- * useSyncExternalStore, so the first client render already matches storage and no
- * effect is needed to "hydrate" the cart. Every mutation writes straight to
- * storage, which also keeps multiple tabs in sync.
- */
 const listeners = new Set<() => void>();
 
 /**
  * The native "storage" event only fires in *other* tabs, so local mutations
- * notify subscribers directly while cross-tab writes still arrive via the event.
+ * notify subscribers directly while cross-tab writes arrive via the event.
  */
 const subscribe = (onStoreChange: () => void) => {
   listeners.add(onStoreChange);
@@ -100,125 +96,102 @@ const subscribe = (onStoreChange: () => void) => {
 };
 
 const getSnapshot = (): CartLine[] => readStoredLines();
+// The server cannot read localStorage; it renders the empty-cart placeholder and
+// the first client render picks up the real cart.
 const getServerSnapshot = (): CartLine[] => EMPTY;
 
 const writeLines = (next: CartLine[]) => {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
-    // Storage unavailable (private mode / quota). Cart stays in memory only.
+    // Storage unavailable (private mode / quota): the cart stays in memory only.
   }
-  // Force the snapshot cache to re-parse the new raw string, then notify.
+  // Invalidate the snapshot cache, then notify so every consumer re-reads.
   cachePrimed = false;
   for (const listener of listeners) listener();
 };
 
+/**
+ * Every mutation funnels through here. The reducer receives the lines currently
+ * persisted, which is the storage equivalent of a functional state update: two
+ * clicks in one tick cannot both act on a stale snapshot.
+ */
+const mutate = (reduce: (current: CartLine[]) => CartLine[]): CartLine[] => {
+  const next = reduce(readStoredLines());
+  writeLines(next);
+  return next;
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const lines = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  // Server-rendered markup shows an empty cart placeholder; the first client
-  // render already reads storage, so `hydrated` is simply "am I on the client".
+  // Server markup shows the empty-cart placeholder; the first client render
+  // already reads storage, so "hydrated" is simply "am I on the client".
   const hydrated = useSyncExternalStore(
     subscribe,
     () => true,
     () => false
   );
 
-  const addItem = useCallback((slug: string, quantity = 1) => {
-    if (!getProductBySlug(slug)) return;
-    const safeQuantity = Math.max(1, Math.floor(quantity));
-    writeLines(
-      readStoredLines().flatMap((line) => {
-        if (line.slug !== slug) return [line];
-        return [{ ...line, quantity: Math.min(99, line.quantity + safeQuantity) }];
-      })
-    );
+  const addItem = useCallback((slug: string, quantity = 1): AddResult => {
+    if (typeof slug !== "string" || !getProductBySlug(slug)) {
+      console.error("addItem called with an unknown slug", { slug });
+      return { ok: false, error: "That product is no longer available." };
+    }
+
+    const next = mutate((current) => addLine(current, slug, quantity));
+
+    return {
+      ok: true,
+      quantity: quantityOfLine(next, slug),
+    };
   }, []);
 
   const setQuantity = useCallback((slug: string, quantity: number) => {
-    if (!getProductBySlug(slug)) return;
-    if (quantity <= 0) {
-      writeLines(readStoredLines().filter((line) => line.slug !== slug));
-      return;
-    }
-    const safeQuantity = Math.min(99, Math.floor(quantity));
-    const current = readStoredLines();
-    if (current.some((line) => line.slug === slug)) {
-      writeLines(
-        current.map((line) =>
-          line.slug === slug ? { ...line, quantity: safeQuantity } : line
-        )
-      );
-      return;
-    }
-    writeLines([...current, { slug, quantity: safeQuantity }]);
+    mutate((current) => setLineQuantity(current, slug, quantity));
   }, []);
 
   const removeItem = useCallback((slug: string) => {
-    writeLines(readStoredLines().filter((line) => line.slug !== slug));
+    mutate((current) => removeLine(current, slug));
   }, []);
 
-  const clearCart = useCallback(() => writeLines([]), []);
+  const clearCart = useCallback(() => {
+    writeLines(clearLines());
+  }, []);
 
-  const detailedLines = useMemo(
-    () =>
-      lines.flatMap((line) => {
-        const product = getProductBySlug(line.slug);
-        if (!product) return [];
-        return [
-          {
-            product,
-            quantity: line.quantity,
-            lineTotal: product.sellingPrice * line.quantity,
-          },
-        ];
-      }),
+  const detailed = useMemo(() => detailLines(lines), [lines]);
+  const count = useMemo(() => countLines(lines), [lines]);
+
+  // Declared at the top level, not inside useMemo: a hook nested in a memo
+  // factory is skipped whenever the deps are unchanged, which breaks hook order.
+  const quantityOf = useCallback(
+    (slug: string) => quantityOfLine(lines, slug),
     [lines]
-  );
-
-  const itemCount = useMemo(
-    () => lines.reduce((sum, line) => sum + line.quantity, 0),
-    [lines]
-  );
-
-  const subtotal = useMemo(
-    () => detailedLines.reduce((sum, line) => sum + line.lineTotal, 0),
-    [detailedLines]
-  );
-
-  const savings = useMemo(
-    () =>
-      detailedLines.reduce(
-        (sum, line) =>
-          sum + (line.product.mrp - line.product.sellingPrice) * line.quantity,
-        0
-      ),
-    [detailedLines]
   );
 
   const value = useMemo<CartContextValue>(
     () => ({
       lines,
       hydrated,
-      itemCount,
-      subtotal,
-      savings,
+      itemCount: count,
+      subtotal: sumLines(detailed),
+      savings: totalSavings(detailed),
       addItem,
       setQuantity,
       removeItem,
       clearCart,
-      detailedLines,
+      quantityOf,
+      detailedLines: detailed,
     }),
     [
       lines,
       hydrated,
-      itemCount,
-      subtotal,
-      savings,
+      count,
+      detailed,
       addItem,
       setQuantity,
       removeItem,
       clearCart,
-      detailedLines,
+      quantityOf,
     ]
   );
 
