@@ -4,9 +4,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react";
 import { getProductBySlug, type Product } from "@/lib/products";
 
@@ -31,12 +30,13 @@ type CartContextValue = {
 const STORAGE_KEY = "cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
-const readStoredLines = (): CartLine[] => {
+const EMPTY: CartLine[] = [];
+
+const parseStoredLines = (raw: string | null): CartLine[] => {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    if (!raw) return EMPTY;
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return EMPTY;
 
     return parsed.flatMap((entry): CartLine[] => {
       if (!entry || typeof entry !== "object") return [];
@@ -48,67 +48,116 @@ const readStoredLines = (): CartLine[] => {
       return [{ slug, quantity: safeQuantity }];
     });
   } catch {
-    return [];
+    return EMPTY;
   }
 };
 
+/**
+ * useSyncExternalStore requires a referentially stable snapshot, so the parsed
+ * result is cached against the exact raw string. Same storage contents must
+ * return the same array instance or React would re-render in a loop.
+ */
+let cachedRaw: string | null = null;
+let cachedLines: CartLine[] = EMPTY;
+let cachePrimed = false;
+
+const readStoredLines = (): CartLine[] => {
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return EMPTY;
+  }
+
+  if (cachePrimed && raw === cachedRaw) return cachedLines;
+
+  cachedRaw = raw;
+  cachedLines = parseStoredLines(raw);
+  cachePrimed = true;
+  return cachedLines;
+};
+
+/**
+ * localStorage is treated as the source of truth and read through
+ * useSyncExternalStore, so the first client render already matches storage and no
+ * effect is needed to "hydrate" the cart. Every mutation writes straight to
+ * storage, which also keeps multiple tabs in sync.
+ */
+const listeners = new Set<() => void>();
+
+/**
+ * The native "storage" event only fires in *other* tabs, so local mutations
+ * notify subscribers directly while cross-tab writes still arrive via the event.
+ */
+const subscribe = (onStoreChange: () => void) => {
+  listeners.add(onStoreChange);
+  const onStorage = () => onStoreChange();
+  window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onStoreChange);
+    window.removeEventListener("storage", onStorage);
+  };
+};
+
+const getSnapshot = (): CartLine[] => readStoredLines();
+const getServerSnapshot = (): CartLine[] => EMPTY;
+
+const writeLines = (next: CartLine[]) => {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Storage unavailable (private mode / quota). Cart stays in memory only.
+  }
+  // Force the snapshot cache to re-parse the new raw string, then notify.
+  cachePrimed = false;
+  for (const listener of listeners) listener();
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [lines, setLines] = useState<CartLine[]>([]);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setLines(readStoredLines());
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
-    } catch {
-      // Storage unavailable (private mode / quota). Cart stays in memory.
-    }
-  }, [lines, hydrated]);
-
-  useEffect(() => {
-    const onStorage = () => setLines(readStoredLines());
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  const lines = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // Server-rendered markup shows an empty cart placeholder; the first client
+  // render already reads storage, so `hydrated` is simply "am I on the client".
+  const hydrated = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
 
   const addItem = useCallback((slug: string, quantity = 1) => {
+    if (!getProductBySlug(slug)) return;
     const safeQuantity = Math.max(1, Math.floor(quantity));
-    setLines((current) => {
-      const existing = current.find((line) => line.slug === slug);
-      if (existing) {
-        return current.map((line) =>
-          line.slug === slug
-            ? { ...line, quantity: Math.min(99, line.quantity + safeQuantity) }
-            : line
-        );
-      }
-      return [...current, { slug, quantity: Math.min(99, safeQuantity) }];
-    });
+    writeLines(
+      readStoredLines().flatMap((line) => {
+        if (line.slug !== slug) return [line];
+        return [{ ...line, quantity: Math.min(99, line.quantity + safeQuantity) }];
+      })
+    );
   }, []);
 
   const setQuantity = useCallback((slug: string, quantity: number) => {
-    setLines((current) => {
-      if (quantity <= 0) return current.filter((line) => line.slug !== slug);
-      const safeQuantity = Math.min(99, Math.floor(quantity));
-      if (!current.some((line) => line.slug === slug)) {
-        return [...current, { slug, quantity: safeQuantity }];
-      }
-      return current.map((line) =>
-        line.slug === slug ? { ...line, quantity: safeQuantity } : line
+    if (!getProductBySlug(slug)) return;
+    if (quantity <= 0) {
+      writeLines(readStoredLines().filter((line) => line.slug !== slug));
+      return;
+    }
+    const safeQuantity = Math.min(99, Math.floor(quantity));
+    const current = readStoredLines();
+    if (current.some((line) => line.slug === slug)) {
+      writeLines(
+        current.map((line) =>
+          line.slug === slug ? { ...line, quantity: safeQuantity } : line
+        )
       );
-    });
+      return;
+    }
+    writeLines([...current, { slug, quantity: safeQuantity }]);
   }, []);
 
   const removeItem = useCallback((slug: string) => {
-    setLines((current) => current.filter((line) => line.slug !== slug));
+    writeLines(readStoredLines().filter((line) => line.slug !== slug));
   }, []);
 
-  const clearCart = useCallback(() => setLines([]), []);
+  const clearCart = useCallback(() => writeLines([]), []);
 
   const detailedLines = useMemo(
     () =>

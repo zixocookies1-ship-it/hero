@@ -23,6 +23,11 @@
 # local database
 prisma/dev.db
 prisma/dev.db-journal
+prisma/dev.db-shm
+prisma/dev.db-wal
+
+# test output
+/tmp
 
 # misc
 .DS_Store

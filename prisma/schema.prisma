@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -46,59 +46,90 @@ model Product {
 }
 
 model Coupon {
-  id                String   @id @default(cuid())
-  code              String   @unique
-  discountType      String   // "percentage" | "fixed"
-  discountValue     Decimal
+  id                 String   @id @default(cuid())
+  code               String   @unique
+  discountType       String // "percentage" | "fixed"
+  discountValue      Decimal
   minimumOrderAmount Decimal?
-  usageLimit        Int?
-  usedCount         Int      @default(0)
-  expiresAt         DateTime?
-  active            Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  orders            Order[]
+  usageLimit         Int?
+  usedCount          Int      @default(0)
+  expiresAt          DateTime?
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  orders             Order[]
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  orderId         String      @unique
-  customerName    String
-  customerEmail   String
-  customerPhone   String
-  address         String
-  city            String
-  state           String
-  postalCode      String
-  country         String      @default("India")
-  items           OrderItem[]
-  subtotal        Decimal
-  discount        Decimal     @default(0)
-  deliveryFee     Decimal     @default(0)
-  total           Decimal
-  paymentStatus   String      @default("pending") // pending, paid, failed, refunded
-  orderStatus     String      @default("pending")  // pending, confirmed, processing, packed, shipped, out_for_delivery, delivered, cancelled
-  deliveryStatus  String      @default("pending")
-  trackingNumber  String?
-  deliveryNotes   String?
-  paymentMethod   String      @default("razorpay")
-  paymentId       String?
-  razorpayOrderId String?
-  couponCode      String?
-  coupon          Coupon?     @relation(fields: [couponCode], references: [code])
-  notes           String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id String @id @default(cuid())
+
+  // Human-facing order number. Left null while the row is still being created so
+  // Postgres assigns the sequence first, then we build NCJ-YYYYMMDD-000123 from
+  // it. Postgres unique constraints guarantee no two orders share an ID.
+  orderId  String? @unique
+  sequence Int     @unique @default(autoincrement())
+  status   String  @default("open")
+
+  // Customer. Email is deliberately optional: checkout does not require it.
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String
+  city           String
+  state          String
+  postalCode     String
+  country        String  @default("India")
+
+  items OrderItem[]
+
+  subtotal    Decimal
+  discount    Decimal  @default(0)
+  deliveryFee Decimal  @default(0)
+  total       Decimal
+
+  // Payment
+  paymentMethod      String  @default("razorpay")
+  paymentStatus      String  @default("pending") // pending | paid | failed | refunded
+  paymentVerified    Boolean @default(false)
+  paymentId          String? @unique
+  razorpayOrderId    String? @unique
+  razorpaySignature  String?
+  paymentFailureCode String?
+
+  // Fulfilment
+  orderStatus    String   @default("pending") // pending | confirmed | processing | packed | shipped | out_for_delivery | delivered | cancelled
+  deliveryStatus String   @default("pending")
+  trackingNumber String?
+  deliveryNotes  String?
+
+  couponCode String?
+  coupon     Coupon? @relation(fields: [couponCode], references: [code])
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([paymentStatus])
+  @@index([orderStatus])
+  @@index([customerPhone])
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  name      String
-  price     Decimal
-  quantity  Int
-  image     String?
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Product catalogue is currently code-owned (src/lib/products.ts), so the
+  // stable slug is what we persist. productId stays optional for when the
+  // catalogue moves into Postgres.
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  productSlug String
+  name        String
+  image       String?
+  quantity    Int
+  mrp         Decimal
+  unitPrice   Decimal
+  lineTotal   Decimal
 }
