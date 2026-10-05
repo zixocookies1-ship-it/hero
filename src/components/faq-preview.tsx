@@ -39,7 +39,7 @@ export default function FAQPreview() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="bg-[var(--warm-cream)] py-16">
+    <section>
       <div className="mx-auto max-w-3xl px-6">
         <div className="text-center">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

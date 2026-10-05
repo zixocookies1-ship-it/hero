@@ -6,6 +6,7 @@ import ProductActions from "@/components/product-actions";
 import ProductCard from "@/components/product-card";
 import ProductGallery from "@/components/product-gallery";
 import PriceDisplay from "@/components/price-display";
+import WhatsAppEnquiry from "@/components/whatsapp-enquiry";
 
 export function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
@@ -126,6 +127,10 @@ export default async function ProductDetailPage({
 
             <div className="mt-6">
               <ProductActions product={product} />
+            </div>
+
+            <div className="mt-4">
+              <WhatsAppEnquiry product={product} />
             </div>
           </div>
         </div>

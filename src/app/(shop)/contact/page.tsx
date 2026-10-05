@@ -1,5 +1,7 @@
 ﻿import type { Metadata } from "next";
+import { BRAND, whatsappLink } from "@/lib/brand";
 import ContactForm from "./contact-form";
+import FAQPreview from "@/components/faq-preview";
 
 export const metadata: Metadata = {
   title: "Contact - Nature's Choice Jaggery",
@@ -8,9 +10,10 @@ export const metadata: Metadata = {
 };
 
 const contactDetails = [
-  { label: "Email", value: "support@natureschoicejaggery.com" },
-  { label: "Phone", value: "+91 98765 43210" },
-  { label: "Office", value: "Mumbai, Maharashtra, India" },
+  { label: "WhatsApp", value: BRAND.phoneDisplay, href: whatsappLink("Hi, I have a question about your jaggery.") },
+  { label: "Phone", value: BRAND.phoneDisplay, href: `tel:${BRAND.phoneDial}` },
+  { label: "Email", value: BRAND.email, href: `mailto:${BRAND.email}` },
+  { label: "Office", value: BRAND.officeAddress, href: undefined },
 ];
 
 export default function ContactPage() {
@@ -40,7 +43,18 @@ export default function ContactPage() {
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
                   {detail.label}
                 </p>
-                <p className="mt-2 text-base text-[var(--dark-text)]">{detail.value}</p>
+                {detail.href ? (
+                  <a
+                    href={detail.href}
+                    target={detail.href.startsWith("http") ? "_blank" : undefined}
+                    rel={detail.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className="mt-2 block text-base text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
+                  >
+                    {detail.value}
+                  </a>
+                ) : (
+                  <p className="mt-2 text-base text-[var(--dark-text)]">{detail.value}</p>
+                )}
               </div>
             ))}
 
@@ -59,6 +73,10 @@ export default function ContactPage() {
 
           <ContactForm />
         </div>
+      </div>
+
+      <div className="mt-16">
+        <FAQPreview />
       </div>
     </main>
   );
