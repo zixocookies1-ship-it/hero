@@ -38,6 +38,11 @@ export const razorpayConfigured = (): boolean =>
 
 export const databaseConfigured = (): boolean => hasEnv("DATABASE_URL");
 
+/** True when a signing key is available. Admin sessions and receipt links both
+ *  need one; without it `signingSecret()` throws rather than falling open. */
+export const signingConfigured = (): boolean =>
+  hasEnv("ORDER_SIGNING_SECRET") || hasEnv("AUTH_SECRET") || hasEnv("RAZORPAY_KEY_SECRET");
+
 /**
  * Secret used to sign admin sessions and order receipt links. Falls back to the
  * Razorpay secret so a missing value cannot silently weaken signing, but a

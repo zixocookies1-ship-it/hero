@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { optionalEnv, signingSecret } from "@/lib/env";
+import { optionalEnv, signingConfigured, signingSecret } from "@/lib/env";
 
 export const ADMIN_COOKIE = "ncj_admin_session";
 
@@ -32,6 +32,15 @@ export function createAdminSession(email: string, ttlMs = ADMIN_SESSION_TTL_MS):
 export function verifyAdminSession(token: unknown): { ok: boolean; email?: string } {
   if (typeof token !== "string" || !token) return { ok: false };
 
+  // No signing key means no session can be trusted. Fail closed instead of
+  // throwing, so the login screen still renders and can explain the problem.
+  let secret: string;
+  try {
+    secret = sessionSecret();
+  } catch {
+    return { ok: false };
+  }
+
   const parts = token.split(".");
   if (parts.length !== 2) return { ok: false };
 
@@ -51,7 +60,7 @@ export function verifyAdminSession(token: unknown): { ok: boolean; email?: strin
   if (!Number.isFinite(expiresAt) || expiresAt < Date.now()) return { ok: false };
 
   const expected = b64url(
-    crypto.createHmac("sha256", sessionSecret()).update(payload).digest()
+    crypto.createHmac("sha256", secret).update(payload).digest()
   );
   const received = Buffer.from(parts[1], "utf8");
   const computed = Buffer.from(expected, "utf8");
@@ -88,8 +97,14 @@ export function checkAdminCredentials(email: string, password: string): boolean 
   return emailOk && passwordOk;
 }
 
+/** Admin login needs both a credential pair and a signing key: without the key a
+ *  session cookie cannot be issued at all. */
 export function adminIsConfigured(): boolean {
-  return Boolean(optionalEnv("ADMIN_EMAIL") && optionalEnv("ADMIN_PASSWORD"));
+  return Boolean(
+    optionalEnv("ADMIN_EMAIL") &&
+    optionalEnv("ADMIN_PASSWORD") &&
+    signingConfigured()
+  );
 }
 
 /** Guard for every protected admin page. Redirects to the login screen. */

@@ -13,7 +13,10 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   if (!adminIsConfigured()) {
     return NextResponse.json(
-      { error: "Admin access is not configured on this deployment." },
+      {
+        error:
+          "Admin access is not configured on this deployment. Set ADMIN_EMAIL, ADMIN_PASSWORD and ORDER_SIGNING_SECRET.",
+      },
       { status: 503 }
     );
   }
