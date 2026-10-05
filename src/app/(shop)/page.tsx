@@ -7,6 +7,8 @@ import ProductCard from "@/components/product-card";
 import WhyNaturesChoice from "@/components/why-natures-choice";
 import FarmToJar from "@/components/farm-to-jar";
 import OurStoryPreview from "@/components/our-story-preview";
+import CustomerReviews from "@/components/customer-reviews";
+import FourDecisions from "@/components/four-decisions";
 
 export const metadata: Metadata = {
   title: "Nature's Choice Jaggery",
@@ -97,6 +99,10 @@ export default function Home() {
       <FarmToJar />
 
       <OurStoryPreview />
+
+      <FourDecisions />
+
+      <CustomerReviews />
     </>
   );
 }
