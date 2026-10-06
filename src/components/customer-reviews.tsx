@@ -18,16 +18,16 @@ const reviews: CustomerReview[] = [
     text: "The first jaggery that actually tastes like my grandmother's. Rich, slightly smoky, and nothing like the adulterated ones in the market.",
   },
   {
-    name: "Rohit Verma",
-    rating: 5,
-    product: "Desi Elaichi Chocolatey Jaggery",
-    text: "I am a tea-drinker's tea drinker's tea drinker, and this has become the default. The elaichi note is present without being sweet.",
-  },
-  {
     name: "Fatima Ansari",
     rating: 4,
     product: "Desi Til Chocolatey Jaggery",
     text: "Very good with warm milk. Four stars only because I would love a smaller pack for travel, but the taste is genuinely excellent.",
+  },
+  {
+    name: "Rohit Verma",
+    rating: 5,
+    product: "Desi Elaichi Chocolatey Jaggery",
+    text: "I am a tea-drinker's tea drinker's tea drinker, and this has become the default. The elaichi note is present without being sweet.",
   },
 ];
 

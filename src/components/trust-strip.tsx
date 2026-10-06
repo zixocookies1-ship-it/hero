@@ -1,3 +1,5 @@
+import { SHELF_LIFE_MONTHS } from "@/lib/products";
+
 const items = [
   {
     eyebrow: "Pure & Natural",
@@ -16,7 +18,7 @@ const items = [
   },
   {
     eyebrow: "Freshness",
-    title: "18-Month Shelf Life",
+    title: `${SHELF_LIFE_MONTHS}-Month Shelf Life`,
     body: "Packed without additives, so it keeps well in an airtight container.",
   },
   {

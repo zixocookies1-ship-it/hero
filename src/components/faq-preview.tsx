@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SHELF_LIFE_MONTHS } from "@/lib/products";
 
 const faqs = [
   {
@@ -21,7 +22,7 @@ const faqs = [
   {
     question: "What is the shelf life?",
     answer:
-      "18 months from the manufacturing date when stored as directed. Because we do not add preservatives, it is best used within that period for the fullest flavour.",
+      `${SHELF_LIFE_MONTHS} months from the manufacturing date when stored as directed. Because we do not add preservatives, it is best used within that period for the fullest flavour.`,
   },
   {
     question: "Do you ship across India?",
@@ -31,7 +32,7 @@ const faqs = [
   {
     question: "What is the difference between the three flavours?",
     answer:
-      "Desi Chocolatey is our classic deep, malty jaggery. Desi Elaichi adds green cardamom and roasted sesame. Desi Til is made with roasted sesame for a warmer, nuttier taste. All three are 500g and contain no preservatives.",
+      "Desi Chocolatey is our classic deep, malty jaggery. Desi Til is made with roasted sesame for a warmer, nuttier taste. Desi Elaichi adds green cardamom and roasted sesame. All three are 500g and contain no preservatives.",
   },
 ];
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BRAND, whatsappLink } from "@/lib/brand";
-import { products } from "@/lib/products";
+import { products, SHELF_LIFE_MONTHS } from "@/lib/products";
 import Founders from "@/components/founders";
 import SocialLinks from "@/components/social-links";
 
@@ -97,7 +97,9 @@ export default function AboutPage() {
                 </dt>
               </div>
               <div className="rounded-2xl border border-black/5 bg-[var(--white)] p-4 text-center">
-                <dd className="font-serif text-xl font-bold text-[var(--jaggery-brown)]">18</dd>
+                <dd className="font-serif text-xl font-bold text-[var(--jaggery-brown)]">
+                  {SHELF_LIFE_MONTHS}
+                </dd>
                 <dt className="mt-1 text-xs text-[var(--dark-text)]/60">
                   month shelf life
                 </dt>

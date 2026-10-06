@@ -22,6 +22,19 @@ const imageSet = (slug: string, count: number) =>
     (_, index) => `/images/products/${slug}/${String(index + 1).padStart(2, "0")}.jpeg`
   );
 
+/**
+ * Shelf life in months, quoted on the about page, the trust strip and the FAQ.
+ * Kept here as the single value so those three cannot drift apart.
+ */
+export const SHELF_LIFE_MONTHS = 8;
+
+/**
+ * Display order for every catalogue listing (home, products grid, about, footer
+ * and the related products block). The array order below is the order customers
+ * see, so re-ordering it re-orders the whole site. Keep it consistent with the
+ * order flavours are described in across the copy: classic, then til, then
+ * elaichi.
+ */
 export const products: Product[] = [
   {
     slug: "desi-chocolatey-jaggery",
@@ -48,30 +61,6 @@ export const products: Product[] = [
     images: imageSet("desi-chocolatey-jaggery", 6),
   },
   {
-    slug: "desi-elaichi-chocolatey-jaggery",
-    name: "Desi Elaichi Chocolatey Jaggery",
-    variantName: "Desi Elaichi & Sonth Chocolatey Gud",
-    shortName: "Desi Elaichi",
-    flavourNote: "Cardamom Infused",
-    description:
-      "Green cardamom and roasted sesame folded into slow-cooked jaggery for an aromatic, gently warming sweetness. A modern finish on an age-old Indian recipe, made for chai, sweets and everyday cooking.",
-    ingredients:
-      "Organic sugarcane juice, jaggery, green cardamom, roasted sesame (sonth), cocoa, natural colour.",
-    highlights: [
-      "Aromatic cardamom and roasted sesame",
-      "No preservatives or chemicals",
-      "Gold-kettle method in pure clay pots",
-      "Suitable for chai and traditional sweets",
-    ],
-    weight: "500g",
-    pack: "Pack of 1",
-    mrp: 299,
-    sellingPrice: 239,
-    discountPercent: 20,
-    inStock: true,
-    images: imageSet("desi-elaichi-chocolatey-jaggery", 6),
-  },
-  {
     slug: "desi-til-chocolatey-jaggery",
     name: "Desi Til Chocolatey Jaggery",
     variantName: "Desi Til Chocolatey Gud",
@@ -94,6 +83,30 @@ export const products: Product[] = [
     discountPercent: 20,
     inStock: true,
     images: imageSet("desi-til-chocolatey-jaggery", 7),
+  },
+  {
+    slug: "desi-elaichi-chocolatey-jaggery",
+    name: "Desi Elaichi Chocolatey Jaggery",
+    variantName: "Desi Elaichi & Sonth Chocolatey Gud",
+    shortName: "Desi Elaichi",
+    flavourNote: "Cardamom Infused",
+    description:
+      "Green cardamom and roasted sesame folded into slow-cooked jaggery for an aromatic, gently warming sweetness. A modern finish on an age-old Indian recipe, made for chai, sweets and everyday cooking.",
+    ingredients:
+      "Organic sugarcane juice, jaggery, green cardamom, roasted sesame (sonth), cocoa, natural colour.",
+    highlights: [
+      "Aromatic cardamom and roasted sesame",
+      "No preservatives or chemicals",
+      "Gold-kettle method in pure clay pots",
+      "Suitable for chai and traditional sweets",
+    ],
+    weight: "500g",
+    pack: "Pack of 1",
+    mrp: 299,
+    sellingPrice: 239,
+    discountPercent: 20,
+    inStock: true,
+    images: imageSet("desi-elaichi-chocolatey-jaggery", 6),
   },
 ];
 
