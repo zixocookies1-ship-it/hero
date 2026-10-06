@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 @layer base {
+  /**
+   * BRAND PALETTE — single source of truth.
+   *
+   * Every page reads these tokens, never hard-coded hex values, so the whole
+   * theme can be changed from this one block. To restyle the site background
+   * (including the cautionary "warm" tone), edit --background / --warm-cream
+   * here and nothing else needs to change.
+   */
   :root {
     --background: #F7F1E7;
     --foreground: #24211D;
@@ -21,9 +29,16 @@
     --color-natural-green: var(--natural-green);
     --color-dark-text: var(--dark-text);
     --color-white: var(--white);
-    
-    --font-heading: "DM Serif Display", "Playfair Display", serif;
-    --font-body: "Inter", "Manrope", sans-serif;
+
+    --font-heading: var(--font-heading-loaded, "DM Serif Display"), "Playfair Display", serif;
+    --font-body: var(--font-body-loaded, "Inter"), "Manrope", sans-serif;
+
+    --animate-marquee: marquee 32s linear infinite;
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
   }
 
   * {

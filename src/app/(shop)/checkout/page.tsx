@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import CartGate from "@/components/cart-gate";
 import CheckoutForm from "@/components/checkout-form";
 import { getShippingPolicy } from "@/lib/pricing";
@@ -14,7 +14,7 @@ export default async function CheckoutPage() {
   const brand = await loadBrand();
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-6xl px-6">
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-[var(--dark-text)]/60">
           <ol className="flex flex-wrap items-center gap-2">

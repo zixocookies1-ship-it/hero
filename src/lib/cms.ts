@@ -139,6 +139,7 @@ const toProduct = (
     name: string;
     description: string;
     sortOrder: number;
+    isFeatured: boolean;
     variantName: string | null;
     shortName: string | null;
     flavourNote: string | null;
@@ -175,6 +176,7 @@ const toProduct = (
   return {
     slug: row.slug,
     name: row.name,
+    featured: row.isFeatured,
     variantName: row.variantName ?? codeEquivalent?.variantName ?? row.name,
     shortName: row.shortName ?? codeEquivalent?.shortName ?? row.name,
     flavourNote: row.flavourNote ?? codeEquivalent?.flavourNote ?? "",
@@ -290,6 +292,46 @@ export const loadSectionsUncached = async (): Promise<SectionMap> => {
  * nothing on screen.
  */
 export const loadSections = cache(loadSectionsUncached);
+
+/**
+ * Splits the raw `announcement` setting into the individual marquee messages.
+ * The stored value is a pipe-separated strip, e.g.
+ * `"PAN INDIA DELIVERY | SECURE PAYMENTS | CUSTOMER SUPPORT"`. Blank entries
+ * are dropped so a stray `|` never renders an empty segment.
+ */
+export const splitAnnouncements = (raw: string): string[] =>
+  raw
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+/**
+ * Shipped-with strip, used only when the database is unreachable so the bar
+ * never goes blank as the result of a failed query. When the database IS
+ * reachable the stored setting is authoritative, and clearing it in the admin
+ * intentionally removes the bar.
+ */
+const FALLBACK_ANNOUNCEMENTS = [
+  "Pan India delivery",
+  "Secure payments",
+  "Customer support",
+];
+
+export const loadAnnouncementsUncached = async (): Promise<string[]> => {
+  try {
+    const settings = await prisma.businessSettings.findFirst({
+      select: { announcement: true },
+    });
+    if (!settings) return FALLBACK_ANNOUNCEMENTS;
+    const split = splitAnnouncements(settings.announcement ?? "");
+    return split.length > 0 ? split : [];
+  } catch (error) {
+    console.error("[cms] announcement load failed, keeping shipped strip", error);
+    return FALLBACK_ANNOUNCEMENTS;
+  }
+};
+
+export const loadAnnouncements = cache(loadAnnouncementsUncached);
 
 /**
  * Replaces `{{token}}` placeholders in stored copy.

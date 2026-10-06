@@ -26,7 +26,7 @@ export default function CartPage() {
 
   if (!hydrated) {
     return (
-      <main className="pt-28 pb-24">
+      <main className="pt-40 pb-24">
         <div className="mx-auto max-w-3xl px-6">
           <p className="text-[var(--dark-text)]/60">Loading your cart...</p>
         </div>
@@ -36,7 +36,7 @@ export default function CartPage() {
 
   if (detailedLines.length === 0) {
     return (
-      <main className="pt-28 pb-24">
+      <main className="pt-40 pb-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <div className="rounded-2xl border border-black/5 bg-[var(--white)] p-12">
             <h1 className="text-2xl font-bold text-[var(--dark-text)]">
@@ -59,7 +59,7 @@ export default function CartPage() {
   }
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-6xl px-6">
         <h1 className="text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
           Your cart
@@ -142,7 +142,7 @@ export default function CartPage() {
             ))}
           </ul>
 
-          <aside className="h-fit rounded-2xl border border-black/5 bg-[var(--white)] p-6 lg:sticky lg:top-28">
+          <aside className="h-fit rounded-2xl border border-black/5 bg-[var(--white)] p-6 lg:sticky lg:top-40">
             <h2 className="font-serif text-lg font-bold text-[var(--dark-text)]">
               Order summary
             </h2>

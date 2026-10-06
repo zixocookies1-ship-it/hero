@@ -12,7 +12,7 @@ export default async function ProductsPage() {
   const products = await loadCatalogue();
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-14 text-center">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

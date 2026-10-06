@@ -60,18 +60,38 @@ export default async function Home() {
   const featured = sections.home_featured ?? FEATURED_FALLBACK;
   const viewAll = featured.links[0] ?? FEATURED_FALLBACK.links[0];
 
+  // "Best sellers" is driven by the admin's featured flag. Until at least one
+  // product is flagged, no best-seller decision has been made, so the shipped
+  // behaviour of showing every product stands rather than an empty grid.
+  const flagged = catalogue.filter((product) => product.featured === true);
+  const displayed = flagged.length > 0 ? flagged : catalogue;
+
+  // The hero banner photograph is the first catalogue product (Desi
+  // Chocolatey). Linking the image itself to that product keeps the whole hero
+  // clickable instead of leaving a large, unclickable visual dead zone.
+  const heroProduct = displayed[0] ?? catalogue[0] ?? null;
+
   return (
     <>
-      <section className="relative flex min-h-[92vh] items-center justify-center overflow-hidden">
+      <section className="group relative flex min-h-[92vh] items-center justify-center overflow-hidden">
+        <Link
+          href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
+          className="absolute inset-0 z-[5]"
+          aria-label={
+            heroProduct
+              ? `Shop ${heroProduct.name}`
+              : "Shop our jaggery"
+          }
+        />
         <Image
           src={hero.image || "/images/hero-banner.png"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
         <div className="relative z-10 w-full px-6 py-28">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-xl">
@@ -129,7 +149,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {catalogue.map((product) => (
+            {displayed.map((product) => (
               <ProductCard key={product.slug} product={product} />
             ))}
           </div>

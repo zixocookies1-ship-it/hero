@@ -1,6 +1,13 @@
 export type Product = {
   slug: string;
   name: string;
+  /**
+   * Set when the product is flagged as a featured/best seller in the admin.
+   * Undefined for the shipped fallback list, which has no such concept — the
+   * storefront treats "no featured flag anywhere" as "nothing decided yet" and
+   * shows everything.
+   */
+  featured?: boolean;
   variantName: string;
   shortName: string;
   flavourNote: string;

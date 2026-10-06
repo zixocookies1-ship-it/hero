@@ -191,6 +191,7 @@ export default async function AdminOrdersPage() {
                             orderStatus: order.orderStatus,
                             trackingNumber: order.trackingNumber,
                             deliveryNotes: order.deliveryNotes,
+                            paymentVerified: order.paymentVerified,
                           }}
                         />
                       ) : (

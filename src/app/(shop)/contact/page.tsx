@@ -23,7 +23,7 @@ export default async function ContactPage() {
   ];
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-14 max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/cart-context";
+import AnnouncementBar from "@/components/announcement-bar";
 
 const links = [
   { href: "/", label: "HOME" },
@@ -41,12 +42,18 @@ function CartIcon({ count }: { count: number }) {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({
+  announcements = [],
+}: {
+  announcements?: string[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const { itemCount } = useCart();
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-black/5 bg-[var(--warm-cream)]/95 backdrop-blur-sm">
+    <header className="fixed inset-x-0 top-0 z-50">
+      <AnnouncementBar messages={announcements} />
+      <nav className="border-b border-black/5 bg-[var(--warm-cream)]/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" aria-label="Nature's Choice Jaggery home">
           <Image
@@ -125,6 +132,7 @@ export default function Navbar() {
           </nav>
         </div>
       )}
-    </nav>
+      </nav>
+    </header>
   );
 }

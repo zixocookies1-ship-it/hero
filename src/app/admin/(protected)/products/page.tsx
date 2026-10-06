@@ -13,6 +13,11 @@ type ProductRow = Prisma.CatalogProductGetPayload<{ include: { variants: true } 
 /** The catalogue stores paise; every price on this site is whole rupees. */
 const toInr = (paise: number) => Math.round(paise / 100);
 
+const currentImages = (value: Prisma.JsonValue): string[] =>
+  Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+
 function serialize(product: ProductRow): AdminProductRow {
   return {
     id: product.id,
@@ -23,6 +28,7 @@ function serialize(product: ProductRow): AdminProductRow {
     isActive: product.isActive,
     isFeatured: product.isFeatured,
     sortOrder: product.sortOrder,
+    images: currentImages(product.imagePaths),
     variants: product.variants.map((variant) => ({
       id: variant.id,
       sku: variant.sku,

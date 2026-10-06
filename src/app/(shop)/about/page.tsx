@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { whatsappLinkFor } from "@/lib/brand";
@@ -52,7 +52,7 @@ export default async function AboutPage() {
   const whatsappLink = (message?: string) => whatsappLinkFor(brand, message);
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-16 max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

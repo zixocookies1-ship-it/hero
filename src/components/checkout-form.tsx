@@ -527,7 +527,7 @@ export default function CheckoutForm({
         </p>
       </form>
 
-      <aside className="h-fit rounded-2xl border border-black/5 bg-[var(--white)] p-6 lg:sticky lg:top-28">
+      <aside className="h-fit rounded-2xl border border-black/5 bg-[var(--white)] p-6 lg:sticky lg:top-40">
         <h2 className="font-serif text-lg font-bold text-[var(--dark-text)]">Order summary</h2>
 
         <CheckoutLines />

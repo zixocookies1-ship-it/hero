@@ -26,7 +26,6 @@ const SECRET_KEYS = [
   "DELHIVERY_CLIENT_ID",
   "CLOUDINARY_API_SECRET",
   "CLOUDINARY_API_KEY",
-  "META_CAPI_ACCESS_TOKEN",
   // The datasource is MongoDB, so MONGODB_URI is the connection string that must
   // never be committed. DATABASE_URL is gone from the app entirely.
   "MONGODB_URI",

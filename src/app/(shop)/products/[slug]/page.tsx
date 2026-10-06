@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductActions from "@/components/product-actions";
@@ -42,7 +42,7 @@ export default async function ProductDetailPage({
   const related = products.filter((item) => item.slug !== product.slug);
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-7xl px-6">
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-[var(--dark-text)]/60">
           <ol className="flex flex-wrap items-center gap-2">

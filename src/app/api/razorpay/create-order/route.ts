@@ -17,6 +17,7 @@ import {
   normaliseCheckoutDetails,
   validateCheckoutDetails,
 } from "@/lib/validation";
+import { delhiveryConfigured, delhiveryPincodeServiceable } from "@/lib/delhivery-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,6 +80,27 @@ export async function POST(request: Request) {
       { error: "Some delivery details are invalid.", fieldErrors },
       { status: 422 }
     );
+  }
+
+  // Delhivery is the store's only delivery partner, so when it is configured the
+  // pincode must be serviceable before an order is even started. A definitive
+  // "no" is a hard reject; an unreachable API is logged and allowed through so
+  // an outage never blocks a sale.
+  if (delhiveryConfigured()) {
+    try {
+      const serviceable = await delhiveryPincodeServiceable(details.postalCode);
+      if (serviceable === false) {
+        return NextResponse.json(
+          { error: "We do not deliver to this pincode yet." },
+          { status: 422 }
+        );
+      }
+    } catch (error) {
+      console.error("[checkout] Delhivery pincode check failed", {
+        postalCode: details.postalCode,
+        error,
+      });
+    }
   }
 
   // Amounts are recalculated from the catalogue. Anything the browser claims

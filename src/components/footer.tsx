@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SocialLinks from "@/components/social-links";
 import { loadBrand, loadCatalogue, loadSections } from "@/lib/cms";
+import { POLICY_LINKS } from "@/lib/policies";
 
 const FALLBACK_BODY =
   "Premium, naturally processed jaggery from sugarcane farms in Uttar Pradesh. Slow-cooked in pure clay pots over natural wood fire, with no preservatives and no chemicals.";
@@ -27,15 +28,26 @@ export default async function Footer() {
   const companyLinks =
     footer && footer.links.length > 0 ? footer.links : FALLBACK_COMPANY_LINKS;
 
+  const heading = "font-heading text-base font-semibold";
+
   return (
-    <footer className="bg-[var(--jaggery-brown)] py-14 text-[var(--white)]">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
-          <div className="md:col-span-2">
+    <footer className="relative overflow-hidden bg-[var(--jaggery-brown)] text-[var(--white)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80rem_30rem_at_120%_-10%,rgba(200,121,69,0.28),transparent_60%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-[50%] bg-[var(--ginger-terracotta)]/10 blur-3xl"
+      />
+
+      <div className="relative mx-auto max-w-7xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+          <div>
             <div className="flex items-center gap-3">
               <Image
                 src="/images/logo.png?v=2"
-                alt={brand.name}
+                alt=""
                 width={96}
                 height={96}
                 className="h-24 w-24 object-contain drop-shadow-[0_0_2px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.4)]"
@@ -44,11 +56,11 @@ export default async function Footer() {
                 {brand.name}
               </span>
             </div>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--white)]/80">
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-[var(--white)]/80">
               {body}
             </p>
 
-            <div className="mt-6">
+            <div className="mt-7">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--white)]/50">
                 Visit us
               </p>
@@ -64,10 +76,8 @@ export default async function Footer() {
             </div>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest">
-              Products
-            </h3>
+          <nav aria-label="Products">
+            <h2 className={heading}>Products</h2>
             <ul className="mt-4 space-y-2.5 text-sm text-[var(--white)]/70">
               {catalogue.map((product) => (
                 <li key={product.slug}>
@@ -80,12 +90,10 @@ export default async function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest">
-              Company
-            </h3>
+          <nav aria-label="Company">
+            <h2 className={heading}>Company</h2>
             <ul className="mt-4 space-y-2.5 text-sm text-[var(--white)]/70">
               {companyLinks.map((link) => (
                 <li key={`${link.href}-${link.label}`}>
@@ -98,12 +106,42 @@ export default async function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
+
+          <nav aria-label="Policies">
+            <h2 className={heading}>Policies</h2>
+            <ul className="mt-4 space-y-2.5 text-sm text-[var(--white)]/70">
+              {POLICY_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-[var(--white)]/10 pt-6 text-xs text-[var(--white)]/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {new Date().getFullYear()} {brand.name}. All rights reserved.</p>
-          <p>{tagline}</p>
+        <div className="mt-14 flex flex-col gap-4 border-t border-[var(--white)]/10 pt-8 lg:flex-row lg:items-center lg:justify-between">
+          <p className="text-xs text-[var(--white)]/60">
+            &copy; {new Date().getFullYear()} {brand.name}. All rights reserved.
+          </p>
+          <ul className="flex flex-wrap gap-x-5 gap-y-2">
+            {POLICY_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-xs text-[var(--white)]/60 transition-colors hover:text-[var(--white)]"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-[var(--white)]/60">{tagline}</p>
         </div>
       </div>
     </footer>

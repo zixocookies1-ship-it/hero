@@ -51,48 +51,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const webhook = process.env.CONTACT_WEBHOOK_URL;
-  if (!webhook) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message:
-          "Enquiries are not configured yet. Please email us directly.",
-      },
-      { status: 503 }
-    );
-  }
-
-  try {
-    const response = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source: "natureschoicejaggery.com",
-        name,
-        email,
-        phone,
-        subject,
-        message,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Webhook responded with ${response.status}`);
-    }
-
-    return NextResponse.json({
-      ok: true,
-      message: "Thanks. We have received your message and will get back to you.",
-    });
-  } catch {
-    return NextResponse.json(
-      {
-        ok: false,
-        message:
-          "We could not send your message right now. Please email us directly.",
-      },
-      { status: 502 }
-    );
-  }
+  // The contact form hands off to WhatsApp (the store's only inbox), so this
+  // legacy endpoint deliberately relays nothing anywhere. It validates and then
+  // points back at WhatsApp rather than calling any external webhook.
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Message us on WhatsApp.",
+      whatsapp: true,
+    },
+    { status: 503 }
+  );
 }

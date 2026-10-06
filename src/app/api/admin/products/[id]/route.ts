@@ -62,6 +62,26 @@ export async function PATCH(
     data.isFeatured = isFeatured.value;
   }
 
+  if (body.images !== undefined) {
+    if (!Array.isArray(body.images) || body.images.length > 10) {
+      return NextResponse.json(
+        { error: "Images must be a list of up to 10 URLs." },
+        { status: 400 }
+      );
+    }
+    const images = body.images.map((entry) => (typeof entry === "string" ? entry.trim() : ""));
+    if (images.some((entry) => !entry || entry.length > 500)) {
+      return NextResponse.json({ error: "Each image must be a URL or an /images/ path." }, { status: 400 });
+    }
+    if (images.some((entry) => !/^(https?:\/\/|\/)/.test(entry))) {
+      return NextResponse.json(
+        { error: "Each image must be an absolute URL or an /images/ path." },
+        { status: 400 }
+      );
+    }
+    data.imagePaths = images;
+  }
+
   try {
     const updated = await prisma.catalogProduct.update({
       where: { id },

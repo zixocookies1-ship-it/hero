@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { databaseConfigured } from "@/lib/env";
@@ -33,7 +33,7 @@ export default async function OrderSuccessPage({ params, searchParams }: PagePro
   const access = verifyReceiptToken(orderId, token);
   if (!access.ok) {
     return (
-      <main className="pt-28 pb-24">
+      <main className="pt-40 pb-24">
         <div className="mx-auto max-w-2xl px-6">
           <div className="rounded-2xl border border-black/5 bg-[var(--white)] p-10 text-center shadow-sm">
             <h1 className="text-2xl font-bold text-[var(--dark-text)]">
@@ -65,7 +65,7 @@ export default async function OrderSuccessPage({ params, searchParams }: PagePro
   const paid = order.paymentStatus === "paid";
 
   return (
-    <main className="pt-28 pb-24">
+    <main className="pt-40 pb-24">
       <div className="mx-auto max-w-3xl px-6">
         <div className="rounded-2xl border border-black/5 bg-[var(--white)] p-8 shadow-sm sm:p-10">
           <div className="text-center">

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AdminImageUpload from "@/components/admin-image-upload";
 
 export type AdminVariantData = {
   id: string;
@@ -24,6 +25,8 @@ export type AdminProductRow = {
   isActive: boolean;
   isFeatured: boolean;
   sortOrder: number;
+  /** Custom gallery served from Cloudinary; an empty list means "ship images". */
+  images: string[];
   variants: AdminVariantData[];
 };
 
@@ -89,7 +92,8 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           product.flavour !== original.flavour ||
           product.isActive !== original.isActive ||
           product.isFeatured !== original.isFeatured ||
-          product.sortOrder !== original.sortOrder
+          product.sortOrder !== original.sortOrder ||
+          product.images.join("\u0000") !== original.images.join("\u0000")
         ) {
           const response = await fetch(`/api/admin/products/${product.id}`, {
             method: "PATCH",
@@ -101,6 +105,7 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
               isActive: product.isActive,
               isFeatured: product.isFeatured,
               sortOrder: product.sortOrder,
+              images: product.images,
             }),
           });
           const payload = (await response.json().catch(() => ({}))) as { error?: string };
@@ -363,6 +368,36 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
                   >
                     {product.isFeatured ? "Unmark featured" : "Mark featured"}
                   </button>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-black/5 bg-gray-50 px-4 py-3">
+                  <div>
+                    <p className="text-xs font-semibold text-[var(--dark-text)]">Photos</p>
+                    <p className="mt-0.5 text-[11px] text-gray-500">
+                      Stored and served from Cloudinary. The live storefront shows an empty
+                      gallery&apos;s shipped images instead.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <AdminImageUpload
+                      folder={`products/${product.slug}`}
+                      value={product.images[0] ?? ""}
+                      onChange={(url) =>
+                        setProduct(product.id, {
+                          images: [url, ...product.images.filter((entry) => entry !== url)].slice(0, 6),
+                        })
+                      }
+                    />
+                    {product.images.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setProduct(product.id, { images: [] })}
+                        className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
+                      >
+                        Reset to shipped images
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-md border border-black/5">

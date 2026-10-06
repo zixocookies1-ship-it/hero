@@ -1,6 +1,7 @@
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import WhatsAppFloat from "@/components/whatsapp-float";
+import { loadAnnouncements } from "@/lib/cms";
 
 /**
  * The storefront renders from the database, so none of it can be baked at build
@@ -10,14 +11,16 @@ import WhatsAppFloat from "@/components/whatsapp-float";
  */
 export const dynamic = "force-dynamic";
 
-export default function ShopLayout({
+export default async function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const announcements = await loadAnnouncements();
+
   return (
     <>
-      <Navbar />
+      <Navbar announcements={announcements} />
       <main className="flex-1">{children}</main>
       <Footer />
       <WhatsAppFloat />

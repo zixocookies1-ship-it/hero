@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AdminImageUpload from "@/components/admin-image-upload";
 
 export type AdminBannerEntry = {
   key: string;
@@ -142,8 +143,13 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                   <input
                     className={inputClass}
                     value={entry.image}
-                    placeholder="/images/..."
+                    placeholder="/images/... or a full URL"
                     onChange={(e) => update(entry.key, { image: e.target.value })}
+                  />
+                  <AdminImageUpload
+                    folder="banners"
+                    value={entry.image}
+                    onChange={(url) => update(entry.key, { image: url })}
                   />
                 </label>
                 <label className="block lg:col-span-2">
