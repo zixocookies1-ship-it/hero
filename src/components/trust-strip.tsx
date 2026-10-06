@@ -1,34 +1,47 @@
 import { SHELF_LIFE_MONTHS } from "@/lib/products";
+import { loadSections, renderTemplate, type SectionItem } from "@/lib/cms";
 
-const items = [
+/**
+ * Copy this strip shipped with, used when the `home_trust` document is absent.
+ * The shelf life is substituted at render time so an admin edit can never
+ * freeze a stale number into the tile.
+ */
+const FALLBACK_ITEMS: SectionItem[] = [
   {
-    eyebrow: "Pure & Natural",
+    subtitle: "Pure & Natural",
     title: "Nothing Added",
-    body: "No preservatives, no chemicals, no artificial colouring. Just sugarcane, slow-cooked.",
+    text: "No preservatives, no chemicals, no artificial colouring. Just sugarcane, slow-cooked.",
   },
   {
-    eyebrow: "Traditional Method",
+    subtitle: "Traditional Method",
     title: "Gold-Kettle Cooking",
-    body: "Slow-cooked in pure clay pots over natural wood fire, the way jaggery has always been made.",
+    text: "Slow-cooked in pure clay pots over natural wood fire, the way jaggery has always been made.",
   },
   {
-    eyebrow: "Quality Checked",
+    subtitle: "Quality Checked",
     title: "Batch Testing",
-    body: "Every batch is checked for purity, moisture content and consistency before packing.",
+    text: "Every batch is checked for purity, moisture content and consistency before packing.",
   },
   {
-    eyebrow: "Freshness",
-    title: `${SHELF_LIFE_MONTHS}-Month Shelf Life`,
-    body: "Packed without additives, so it keeps well in an airtight container.",
+    subtitle: "Freshness",
+    title: "{{shelfLife}}-Month Shelf Life",
+    text: "Packed without additives, so it keeps well in an airtight container.",
   },
   {
-    eyebrow: "Sourcing",
+    subtitle: "Sourcing",
     title: "Uttar Pradesh Farms",
-    body: "Sugarcane sourced directly from partner farms in Uttar Pradesh, India.",
+    text: "Sugarcane sourced directly from partner farms in Uttar Pradesh, India.",
   },
 ];
 
-export default function TrustStrip() {
+const tokens = { shelfLife: SHELF_LIFE_MONTHS };
+
+export default async function TrustStrip() {
+  const sections = await loadSections();
+  const items = sections.home_trust?.items.length
+    ? sections.home_trust.items
+    : FALLBACK_ITEMS;
+
   return (
     <section className="bg-[var(--warm-cream)] py-14">
       <div className="mx-auto max-w-7xl px-6">
@@ -55,13 +68,13 @@ export default function TrustStrip() {
                 </svg>
               </span>
               <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-[var(--ginger-terracotta)]">
-                {item.eyebrow}
+                {item.subtitle}
               </p>
               <h3 className="mt-1.5 font-serif text-base font-bold leading-snug text-[var(--dark-text)]">
-                {item.title}
+                {renderTemplate(item.title ?? "", tokens)}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--dark-text)]/65">
-                {item.body}
+                {item.text}
               </p>
             </div>
           ))}

@@ -148,6 +148,229 @@ model Order {
   @@index([paymentId])
 }
 
+// ---------------------------------------------------------------------------
+// Reference data owned by the catalogue service that seeded this database.
+//
+// These collections already exist in MongoDB with real records, and they use
+// their own field names — lowercase collection names, prices in paise, image
+// objects rather than a path string, isActive rather than status. The models
+// below are read-only mirrors of the shape those documents actually have; every
+// required field was verified to be present in every document of its collection
+// before it was declared required, so a read can never fail on a missing field.
+//
+// They are deliberately NOT mapped onto User/Product/Coupon/Order above. Those
+// models are this application's own write path, and mixing two writers into one
+// collection would let a foreign document break a checkout.
+//
+// Nothing here writes. `prisma db push` is not needed to read them.
+// ---------------------------------------------------------------------------
+
+model CatalogProduct {
+  id               String @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  slug             String @unique
+  tagline          String
+  shortDescription String
+  description      String
+  flavour          String
+  sortOrder        Int
+  isActive         Boolean
+  isFeatured       Boolean
+  isVerified       Boolean
+  seoTitle         String
+  seoDescription   String
+  shelfLife        String
+  storage          String
+  fssaiNote        String
+
+  // Complex values stay as Json: images are objects, the rest are arrays whose
+  // element type the source service never declared. Json accepts either, so a
+  // later document with a different element type still reads.
+  images        Json
+  ogImage       Json
+  marketplace   Json
+  nutritionPer  Json
+  allergens     Json
+  ingredients   Json
+  howToUse      Json
+  nutrition     Json
+
+  // Storefront presentation fields. Optional rather than required so a document
+  // written before they existed still reads; the loader falls back to a sensible
+  // value for every one of them.
+  //
+  // ingredientsText carries the sentence the product page prints. The older
+  // `ingredients` array above is left untouched: it belongs to the service that
+  // seeded this collection and was empty in every document.
+  variantName    String?
+  shortName      String?
+  flavourNote    String?
+  highlights     Json?
+  ingredientsText String?
+  weight         String?
+  pack           String?
+  imagePaths     Json?
+
+  createdAt DateTime
+  updatedAt DateTime
+
+  variants ProductVariant[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id               String @id @default(auto()) @map("_id") @db.ObjectId
+  productId        String @db.ObjectId
+  product          CatalogProduct @relation(fields: [productId], references: [id])
+  sku              String @unique
+  weightGrams      Int
+  weightLabel      String
+  packCount        Int
+  pricePaise       Int
+  // Null while a variant has no separate MRP, which is how all nine read today.
+  mrpPaise         Int?
+  inventory        Int
+  lowStockThreshold Int
+  isActive         Boolean
+  sortOrder        Int
+  createdAt        DateTime
+  updatedAt        DateTime
+
+  @@map("productvariants")
+}
+
+model BusinessSettings {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  brandName         String
+  tagline           String
+  announcement      String
+  description       String
+  currency          String
+  defaultOgImageUrl String
+
+  supportEmail  String
+  supportPhone  String
+  whatsappNumber String
+
+  instagramHandle String
+  twitterHandle   String
+  social          Json
+  notifications   Json
+  logo            Json?
+
+  legalName   String
+  gstNumber   String
+  fssaiNumber String
+  cinNumber   String
+
+  businessAddressLine1 String
+  businessAddressLine2 String
+  businessCity         String
+  businessState        String
+  businessPincode      String
+  businessCountry      String
+  businessHours        String
+
+  onlinePaymentEnabled Boolean
+  razorpayDisplayName  String
+
+  isVerified Boolean
+  createdAt  DateTime
+  updatedAt  DateTime
+
+  @@map("businesssettings")
+}
+
+/**
+ * Every editable block of copy on the storefront — hero banner, trust strip,
+ * section headings, bullet lists, the footer blurb. One document per section,
+ * addressed by `key`.
+ *
+ * `label` is the name shown to the admin, `key` is what the component asks for.
+ * The scalar fields cover a headline plus paragraphs; `items` covers bullet
+ * lists, steps, FAQs and reviews, and `links` covers the buttons under a
+ * heading. Both stay Json because their element shapes differ per section.
+ *
+ * Nothing here was created by `db push` — the collection is populated by the
+ * one-time seed and written by the admin editor, so a missing or empty
+ * collection simply means each component renders the copy it shipped with.
+ */
+model Section {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  key         String
+  label       String
+  eyebrow     String
+  title       String
+  titleAccent String
+  body        String
+  body2       String
+  image       String
+  items       Json
+  links       Json
+  createdAt   DateTime
+  updatedAt   DateTime
+
+  @@index([key])
+  @@map("sections")
+}
+
+model ShippingConfiguration {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  configVersion Int
+  shippingEnabled       Boolean
+  shippingDisabledMessage String
+  shippingPolicyNote    String
+
+  flatShippingPaise         Int
+  handlingPaise             Int
+  freeShippingEnabled       Boolean
+  freeShippingThresholdPaise Int
+
+  weightBasedShipping Boolean
+  weightRatePaisePerKg Int
+  maxWeightPerOrderGrams Int
+
+  codEnabled        Boolean
+  codHandlingPaise  Int
+  codMaxOrderPaise  Int?
+
+  taxEnabled    Boolean
+  taxInclusive  Boolean
+  taxPercent    Int
+
+  serviceabilityMode    String
+  serviceablePincodes   Json
+  blockedPincodes       Json
+  unknownPincodeMessage String
+  unserviceableMessage  String
+
+  showEstimatedDelivery       Boolean
+  defaultEstimatedDeliveryDaysMin Int
+  defaultEstimatedDeliveryDaysMax Int
+
+  allowCancellation  Boolean
+  cancelWindowHours  Int
+
+  pickupName           String
+  pickupContactName    String
+  pickupContactPhone   String
+  pickupEmail          String
+  pickupAddressLine1   String
+  pickupAddressLine2   String
+  pickupCity           String
+  pickupState          String
+  pickupPincode        String
+  pickupCountry        String
+
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@map("shippingconfigurations")
+}
+
 model OrderItem {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   orderId String @db.ObjectId

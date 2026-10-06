@@ -90,8 +90,10 @@ test("contact page no longer renders the phone number", async () => {
 test("contact form hands off to WhatsApp instead of posting to an API", async () => {
   const source = await read("src/app/(shop)/contact/contact-form.tsx");
 
+  // The number is injected from stored settings, so the link is built with the
+  // settings-aware helper rather than the fixed BRAND constant.
   assert.ok(
-    source.includes("whatsappLink(message)") && source.includes("contactEnquiryMessage({"),
+    source.includes("whatsappLinkFor(") && source.includes("contactEnquiryMessage({"),
     "must build a WhatsApp link from the form fields"
   );
   assert.ok(!source.includes("/api/contact"), "must not post to an API endpoint");
@@ -118,7 +120,7 @@ test("footer no longer lists contact details", async () => {
   assert.ok(!source.includes("tel:"), "footer should not link to the phone number");
   assert.ok(!source.includes("mailto:"), "footer should not list the email address");
   assert.ok(!source.includes("whatsappLink"), "footer should not offer a WhatsApp link");
-  assert.ok(source.includes("BRAND.address"), "footer keeps the postal address");
+  assert.ok(source.includes("brand.address"), "footer keeps the postal address");
   assert.ok(source.includes("SocialLinks"), "footer keeps the social links");
 });
 

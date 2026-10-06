@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { contactEnquiryMessage, whatsappLink } from "@/lib/brand";
+import { contactEnquiryMessage, whatsappLinkFor } from "@/lib/brand";
 
 type FieldName = "name" | "email" | "phone" | "subject" | "message";
 
@@ -35,7 +35,7 @@ const validate = (form: typeof initialForm): FieldErrors => {
   return errors;
 };
 
-export default function ContactForm() {
+export default function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sent, setSent] = useState(false);
@@ -77,7 +77,7 @@ export default function ContactForm() {
       message: form.message,
     });
 
-    window.open(whatsappLink(message), "_blank", "noopener,noreferrer");
+    window.open(whatsappLinkFor({ whatsappNumber }, message), "_blank", "noopener,noreferrer");
     setSent(true);
   };
 

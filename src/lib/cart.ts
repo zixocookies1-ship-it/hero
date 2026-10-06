@@ -1,4 +1,12 @@
-import { getProductBySlug, type Product } from "@/lib/products";
+import { getProductBySlug, products, type Product } from "@/lib/products";
+
+/**
+ * Every lookup in this module takes an optional `catalogue` and falls back to
+ * the shipped list when it is absent. The client passes the catalogue the root
+ * layout loaded from the database; tests and any caller that has not loaded one
+ * keep working against the shipped list, unchanged.
+ */
+export type Catalogue = readonly Product[];
 
 /**
  * A cart line is stored as { slug, quantity } and nothing else.
@@ -46,7 +54,10 @@ export type StoredCartState = {
   coupon: string | null;
 };
 
-const parseLineArray = (parsed: unknown): CartLine[] => {
+const parseLineArray = (
+  parsed: unknown,
+  catalogue: Catalogue = products
+): CartLine[] => {
   if (!Array.isArray(parsed)) return [];
 
   const seen = new Set<string>();
@@ -61,7 +72,7 @@ const parseLineArray = (parsed: unknown): CartLine[] => {
 
     if (typeof slug !== "string" || !slug) continue;
     if (!Number.isFinite(quantity)) continue;
-    if (!getProductBySlug(slug)) continue;
+    if (!getProductBySlug(slug, catalogue)) continue;
     if (seen.has(slug)) continue;
 
     seen.add(slug);
@@ -78,7 +89,10 @@ const parseLineArray = (parsed: unknown): CartLine[] => {
  * to the first occurrence, and slugs that no longer exist in the catalogue are
  * discarded so a deleted product cannot poison the cart.
  */
-export const parseStoredState = (raw: string | null): StoredCartState => {
+export const parseStoredState = (
+  raw: string | null,
+  catalogue: Catalogue = products
+): StoredCartState => {
   if (!raw) return { lines: [], coupon: null };
 
   let parsed: unknown;
@@ -90,7 +104,7 @@ export const parseStoredState = (raw: string | null): StoredCartState => {
 
   // Legacy shape: a bare array of lines, which carried no coupon.
   if (Array.isArray(parsed)) {
-    return { lines: parseLineArray(parsed), coupon: null };
+    return { lines: parseLineArray(parsed, catalogue), coupon: null };
   }
 
   if (!parsed || typeof parsed !== "object") {
@@ -103,7 +117,7 @@ export const parseStoredState = (raw: string | null): StoredCartState => {
       ? record.coupon.trim().toUpperCase()
       : null;
 
-  return { lines: parseLineArray(record.lines), coupon };
+  return { lines: parseLineArray(record.lines, catalogue), coupon };
 };
 
 /**
@@ -111,8 +125,10 @@ export const parseStoredState = (raw: string | null): StoredCartState => {
  * trusted, duplicates collapse to the first occurrence, and slugs that no longer
  * exist in the catalogue are discarded so a deleted product cannot poison the cart.
  */
-export const parseStoredLines = (raw: string | null): CartLine[] =>
-  parseStoredState(raw).lines;
+export const parseStoredLines = (
+  raw: string | null,
+  catalogue: Catalogue = products
+): CartLine[] => parseStoredState(raw, catalogue).lines;
 
 /**
  * Adds `quantity` to the line for `slug`, appending it when absent.
@@ -120,8 +136,13 @@ export const parseStoredLines = (raw: string | null): CartLine[] =>
  * This is the reducer form: the next array is derived purely from `lines`, so
  * repeated calls inside one tick cannot read a stale snapshot.
  */
-export const addLine = (lines: CartLine[], slug: string, quantity = 1): CartLine[] => {
-  if (!getProductBySlug(slug)) return lines;
+export const addLine = (
+  lines: CartLine[],
+  slug: string,
+  quantity = 1,
+  catalogue: Catalogue = products
+): CartLine[] => {
+  if (!getProductBySlug(slug, catalogue)) return lines;
 
   const step = clampQuantity(quantity);
   const existing = lines.find((line) => line.slug === slug);
@@ -140,9 +161,10 @@ export const addLine = (lines: CartLine[], slug: string, quantity = 1): CartLine
 export const setLineQuantity = (
   lines: CartLine[],
   slug: string,
-  quantity: number
+  quantity: number,
+  catalogue: Catalogue = products
 ): CartLine[] => {
-  if (!getProductBySlug(slug)) return lines;
+  if (!getProductBySlug(slug, catalogue)) return lines;
 
   const requested = Number(quantity);
   if (!Number.isFinite(requested) || requested <= 0) {
@@ -168,9 +190,12 @@ export const quantityOfLine = (lines: CartLine[], slug: string): number =>
   lines.find((line) => line.slug === slug)?.quantity ?? 0;
 
 /** Joins each line to its catalogue product. Unknown slugs are dropped. */
-export const detailedLines = (lines: CartLine[]): CartDetail[] =>
+export const detailedLines = (
+  lines: CartLine[],
+  catalogue: Catalogue = products
+): CartDetail[] =>
   lines.flatMap((line) => {
-    const product = getProductBySlug(line.slug);
+    const product = getProductBySlug(line.slug, catalogue);
     if (!product) return [];
     return [{ product, quantity: line.quantity, lineTotal: product.sellingPrice * line.quantity }];
   });

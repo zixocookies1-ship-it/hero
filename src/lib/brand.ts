@@ -20,20 +20,44 @@ export const BRAND = {
   },
 } as const;
 
-export const addressLine = (separator = ", ") =>
+export const addressLine = (separator = ", ") => addressLineOf(BRAND, separator);
+
+export type Address = {
+  line1: string;
+  line2: string;
+  cityState: string;
+  pincode: string;
+  country: string;
+};
+
+/**
+ * Same two helpers parameterised over a brand, so a caller that loaded the
+ * business settings from the database renders the stored values. The
+ * no-argument forms above still exist for callers that have not loaded one.
+ */
+export const addressLineOf = (
+  brand: { address: Address },
+  separator = ", "
+) =>
   [
-    BRAND.address.line1,
-    BRAND.address.line2,
-    `${BRAND.address.cityState} ${BRAND.address.pincode}`,
-    BRAND.address.country,
+    brand.address.line1,
+    brand.address.line2,
+    `${brand.address.cityState} ${brand.address.pincode}`,
+    brand.address.country,
   ].join(separator);
 
-export const whatsappLink = (message?: string) => {
-  const base = `https://wa.me/${BRAND.whatsappNumber}`;
+export const whatsappLinkFor = (
+  brand: { whatsappNumber: string },
+  message?: string
+) => {
+  const base = `https://wa.me/${brand.whatsappNumber}`;
   return message
     ? `${base}?text=${encodeURIComponent(message)}`
     : base;
 };
+
+export const whatsappLink = (message?: string) =>
+  whatsappLinkFor(BRAND, message);
 
 /**
  * Builds a WhatsApp message from the contact form fields. Lines are omitted

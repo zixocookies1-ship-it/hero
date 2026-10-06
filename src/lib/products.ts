@@ -110,8 +110,18 @@ export const products: Product[] = [
   },
 ];
 
-export const getProductBySlug = (slug: string) =>
-  products.find((product) => product.slug === slug);
+/**
+ * Looks a slug up in a catalogue.
+ *
+ * `catalogue` is optional and defaults to the shipped list, so every caller
+ * that has not been given the database catalogue still behaves exactly as
+ * before. Callers on the server pass `await loadCatalogue()` instead, which is
+ * how an admin edit reaches a price shown to a customer.
+ */
+export const getProductBySlug = (
+  slug: string,
+  catalogue: readonly Product[] = products
+) => catalogue.find((product) => product.slug === slug);
 
 export const formatPrice = (value: number) =>
   new Intl.NumberFormat("en-IN", {

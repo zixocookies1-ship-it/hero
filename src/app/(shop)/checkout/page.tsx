@@ -2,14 +2,16 @@ import Link from "next/link";
 import CartGate from "@/components/cart-gate";
 import CheckoutForm from "@/components/checkout-form";
 import { getShippingPolicy } from "@/lib/pricing";
+import { loadBrand } from "@/lib/cms";
 
 export const metadata = {
   title: "Checkout - Nature's Choice Jaggery",
   description: "Enter your delivery details and pay securely with Razorpay.",
 };
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
   const policy = getShippingPolicy();
+  const brand = await loadBrand();
 
   return (
     <main className="pt-28 pb-24">
@@ -38,6 +40,7 @@ export default function CheckoutPage() {
             <CheckoutForm
               shippingFeeInr={policy.feeInr}
               freeAboveInr={policy.freeAboveInr}
+              brandName={brand.name}
             />
           </CartGate>
         </div>

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { classifyMongoError, type MongoFailure } from "@/lib/mongo-diagnostics";
 import { formatIndianDate } from "@/lib/order-id";
 import { formatPrice } from "@/lib/products";
+import AdminOrderFulfilment from "@/components/admin-order-fulfilment";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,7 @@ export default async function AdminOrdersPage() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg bg-white shadow">
-          <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-black/5 text-xs uppercase tracking-wide text-gray-500">
                 <th className="px-4 py-3 font-semibold">Order</th>
@@ -124,6 +125,7 @@ export default async function AdminOrdersPage() {
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Razorpay payment ID</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
+                <th className="px-4 py-3 font-semibold">Fulfilment</th>
               </tr>
             </thead>
             <tbody>
@@ -180,6 +182,20 @@ export default async function AdminOrdersPage() {
                     </td>
                     <td className="px-4 py-3 text-xs whitespace-nowrap text-gray-600">
                       {formatIndianDate(order.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {order.orderId ? (
+                        <AdminOrderFulfilment
+                          order={{
+                            orderId: order.orderId,
+                            orderStatus: order.orderStatus,
+                            trackingNumber: order.trackingNumber,
+                            deliveryNotes: order.deliveryNotes,
+                          }}
+                        />
+                      ) : (
+                        <span className="text-xs text-gray-400">not allocated</span>
+                      )}
                     </td>
                   </tr>
                 );

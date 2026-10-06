@@ -1,4 +1,4 @@
-import { BRAND } from "@/lib/brand";
+import { loadBrand } from "@/lib/cms";
 
 const icons = {
   instagram: (
@@ -18,20 +18,21 @@ const icons = {
   ),
 };
 
-const links = [
-  { key: "instagram", label: "Instagram", href: BRAND.social.instagram },
-  { key: "youtube", label: "YouTube", href: BRAND.social.youtube },
-  { key: "facebook", label: "Facebook", href: BRAND.social.facebook },
-] as const;
-
-export default function SocialLinks({
+export default async function SocialLinks({
   tone = "light",
   withLabels = false,
 }: {
   tone?: "light" | "dark";
   withLabels?: boolean;
 }) {
+  const brand = await loadBrand();
   const isDark = tone === "dark";
+
+  const links = [
+    { key: "instagram", label: "Instagram", href: brand.social.instagram },
+    { key: "youtube", label: "YouTube", href: brand.social.youtube },
+    { key: "facebook", label: "Facebook", href: brand.social.facebook },
+  ] as const;
 
   return (
     <ul className="flex flex-wrap items-center gap-2">

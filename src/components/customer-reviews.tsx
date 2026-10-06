@@ -1,3 +1,5 @@
+import { loadSections, type SectionItem } from "@/lib/cms";
+
 export type CustomerReview = {
   name: string;
   rating: number;
@@ -9,27 +11,42 @@ export type CustomerReview = {
  * Placeholder reviews so the section can be reviewed visually. Replace the text
  * below with real customer quotes before going live, and drop any entry whose
  * rating is not genuine.
+ *
+ * The admin customer-reviews editor writes to the `home_reviews` section, which
+ * takes precedence over this list whenever it holds an entry.
  */
-const reviews: CustomerReview[] = [
+const FALLBACK: SectionItem[] = [
   {
-    name: "Anjali Sharma",
+    title: "Anjali Sharma",
+    subtitle: "Desi Chocolatey Jaggery",
     rating: 5,
-    product: "Desi Chocolatey Jaggery",
     text: "The first jaggery that actually tastes like my grandmother's. Rich, slightly smoky, and nothing like the adulterated ones in the market.",
   },
   {
-    name: "Fatima Ansari",
+    title: "Fatima Ansari",
+    subtitle: "Desi Til Chocolatey Jaggery",
     rating: 4,
-    product: "Desi Til Chocolatey Jaggery",
     text: "Very good with warm milk. Four stars only because I would love a smaller pack for travel, but the taste is genuinely excellent.",
   },
   {
-    name: "Rohit Verma",
+    title: "Rohit Verma",
+    subtitle: "Desi Elaichi Chocolatey Jaggery",
     rating: 5,
-    product: "Desi Elaichi Chocolatey Jaggery",
     text: "I am a tea-drinker's tea drinker's tea drinker, and this has become the default. The elaichi note is present without being sweet.",
   },
 ];
+
+const FALLBACK_HEADER = {
+  eyebrow: "Customer reviews",
+  title: "What people say",
+};
+
+const toReview = (item: SectionItem): CustomerReview => ({
+  name: item.title ?? "",
+  product: item.subtitle || undefined,
+  rating: Number.isFinite(item.rating) ? Number(item.rating) : 5,
+  text: item.text ?? "",
+});
 
 const averageRating = (list: CustomerReview[]) =>
   list.reduce((sum, review) => sum + review.rating, 0) / list.length;
@@ -69,7 +86,13 @@ function Stars({ rating, className = "" }: { rating: number; className?: string 
   );
 }
 
-export default function CustomerReviews() {
+export default async function CustomerReviews() {
+  const sections = await loadSections();
+  const section = sections.home_reviews;
+  const reviews = (section?.items.length ? section.items : FALLBACK).map(toReview);
+
+  const eyebrow = section?.eyebrow || FALLBACK_HEADER.eyebrow;
+  const title = section?.title || FALLBACK_HEADER.title;
   const average = averageRating(reviews);
 
   return (
@@ -78,10 +101,10 @@ export default function CustomerReviews() {
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
-              Customer reviews
+              {eyebrow}
             </p>
             <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
-              What people say
+              {title}
             </h2>
           </div>
 

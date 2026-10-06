@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProductBySlug, products } from "@/lib/products";
 import ProductActions from "@/components/product-actions";
 import ProductCard from "@/components/product-card";
 import ProductGallery from "@/components/product-gallery";
 import PriceDisplay from "@/components/price-display";
 import WhatsAppEnquiry from "@/components/whatsapp-enquiry";
+import { loadCatalogue } from "@/lib/cms";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await loadCatalogue();
   return products.map((product) => ({ slug: product.slug }));
 }
 
@@ -18,7 +19,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = (await loadCatalogue()).find((entry) => entry.slug === slug);
   if (!product) return {};
 
   return {
@@ -33,7 +34,8 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const products = await loadCatalogue();
+  const product = products.find((entry) => entry.slug === slug);
 
   if (!product) notFound();
 

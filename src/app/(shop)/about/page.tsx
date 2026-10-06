@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { BRAND, whatsappLink } from "@/lib/brand";
-import { products, SHELF_LIFE_MONTHS } from "@/lib/products";
+import { whatsappLinkFor } from "@/lib/brand";
+import { SHELF_LIFE_MONTHS } from "@/lib/products";
 import Founders from "@/components/founders";
 import SocialLinks from "@/components/social-links";
+import { loadBrand, loadCatalogue } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "About - Nature's Choice Jaggery",
@@ -46,7 +47,10 @@ const values = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [brand, products] = await Promise.all([loadBrand(), loadCatalogue()]);
+  const whatsappLink = (message?: string) => whatsappLinkFor(brand, message);
+
   return (
     <main className="pt-28 pb-24">
       <div className="mx-auto max-w-7xl px-6">
@@ -251,13 +255,13 @@ export default function AboutPage() {
                 Address
               </p>
               <address className="mt-2 text-sm not-italic leading-relaxed text-[var(--dark-text)]">
-                {BRAND.address.line1}
+                {brand.address.line1}
                 <br />
-                {BRAND.address.line2}
+                {brand.address.line2}
                 <br />
-                {BRAND.address.cityState} {BRAND.address.pincode}
+                {brand.address.cityState} {brand.address.pincode}
                 <br />
-                {BRAND.address.country}
+                {brand.address.country}
               </address>
             </div>
 
@@ -272,19 +276,19 @@ export default function AboutPage() {
                   rel="noopener noreferrer"
                   className="inline-block whitespace-nowrap font-medium text-[var(--natural-green)] transition-colors hover:text-[var(--ginger-terracotta)]"
                 >
-                  WhatsApp {BRAND.phoneDisplay}
+                  WhatsApp {brand.phoneDisplay}
                 </a>
                 <a
-                  href={`tel:${BRAND.phoneDial}`}
+                  href={`tel:${brand.phoneDial}`}
                   className="inline-block whitespace-nowrap text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
                 >
-                  Call {BRAND.phoneDisplay}
+                  Call {brand.phoneDisplay}
                 </a>
                 <a
-                  href={`mailto:${BRAND.email}`}
+                  href={`mailto:${brand.email}`}
                   className="text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
                 >
-                  {BRAND.email}
+                  {brand.email}
                 </a>
               </div>
             </div>

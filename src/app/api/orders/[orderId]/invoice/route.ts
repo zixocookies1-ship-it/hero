@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { databaseConfigured } from "@/lib/env";
 import { findOrderByOrderId } from "@/lib/orders";
 import { generateInvoicePdf } from "@/lib/invoice-pdf";
+import { loadBrandUncached } from "@/lib/cms";
 import { isValidOrderId } from "@/lib/order-id";
 import { verifyReceiptToken } from "@/lib/receipt-token";
 
@@ -70,7 +71,9 @@ export async function GET(
       subtotal: Number(order.subtotal),
       deliveryFee: Number(order.deliveryFee),
       total: Number(order.total),
-    });
+    },
+    await loadBrandUncached()
+    );
   } catch (error) {
     console.error("invoice generation failed", error);
     return NextResponse.json(

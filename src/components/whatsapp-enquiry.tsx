@@ -1,12 +1,14 @@
-import { whatsappLink } from "@/lib/brand";
+import { whatsappLinkFor } from "@/lib/brand";
 import type { Product } from "@/lib/products";
+import { loadBrand } from "@/lib/cms";
 
-export default function WhatsAppEnquiry({ product }: { product: Product }) {
+export default async function WhatsAppEnquiry({ product }: { product: Product }) {
+  const brand = await loadBrand();
   const message = `Hi, I'm interested in ${product.name} (${product.weight}, ${product.pack}). Could you share more details?`;
 
   return (
     <a
-      href={whatsappLink(message)}
+      href={whatsappLinkFor(brand, message)}
       target="_blank"
       rel="noopener noreferrer"
       className="inline-flex items-center gap-2 text-sm font-medium text-[var(--dark-text)]/70 underline underline-offset-4 transition-colors hover:text-[var(--natural-green)]"

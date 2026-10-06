@@ -7,7 +7,7 @@ import {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { getProductBySlug } from "@/lib/products";
+import { getProductBySlug, type Product } from "@/lib/products";
 import {
   addLine,
   clearLines,
@@ -52,6 +52,11 @@ type CartContextValue = {
  * localStorage is the single source of truth for this project's guest cart. The
  * one provider in the app root layout makes header, product cards, cart page,
  * checkout and buy-now all read the same state.
+ *
+ * The provider is handed the catalogue the root layout loaded from the
+ * database. Slugs are validated and lines are priced against it, so a product
+ * the admin added becomes purchasable and one they removed stops validating —
+ * without the client ever reaching for the shipped list on its own.
  */
 const STORAGE_KEY = "cart";
 const CartContext = createContext<CartContextValue | null>(null);
@@ -65,12 +70,16 @@ const EMPTY_STATE: StoredCartState = { lines: EMPTY_LINES, coupon: null };
  * return the same array instance or React re-renders in a loop. The whole state
  * is cached rather than just the lines, so lines and coupon always come from one
  * consistent parse of the same write.
+ *
+ * The catalogue is part of the cache key: the same cart parsed against a
+ * catalogue the admin just changed must not return the previous parse.
  */
 let cachedRaw: string | null = null;
+let cachedCatalogue: readonly Product[] | null = null;
 let cachedState: StoredCartState = EMPTY_STATE;
 let cachePrimed = false;
 
-const readStoredState = (): StoredCartState => {
+const readStoredState = (catalogue: readonly Product[]): StoredCartState => {
   let raw: string | null = null;
   try {
     raw = window.localStorage.getItem(STORAGE_KEY);
@@ -78,10 +87,17 @@ const readStoredState = (): StoredCartState => {
     return EMPTY_STATE;
   }
 
-  if (cachePrimed && raw === cachedRaw) return cachedState;
+  if (
+    cachePrimed &&
+    raw === cachedRaw &&
+    catalogue === cachedCatalogue
+  ) {
+    return cachedState;
+  }
 
   cachedRaw = raw;
-  cachedState = parseStoredState(raw);
+  cachedCatalogue = catalogue;
+  cachedState = parseStoredState(raw, catalogue);
   cachePrimed = true;
   return cachedState;
 };
@@ -102,12 +118,9 @@ const subscribe = (onStoreChange: () => void) => {
   };
 };
 
-const getSnapshot = (): CartLine[] => readStoredState().lines;
 // The server cannot read localStorage; it renders the empty-cart placeholder and
 // the first client render picks up the real cart.
 const getServerSnapshot = (): CartLine[] => EMPTY_LINES;
-
-const getCouponSnapshot = (): string | null => readStoredState().coupon;
 const getServerCouponSnapshot = (): string | null => null;
 
 /**
@@ -134,18 +147,34 @@ const writeState = (next: StoredCartState) => {
  * carried through untouched, so editing a quantity never silently drops a discount
  * that is still valid.
  */
-const mutate = (reduce: (current: CartLine[]) => CartLine[]): CartLine[] => {
-  const current = readStoredState();
+const mutate = (
+  catalogue: readonly Product[],
+  reduce: (current: CartLine[]) => CartLine[]
+): CartLine[] => {
+  const current = readStoredState(catalogue);
   const nextLines = reduce(current.lines);
   writeState({ lines: nextLines, coupon: current.coupon });
   return nextLines;
 };
 
-const writeCoupon = (code: string | null) => {
-  writeState({ lines: readStoredState().lines, coupon: code });
+const writeCoupon = (catalogue: readonly Product[], code: string | null) => {
+  writeState({ lines: readStoredState(catalogue).lines, coupon: code });
 };
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({
+  children,
+  catalogue,
+}: {
+  children: React.ReactNode;
+  catalogue: readonly Product[];
+}) {
+  const readState = useCallback(
+    () => readStoredState(catalogue),
+    [catalogue]
+  );
+  const getSnapshot = useCallback(() => readState().lines, [readState]);
+  const getCouponSnapshot = useCallback(() => readState().coupon, [readState]);
+
   const lines = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   // Server markup shows the empty-cart placeholder; the first client render
   // already reads storage, so "hydrated" is simply "am I on the client".
@@ -155,27 +184,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => false
   );
 
-  const addItem = useCallback((slug: string, quantity = 1): AddResult => {
-    if (typeof slug !== "string" || !getProductBySlug(slug)) {
-      console.error("addItem called with an unknown slug", { slug });
-      return { ok: false, error: "That product is no longer available." };
-    }
+  const addItem = useCallback(
+    (slug: string, quantity = 1): AddResult => {
+      if (typeof slug !== "string" || !getProductBySlug(slug, catalogue)) {
+        console.error("addItem called with an unknown slug", { slug });
+        return { ok: false, error: "That product is no longer available." };
+      }
 
-    const next = mutate((current) => addLine(current, slug, quantity));
+      const next = mutate(catalogue, (current) =>
+        addLine(current, slug, quantity, catalogue)
+      );
 
-    return {
-      ok: true,
-      quantity: quantityOfLine(next, slug),
-    };
-  }, []);
+      return {
+        ok: true,
+        quantity: quantityOfLine(next, slug),
+      };
+    },
+    [catalogue]
+  );
 
-  const setQuantity = useCallback((slug: string, quantity: number) => {
-    mutate((current) => setLineQuantity(current, slug, quantity));
-  }, []);
+  const setQuantity = useCallback(
+    (slug: string, quantity: number) => {
+      mutate(catalogue, (current) =>
+        setLineQuantity(current, slug, quantity, catalogue)
+      );
+    },
+    [catalogue]
+  );
 
-  const removeItem = useCallback((slug: string) => {
-    mutate((current) => removeLine(current, slug));
-  }, []);
+  const removeItem = useCallback(
+    (slug: string) => {
+      mutate(catalogue, (current) => removeLine(current, slug));
+    },
+    [catalogue]
+  );
 
   const clearCart = useCallback(() => {
     // One write clears both: an emptied cart cannot satisfy a minimum-order rule,
@@ -189,13 +231,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     getServerCouponSnapshot
   );
 
-  const setCouponCode = useCallback((code: string | null) => {
-    writeCoupon(
-      typeof code === "string" && code.trim() !== "" ? code.trim().toUpperCase() : null
-    );
-  }, []);
+  const setCouponCode = useCallback(
+    (code: string | null) => {
+      writeCoupon(
+        catalogue,
+        typeof code === "string" && code.trim() !== "" ? code.trim().toUpperCase() : null
+      );
+    },
+    [catalogue]
+  );
 
-  const detailed = useMemo(() => detailLines(lines), [lines]);
+  const detailed = useMemo(
+    () => detailLines(lines, catalogue),
+    [lines, catalogue]
+  );
   const count = useMemo(() => countLines(lines), [lines]);
 
   // Declared at the top level, not inside useMemo: a hook nested in a memo

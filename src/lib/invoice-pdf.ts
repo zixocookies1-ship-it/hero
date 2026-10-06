@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
-import { BRAND } from "@/lib/brand";
+import { BRAND, type Address } from "@/lib/brand";
 import { formatIndianDate } from "@/lib/order-id";
 
 const BROWN = rgb(0x5a / 255, 0x32 / 255, 0x1f / 255);
@@ -87,12 +87,25 @@ function drawLabel(page: PDFPage, text: string, x: number, y: number, font: PDFF
   });
 }
 
-export async function generateInvoicePdf(order: InvoiceOrder): Promise<Uint8Array> {
+export async function generateInvoicePdf(
+  order: InvoiceOrder,
+  /**
+   * Business details printed on the invoice. Defaults to the shipped values so
+   * the existing call sites keep working; the route that streams the PDF passes
+   * the stored settings so an edit to the company name reaches the receipt.
+   */
+  brand: {
+    name: string;
+    address: Address;
+    phoneDisplay: string;
+    email: string;
+  } = BRAND
+): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  doc.setTitle(`${BRAND.name} — Order ${order.orderId}`);
-  doc.setAuthor(BRAND.name);
+  doc.setTitle(`${brand.name} — Order ${order.orderId}`);
+  doc.setAuthor(brand.name);
   doc.setSubject("Order confirmation and invoice");
-  doc.setCreator(BRAND.name);
+  doc.setCreator(brand.name);
 
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
@@ -135,7 +148,7 @@ export async function generateInvoicePdf(order: InvoiceOrder): Promise<Uint8Arra
     }
   }
 
-  page.drawText(BRAND.name.toUpperCase(), {
+  page.drawText(brand.name.toUpperCase(), {
     x: headerTextX,
     y: PAGE_HEIGHT - 42,
     size: 15,
@@ -424,7 +437,7 @@ export async function generateInvoicePdf(order: InvoiceOrder): Promise<Uint8Arra
     color: BROWN,
   });
   y -= 14;
-  page.drawText(`${BRAND.address.line1}, ${BRAND.address.line2}, ${BRAND.address.cityState} ${BRAND.address.pincode}`, {
+  page.drawText(`${brand.address.line1}, ${brand.address.line2}, ${brand.address.cityState} ${brand.address.pincode}`, {
     x: MARGIN,
     y,
     size: 8,
@@ -432,7 +445,7 @@ export async function generateInvoicePdf(order: InvoiceOrder): Promise<Uint8Arra
     color: MUTED,
   });
   y -= 12;
-  page.drawText(`WhatsApp ${BRAND.phoneDisplay}  ·  ${BRAND.email}`, {
+  page.drawText(`WhatsApp ${brand.phoneDisplay}  ·  ${brand.email}`, {
     x: MARGIN,
     y,
     size: 8,

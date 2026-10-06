@@ -3,6 +3,7 @@ import { databaseConfigured, razorpayConfigured } from "@/lib/env";
 import { evaluateCoupon } from "@/lib/coupons";
 import { databaseEnvPresence } from "@/lib/mongo-diagnostics";
 import { applyCoupon, priceCart, PricingError, type CartInputLine } from "@/lib/pricing";
+import { loadCatalogueUncached } from "@/lib/cms";
 import {
   createPendingOrder,
   attachRazorpayOrderId,
@@ -81,10 +82,16 @@ export async function POST(request: Request) {
   }
 
   // Amounts are recalculated from the catalogue. Anything the browser claims
-  // about price, discount or shipping is ignored.
+  // about price, discount or shipping is ignored. The catalogue is read fresh
+  // from the database here — this is the number that gets charged, so it must
+  // reflect what the admin has published, not the list baked into the bundle.
   let base;
   try {
-    base = priceCart(readCartLines(payload));
+    base = priceCart(
+      readCartLines(payload),
+      process.env,
+      await loadCatalogueUncached()
+    );
   } catch (error) {
     if (error instanceof PricingError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 });

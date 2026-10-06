@@ -115,10 +115,28 @@ export async function requireAdmin(): Promise<string> {
   return session.email as string;
 }
 
+/**
+ * Guard for admin API routes. Returns the session email when the request is
+ * authenticated, or null so the caller can answer with a 401 JSON body (which
+ * `redirect()` would not produce for a fetch from a client component).
+ */
+export async function requireAdminApi(): Promise<string | null> {
+  const store = await cookies();
+  const session = verifyAdminSession(store.get(ADMIN_COOKIE)?.value);
+  return session.ok ? (session.email as string) : null;
+}
+
 export const adminCookieOptions = {
   httpOnly: true as const,
   sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  // Secure on an HTTPS deployment (Vercel, or any host that declares an https
+  // public URL). A production-mode server on plain http — for example `next
+  // start` testing against the live database — otherwise drops its own cookie,
+  // because a Secure cookie is never sent over cleartext.
+  secure:
+    process.env.NODE_ENV === "production" &&
+    (process.env.VERCEL === "1" ||
+      (process.env.NEXT_PUBLIC_APP_URL ?? "").startsWith("https://")),
   path: "/",
   maxAge: Math.floor(ADMIN_SESSION_TTL_MS / 1000),
 };

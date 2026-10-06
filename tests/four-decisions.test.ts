@@ -20,9 +20,16 @@ const read = (relative: string) =>
 test("renders every decision in order", async () => {
   const source = await read("src/components/four-decisions.tsx");
 
-  for (const number of ["01", "02", "03", "04", "05"]) {
-    assert.ok(source.includes(`number: "${number}"`), `missing decision ${number}`);
-  }
+  // The badge is derived from the item index rather than typed per item, so the
+  // numbering cannot skip or repeat even if an admin reorders the section.
+  assert.ok(
+    source.includes('String(index + 1).padStart(2, "0")'),
+    "decision numbers must be generated in index order"
+  );
+
+  // Five decisions are still defined as the fallback copy.
+  const titles = source.match(/^\s{4}title: "/gm) ?? [];
+  assert.ok(titles.length >= 5, `expected five fallback decisions, found ${titles.length}`);
 });
 
 test("the price and weight come from the catalogue, not hardcoded text", async () => {

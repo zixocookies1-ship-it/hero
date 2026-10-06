@@ -51,9 +51,11 @@ test("every flavour appears exactly once", () => {
 test("the lead product used by the decisions section is the classic", async () => {
   const source = await read("src/components/four-decisions.tsx");
 
-  // four-decisions reads products[0] as the lead product.
+  // The lead product now comes from the admin-managed catalogue, which falls
+  // back to the shipped products array when the database is unreachable.
   assert.ok(
-    source.includes("const lead = products[0]"),
+    source.includes("const lead = catalogue[0]") ||
+      source.includes("const lead = products[0]"),
     "the decisions section must keep taking the lead from the catalogue"
   );
   assert.equal(products[0].slug, "desi-chocolatey-jaggery");

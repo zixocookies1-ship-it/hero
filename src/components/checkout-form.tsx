@@ -43,9 +43,12 @@ const emptyDetails: CheckoutDetails = {
 export default function CheckoutForm({
   shippingFeeInr,
   freeAboveInr,
+  brandName = BRAND.name,
 }: {
   shippingFeeInr: number;
   freeAboveInr: number | null;
+  /** Shown on the Razorpay checkout sheet. Loaded from settings by the page. */
+  brandName?: string;
 }) {
   const router = useRouter();
   const { lines, detailedLines, clearCart } = useCart();
@@ -214,7 +217,7 @@ export default function CheckoutForm({
         amount: order.amount,
         currency: order.currency,
         order_id: order.razorpayOrderId,
-        name: BRAND.name,
+        name: brandName,
         description: `Order ${order.orderId}`,
         prefill,
         notes: { orderId: order.orderId },

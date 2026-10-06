@@ -5,6 +5,7 @@ import { databaseEnvPresence } from "@/lib/mongo-diagnostics";
 import { databaseConfigured } from "@/lib/env";
 import { findCouponByCode } from "@/lib/orders";
 import { priceCart, PricingError, type CartInputLine } from "@/lib/pricing";
+import { loadCatalogueUncached } from "@/lib/cms";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,7 +62,15 @@ export async function POST(request: Request) {
 
   let subtotal: number;
   try {
-    subtotal = priceCart(readCartLines(payload)).subtotal;
+    // Priced against the catalogue the admin currently has published, not the
+    // list that shipped in the bundle. The uncached loader is used deliberately:
+    // React's cache() is scoped to a component render, and a price held across
+    // two requests would be a price a coupon could be judged against wrongly.
+    subtotal = priceCart(
+      readCartLines(payload),
+      process.env,
+      await loadCatalogueUncached()
+    ).subtotal;
   } catch (error) {
     if (error instanceof PricingError) {
       return NextResponse.json(

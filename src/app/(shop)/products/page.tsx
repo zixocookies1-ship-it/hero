@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from "next";
-import { products } from "@/lib/products";
 import ProductCard from "@/components/product-card";
+import { loadCatalogue } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Products - Nature's Choice Jaggery",
@@ -8,7 +8,9 @@ export const metadata: Metadata = {
     "Shop all three authentic flavours of Nature's Choice Jaggery. 500g packs, traditional gold-kettle method, no preservatives.",
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products = await loadCatalogue();
+
   return (
     <main className="pt-28 pb-24">
       <div className="mx-auto max-w-7xl px-6">

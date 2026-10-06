@@ -1,8 +1,9 @@
 ﻿import type { Metadata } from "next";
-import { BRAND, addressLine } from "@/lib/brand";
+import { addressLineOf } from "@/lib/brand";
 import ContactForm from "./contact-form";
 import FAQPreview from "@/components/faq-preview";
 import SocialLinks from "@/components/social-links";
+import { loadBrand, loadSections } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Contact - Nature's Choice Jaggery",
@@ -10,14 +11,17 @@ export const metadata: Metadata = {
     "Questions about our jaggery, wholesale enquiries or partnerships? Send us a message and we will get back to you.",
 };
 
-// The phone number lives in the footer and the floating WhatsApp button, so it
-// is deliberately absent here.
-const contactDetails = [
-  { label: "Email", value: BRAND.email, href: `mailto:${BRAND.email}` },
-  { label: "Address", value: addressLine(), href: undefined },
-];
+export default async function ContactPage() {
+  const [brand, sections] = await Promise.all([loadBrand(), loadSections()]);
+  const faq = sections.contact_faq;
 
-export default function ContactPage() {
+  // The phone number lives in the footer and the floating WhatsApp button, so
+  // it is deliberately absent here.
+  const contactDetails = [
+    { label: "Email", value: brand.email, href: `mailto:${brand.email}` },
+    { label: "Address", value: addressLineOf(brand), href: undefined },
+  ];
+
   return (
     <main className="pt-28 pb-24">
       <div className="mx-auto max-w-7xl px-6">
@@ -81,12 +85,16 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <ContactForm />
+          <ContactForm whatsappNumber={brand.whatsappNumber} />
         </div>
       </div>
 
       <div className="mt-16">
-        <FAQPreview />
+        <FAQPreview
+          items={faq?.items}
+          eyebrow={faq?.eyebrow}
+          title={faq?.title}
+        />
       </div>
     </main>
   );

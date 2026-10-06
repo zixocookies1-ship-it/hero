@@ -77,7 +77,8 @@ export function getShippingPolicy(env: NodeJS.ProcessEnv = process.env) {
  */
 export function priceCart(
   input: CartInputLine[],
-  env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv = process.env,
+  catalogue: readonly Product[] = products
 ): Pricing {
   const usable = input.filter((line) => line && typeof line.slug === "string");
 
@@ -86,7 +87,7 @@ export function priceCart(
   }
 
   const lines: PricedLine[] = usable.map((line) => {
-    const product: Product | undefined = getProductBySlug(line.slug);
+    const product: Product | undefined = getProductBySlug(line.slug, catalogue);
     if (!product) {
       throw new PricingError(
         `A product in your cart is no longer available: ${line.slug}.`,
