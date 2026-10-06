@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { classifyMongoError, type MongoFailure } from "@/lib/mongo-diagnostics";
 import { formatIndianDate } from "@/lib/order-id";
 import { formatPrice } from "@/lib/products";
 
@@ -30,7 +31,9 @@ export default async function AdminOrdersPage() {
   // must never imply that orders exist. An empty table and a missing table look
   // identical to a customer reading the screen, so say which one it is.
   let orders: Awaited<ReturnType<typeof prisma.order.findMany<{ include: { items: true } }>>> = [];
-  let databaseError: string | null = null;
+  // Null means the query succeeded. A set value means the database failed, which
+  // must never be rendered as an empty order list.
+  let failure: MongoFailure | null = null;
 
   try {
     orders = await prisma.order.findMany({
@@ -39,19 +42,50 @@ export default async function AdminOrdersPage() {
       include: { items: true },
     });
   } catch (error) {
-    databaseError = error instanceof Error ? error.message : String(error);
-    console.error("admin orders query failed", error);
+    failure = classifyMongoError(error);
+    console.error("[mongo] admin orders query failed", {
+      kind: failure.kind,
+      errorName: failure.errorName,
+      errorCode: failure.errorCode,
+    });
   }
 
-  if (databaseError) {
+  if (failure) {
     return (
       <div>
         <h2 className="font-serif text-2xl font-bold text-[var(--jaggery-brown)]">Orders</h2>
         <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-6">
-          <p className="font-semibold text-red-800">The order database is not reachable.</p>
-          <p className="mt-2 text-sm text-red-700">
-            Set <code className="font-mono">MONGODB_URI</code> and run{" "}
-            <code className="font-mono">npm run db:deploy</code>, then reload this page.
+          <p className="font-semibold text-red-800">
+            The order database could not be queried. These orders could not be loaded.
+          </p>
+          <p className="mt-2 text-sm text-red-700">{failure.summary}</p>
+          <dl className="mt-3 space-y-1 text-xs text-red-700">
+            <div className="flex gap-2">
+              <dt className="font-semibold">Reason</dt>
+              <dd className="font-mono">{failure.kind}</dd>
+            </div>
+            {failure.errorName ? (
+              <div className="flex gap-2">
+                <dt className="font-semibold">Error</dt>
+                <dd className="font-mono">{failure.errorName}</dd>
+              </div>
+            ) : null}
+            {failure.errorCode ? (
+              <div className="flex gap-2">
+                <dt className="font-semibold">Code</dt>
+                <dd className="font-mono">{failure.errorCode}</dd>
+              </div>
+            ) : null}
+          </dl>
+          {failure.message ? (
+            <pre className="mt-3 overflow-x-auto rounded border border-red-200 bg-white/70 p-3 font-mono text-xs whitespace-pre-wrap text-red-900">
+              {failure.message}
+            </pre>
+          ) : null}
+          <p className="mt-3 text-sm text-red-700">
+            Full diagnostics are available at{" "}
+            <code className="font-mono">/api/admin/db-health</code>. They never include the
+            connection string or credentials.
           </p>
         </div>
       </div>
