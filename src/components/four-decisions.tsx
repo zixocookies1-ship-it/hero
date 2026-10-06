@@ -36,9 +36,19 @@ const decisions = [
 
 export default function FourDecisions() {
   return (
-    <section className="bg-[var(--warm-cream)] py-16">
+    <section className="relative isolate overflow-hidden bg-[var(--warm-cream)] py-16 md:py-24">
+      {/*
+        Ambient colour behind the panels. Decorative only, so it is hidden from
+        assistive tech and cannot intercept clicks.
+      */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-28 left-1/2 h-72 w-[38rem] -translate-x-1/2 rounded-full bg-[var(--ginger-terracotta)]/20 blur-3xl" />
+        <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-[var(--natural-green)]/15 blur-3xl" />
+        <div className="absolute right-0 top-1/3 h-64 w-64 rounded-full bg-[var(--jaggery-brown)]/10 blur-3xl" />
+      </div>
+
       <div className="mx-auto max-w-7xl px-6">
-        <div className="max-w-3xl">
+        <div className="relative max-w-3xl rounded-[2rem] border border-white/70 bg-[var(--white)]/75 p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_48px_-28px_rgba(90,50,31,0.45)] backdrop-blur-md sm:p-10">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
             How we make it
           </p>
@@ -55,11 +65,17 @@ export default function FourDecisions() {
           {decisions.map((decision) => (
             <li
               key={decision.number}
-              className="flex gap-5 rounded-2xl border border-black/5 bg-[var(--white)] p-6 shadow-sm sm:p-7"
+              className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[var(--white)]/85 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(90,50,31,0.5)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(90,50,31,0.55)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7"
             >
+              {/* Warm wash that fades up on hover, under the text. */}
               <span
                 aria-hidden="true"
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--jaggery-brown)] font-serif text-sm font-bold tracking-wider text-[var(--white)]"
+                className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_100%_at_0%_0%,rgba(200,121,69,0.14),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
+              />
+
+              <span
+                aria-hidden="true"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--jaggery-brown)] to-[var(--natural-green)] font-serif text-sm font-bold tracking-wider text-[var(--white)] shadow-[0_6px_14px_-6px_rgba(90,50,31,0.7)] ring-1 ring-white/40 transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none"
               >
                 {decision.number}
               </span>
