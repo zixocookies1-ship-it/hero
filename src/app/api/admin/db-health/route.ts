@@ -36,6 +36,9 @@ export async function GET() {
       ok: health.ok,
       attempted: health.attempted,
       uri: health.uri,
+      // Booleans only: which database variable names this runtime can see. Names,
+      // never values, so a variable still set under an old name is visible.
+      envPresence: health.envPresence,
       failure: health.failure,
       serverVersion: health.serverVersion,
       databaseNameInUse: health.databaseNameInUse,

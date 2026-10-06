@@ -12,15 +12,20 @@ import { afterEach, test } from "node:test";
 
 import {
   classifyMongoError,
+  databaseEnvPresence,
   describeMongoUri,
   redactConnectionString,
 } from "../src/lib/mongo-diagnostics";
 
 const original = process.env.MONGODB_URI;
+const originalDatabaseUrl = process.env.DATABASE_URL;
 
 afterEach(() => {
   if (original === undefined) delete process.env.MONGODB_URI;
   else process.env.MONGODB_URI = original;
+
+  if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+  else process.env.DATABASE_URL = originalDatabaseUrl;
 });
 
 const SECRET = "hunter2";
@@ -93,6 +98,67 @@ test("classifies a missing database name as a URI problem, not a missing variabl
 
   assert.equal(failure.kind, "uri-missing-database-name");
   assert.match(failure.summary, /database name/i);
+});
+
+test("classifies the production failure where MONGODB_URI is absent from the runtime", () => {
+  // Regression test for the live incident: this is the exact error the deployed
+  // admin returned. Prisma failed while evaluating the datasource, so it never
+  // reached the network, and the panel had to be able to say that precisely
+  // rather than falling through to "unknown".
+  const failure = classifyMongoError(
+    Object.assign(
+      new Error(
+        "Invalid `prisma.order.count()` invocation:\n\n" +
+          "error: Environment variable not found: MONGODB_URI.\n" +
+          "  -->  schema.prisma:14\n" +
+          "13 |   provider = \"mongodb\"\n" +
+          "14 |   url      = env(\"MONGODB_URI\")\n\n" +
+          "Validation Error Count: 1"
+      ),
+      { name: "PrismaClientInitializationError" }
+    )
+  );
+
+  assert.equal(failure.kind, "uri-missing");
+  assert.equal(failure.errorName, "PrismaClientInitializationError");
+  assert.match(failure.summary, /Production environment/i);
+  assert.match(failure.summary, /redeploy/i);
+});
+
+test("classifies a URI that is missing its mongodb scheme", () => {
+  const failure = classifyMongoError(
+    new Error("the URL must start with the protocol mongodb:// (P1011)")
+  );
+
+  assert.equal(failure.kind, "uri-malformed");
+  assert.match(failure.summary, /mongodb:\/\//);
+});
+
+test("does not mistake an absent MONGODB_URI for a missing database name", () => {
+  // Guards the rule order: the two look similar but need opposite advice.
+  const failure = classifyMongoError(
+    new Error("error: Environment variable not found: MONGODB_URI.")
+  );
+
+  assert.equal(failure.kind, "uri-missing");
+});
+
+test("reports which database variable names the runtime can see", () => {
+  // The failure mode this exists for: a variable that is set but still under the
+  // name the project used before it moved to MongoDB reads exactly like "never
+  // configured" until you look at the name.
+  delete process.env.MONGODB_URI;
+  process.env.DATABASE_URL = `postgresql://user:${SECRET}@db.example.net/shop`;
+
+  const presence = databaseEnvPresence();
+
+  assert.equal(presence.MONGODB_URI, false);
+  assert.equal(presence.DATABASE_URL, true);
+  // Presence only: the value must never appear anywhere in the payload.
+  assert.ok(
+    !JSON.stringify(presence).includes(SECRET),
+    "env presence must expose no values"
+  );
 });
 
 test("classifies authentication failures", () => {

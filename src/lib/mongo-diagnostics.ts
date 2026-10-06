@@ -11,7 +11,7 @@
  * a password or any other credential. Only booleans, the host, the database
  * name, an error name/code and a redacted message are allowed out.
  */
-import { databaseConfigured, optionalEnv } from "./env";
+import { databaseConfigured, hasEnv, optionalEnv } from "./env";
 
 /** Broad buckets, so the admin UI can say what actually went wrong. */
 export type MongoFailureKind =
@@ -92,6 +92,20 @@ export function describeMongoUri(): MongoUriShape {
   };
 }
 
+/**
+ * Which database variable names this runtime can actually see.
+ *
+ * Presence booleans only - never a value. This exists because a project that moved
+ * from another database engine is the most common way to end up with the variable
+ * present but under its old name, which reads identically to "never configured".
+ */
+export function databaseEnvPresence(): Record<string, boolean> {
+  return {
+    MONGODB_URI: hasEnv("MONGODB_URI"),
+    DATABASE_URL: hasEnv("DATABASE_URL"),
+  };
+}
+
 const KIND_RULES: Array<{ kind: MongoFailureKind; test: RegExp; summary: string }> = [
   {
     kind: "client-not-generated",
@@ -99,6 +113,28 @@ const KIND_RULES: Array<{ kind: MongoFailureKind; test: RegExp; summary: string 
     summary:
       "The Prisma client was not generated in this build, so no query can run. Make sure the " +
       "build command runs `prisma generate` before `next build`.",
+  },
+  {
+    // Most common cause by far, and the one a real deployment hits: the variable
+    // simply is not in the process environment, so Prisma cannot even build a
+    // datasource. It fails before any socket is opened, which is why the error
+    // says nothing about the host, the credentials or the network.
+    kind: "uri-missing",
+    test: /Environment variable not found|Environment variable\s+[A-Z0-9_]+\s+is not set/i,
+    summary:
+      "MONGODB_URI is not present in this server runtime, so Prisma fails before opening a " +
+      "connection. On Vercel the value has to be attached to the Production environment (not " +
+      "only Preview), spelled exactly like this, and the project must be redeployed after it is " +
+      "added - editing a variable does not change an existing deployment. This endpoint also " +
+      "reports whether a DATABASE_URL variable is present, which is the name this project used " +
+      "before it moved to MongoDB.",
+  },
+  {
+    kind: "uri-malformed",
+    test: /must start with the protocol|URL must start with|P1011/i,
+    summary:
+      "MONGODB_URI does not start with mongodb:// or mongodb+srv://, so Prisma cannot parse it " +
+      "as a datasource. Check for a missing scheme or a stray whitespace at the start of the value.",
   },
   {
     kind: "uri-missing-database-name",
@@ -167,6 +203,8 @@ export type MongoHealth = {
   /** What the server tried, safe to print. */
   attempted: boolean;
   uri: MongoUriShape;
+  /** Names of the database env vars this runtime sees, booleans only. */
+  envPresence: Record<string, boolean>;
   failure: MongoFailure | null;
   /** Only set when the ping succeeded. */
   serverVersion: string | null;
@@ -187,7 +225,12 @@ export type MongoHealth = {
 export async function checkMongoHealth(timeoutMs = 10_000): Promise<MongoHealth> {
   const started = Date.now();
   const uri = describeMongoUri();
-  const base = { uri, failure: null as MongoFailure | null, attempted: false };
+  const base = {
+    uri,
+    envPresence: databaseEnvPresence(),
+    failure: null as MongoFailure | null,
+    attempted: false,
+  };
 
   if (!databaseConfigured()) {
     return {
@@ -202,7 +245,8 @@ export async function checkMongoHealth(timeoutMs = 10_000): Promise<MongoHealth>
       failure: {
         kind: "uri-missing",
         summary:
-          "MONGODB_URI is not present in the server runtime, so no query can be attempted.",
+          "MONGODB_URI is not present in the server runtime, so no query can be attempted. " +
+          "On Vercel, confirm it is attached to the Production environment and redeploy.",
         errorName: null,
         errorCode: null,
         message: null,
@@ -281,6 +325,7 @@ export async function checkMongoHealth(timeoutMs = 10_000): Promise<MongoHealth>
       ok: true,
       attempted: true,
       uri,
+      envPresence: base.envPresence,
       failure: null,
       serverVersion: result.serverVersion,
       databaseNameInUse: uri.databaseName,
