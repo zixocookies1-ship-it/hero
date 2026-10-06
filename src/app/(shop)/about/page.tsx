@@ -270,13 +270,13 @@ export default function AboutPage() {
                   href={whatsappLink("Hi, I saw your website and have a question.")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-[var(--natural-green)] transition-colors hover:text-[var(--ginger-terracotta)]"
+                  className="inline-block whitespace-nowrap font-medium text-[var(--natural-green)] transition-colors hover:text-[var(--ginger-terracotta)]"
                 >
                   WhatsApp {BRAND.phoneDisplay}
                 </a>
                 <a
                   href={`tel:${BRAND.phoneDial}`}
-                  className="text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
+                  className="inline-block whitespace-nowrap text-[var(--dark-text)] transition-colors hover:text-[var(--ginger-terracotta)]"
                 >
                   Call {BRAND.phoneDisplay}
                 </a>

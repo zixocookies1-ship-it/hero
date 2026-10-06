@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BRAND, whatsappLink } from "@/lib/brand";
+import { BRAND } from "@/lib/brand";
 import { products } from "@/lib/products";
 import SocialLinks from "@/components/social-links";
 
@@ -12,11 +12,11 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/logo.png"
+                src="/images/logo.png?v=2"
                 alt="Nature's Choice Jaggery"
-                width={80}
-                height={80}
-                  className="h-[74px] w-[74px] object-contain drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]"
+                width={96}
+                height={96}
+                className="h-24 w-24 object-contain drop-shadow-[0_0_2px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.4)]"
               />
               <span className="font-heading text-lg font-bold">
                 Nature&apos;s Choice Jaggery
@@ -37,40 +37,6 @@ export default function Footer() {
                 {BRAND.address.cityState} {BRAND.address.pincode},{" "}
                 {BRAND.address.country}
               </address>
-            </div>
-
-            <div className="mt-6">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--white)]/50">
-                Talk to us
-              </p>
-              <ul className="mt-2 space-y-1.5 text-sm text-[var(--white)]/80">
-                <li>
-                  <a
-                    href={whatsappLink("Hi, I have a question about your jaggery.")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block whitespace-nowrap transition-colors hover:text-[var(--ginger-terracotta)]"
-                  >
-                    WhatsApp {BRAND.phoneDisplay}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={`tel:${BRAND.phoneDial}`}
-                    className="inline-block whitespace-nowrap transition-colors hover:text-[var(--ginger-terracotta)]"
-                  >
-                    Call {BRAND.phoneDisplay}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={`mailto:${BRAND.email}`}
-                    className="inline-block break-all transition-colors hover:text-[var(--ginger-terracotta)]"
-                  >
-                    {BRAND.email}
-                  </a>
-                </li>
-              </ul>
             </div>
 
             <div className="mt-6">

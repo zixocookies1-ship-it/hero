@@ -108,13 +108,50 @@ test("navbar has no WhatsApp link and uses the larger logo", async () => {
   assert.ok(source.includes("sm:h-24 sm:w-24"), "sm+ logo should be sm:h-24 sm:w-24");
 });
 
-test("footer logo is 70% larger and the phone number cannot wrap", async () => {
+test("footer no longer lists contact details", async () => {
   const source = await read("src/components/footer.tsx");
 
-  // 44px * 1.7 = 74.8, so 74px.
-  assert.ok(source.includes("h-[74px] w-[74px]"), "footer logo should be 74px");
+  // The "Talk to us" block was removed from the footer. The postal address and the
+  // social links stay, so only the phone, the WhatsApp link and the email go.
+  assert.ok(!source.includes("Talk to us"), "footer should not render a Talk to us block");
+  assert.ok(!source.includes("phoneDisplay"), "footer should not list the phone number");
+  assert.ok(!source.includes("tel:"), "footer should not link to the phone number");
+  assert.ok(!source.includes("mailto:"), "footer should not list the email address");
+  assert.ok(!source.includes("whatsappLink"), "footer should not offer a WhatsApp link");
+  assert.ok(source.includes("BRAND.address"), "footer keeps the postal address");
+  assert.ok(source.includes("SocialLinks"), "footer keeps the social links");
+});
+
+test("footer logo is large enough to resolve and has a halo against the brown", async () => {
+  const source = await read("src/components/footer.tsx");
+
+  // Once the baked-in white plate was removed the mark sat directly on the dark
+  // brown footer, where the brand green only reaches 2.78:1 and the emblem's
+  // strokes render about 2px wide at 74px. It needs to be bigger to resolve, and
+  // it needs a halo rather than a background to stay off the brand colour.
+  assert.ok(source.includes("h-24 w-24"), "footer logo should be h-24 w-24 (96px)");
   assert.ok(
-    source.includes("inline-block whitespace-nowrap"),
+    !source.includes("h-[74px]"),
+    "the old 74px size resolved the emblem's strokes too thin to read"
+  );
+  assert.match(
+    source,
+    /drop-shadow-\[[^\]]*rgba\(255,255,255/,
+    "footer logo needs a light halo so it reads on the brown"
+  );
+  // The halo must not reintroduce a plate behind the mark.
+  assert.ok(!source.includes("rounded-full bg-"), "no plate behind the footer logo");
+  assert.ok(!source.includes("object-cover"), "the logo must not be cropped or scaled to fill");
+});
+
+test("phone numbers cannot wrap mid-number wherever they are listed", async () => {
+  // The footer no longer lists the phone, so this guard now covers the about page,
+  // which is where the number is rendered.
+  const about = await read("src/app/(shop)/about/page.tsx");
+
+  assert.ok(about.includes("phoneDisplay"), "about page lists the phone number");
+  assert.ok(
+    about.includes("inline-block whitespace-nowrap"),
     "WhatsApp and Call entries must not wrap mid-number"
   );
 });

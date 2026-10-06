@@ -50,7 +50,7 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" aria-label="Nature's Choice Jaggery home">
           <Image
-            src="/images/logo.png"
+              src="/images/logo.png?v=2"
             alt=""
             width={96}
             height={96}
