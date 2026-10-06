@@ -54,7 +54,7 @@ export default function Navbar() {
             alt=""
             width={96}
             height={96}
-            className="h-20 w-20 object-contain sm:h-24 sm:w-24"
+              className="h-20 w-20 object-contain drop-shadow-[0_1px_6px_rgba(90,50,31,0.22)] sm:h-24 sm:w-24"
             priority
           />
         </Link>

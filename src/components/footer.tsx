@@ -16,7 +16,7 @@ export default function Footer() {
                 alt="Nature's Choice Jaggery"
                 width={80}
                 height={80}
-                className="h-[74px] w-[74px] object-contain"
+                  className="h-[74px] w-[74px] object-contain drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]"
               />
               <span className="font-heading text-lg font-bold">
                 Nature&apos;s Choice Jaggery
