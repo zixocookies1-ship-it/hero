@@ -109,8 +109,13 @@ export async function createPendingOrder(params: {
 }
 
 export async function attachRazorpayOrderId(orderId: string, razorpayOrderId: string) {
+  // `isSet: false` rather than `razorpayOrderId: null`: Prisma omits unset
+  // nullable fields when inserting, so a fresh order has no such key in Mongo
+  // and the connector's `null` filter does not match a missing field. That made
+  // this update match nothing, so every payment confirmation failed with
+  // "We could not find that order". Verified against the live cluster.
   await prisma.order.updateMany({
-    where: { orderId, razorpayOrderId: null },
+    where: { orderId, razorpayOrderId: { isSet: false } },
     data: { razorpayOrderId },
   });
 }
