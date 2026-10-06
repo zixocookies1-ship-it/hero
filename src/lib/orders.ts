@@ -66,8 +66,11 @@ async function nextOrderSequence(when: Date): Promise<number> {
 export async function createPendingOrder(params: {
   pricing: Pricing;
   details: CheckoutDetails;
+  /** Set when a coupon was accepted, so the order keeps the link and the code. */
+  coupon?: { id: string; code: string } | null;
 }) {
   const { pricing, details } = params;
+  const coupon = params.coupon ?? null;
   const createdAt = new Date();
   const sequence = await nextOrderSequence(createdAt);
   const orderId = buildOrderId(sequence, createdAt);
@@ -100,6 +103,8 @@ export async function createPendingOrder(params: {
       paymentMethod: "razorpay",
       paymentStatus: "pending",
       orderStatus: "pending",
+      couponCode: coupon ? coupon.code : null,
+      couponId: coupon ? coupon.id : null,
       items: { create: items },
     },
     select: { id: true, sequence: true, orderId: true, createdAt: true },
@@ -276,4 +281,32 @@ export async function getOrderCounts(): Promise<OrderCounts> {
     prisma.order.count(),
   ]);
   return { paid, pending, failed, total };
+}
+
+/**
+ * Looks a coupon up by code, ignoring case and surrounding whitespace.
+ *
+ * Returns null for no match, which evaluateCoupon() turns into "not found". All
+ * the other rules - active, expiry, usage limit, minimum order - live in
+ * coupons.ts so they can be tested without a database.
+ */
+export async function findCouponByCode(rawCode: string) {
+  const code = rawCode.trim().toUpperCase();
+  if (!code) return null;
+
+  return prisma.coupon.findFirst({ where: { code } });
+}
+
+/**
+ * Counts one redemption against a coupon.
+ *
+ * Deliberately only bumped once an order has actually been created, and it is
+ * written as an atomic increment so two simultaneous checkouts cannot both read
+ * the same usedCount and let the last redemption through.
+ */
+export async function recordCouponUsage(couponId: string): Promise<void> {
+  await prisma.coupon.update({
+    where: { id: couponId },
+    data: { usedCount: { increment: 1 } },
+  });
 }

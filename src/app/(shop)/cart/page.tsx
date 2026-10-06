@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/cart-context";
+import { useCoupon } from "@/hooks/use-coupon";
+import CouponField from "@/components/coupon-field";
 import { formatPrice } from "@/lib/products";
 
 export default function CartPage() {
@@ -16,6 +18,11 @@ export default function CartPage() {
     removeItem,
     clearCart,
   } = useCart();
+
+  // Display only. create-order re-prices and re-validates the coupon before any
+  // money moves, so this figure can never be what the shopper is charged.
+  const { discountInr } = useCoupon();
+  const total = Math.max(0, subtotal - discountInr);
 
   if (!hydrated) {
     return (
@@ -140,6 +147,10 @@ export default function CartPage() {
               Order summary
             </h2>
 
+            <div className="mt-6">
+              <CouponField />
+            </div>
+
             <dl className="mt-6 space-y-3 text-sm">
               <div className="flex justify-between">
                 <dt className="text-[var(--dark-text)]/70">Subtotal</dt>
@@ -151,13 +162,19 @@ export default function CartPage() {
                   <dd className="font-medium">-{formatPrice(savings)}</dd>
                 </div>
               )}
+              {discountInr > 0 && (
+                <div className="flex justify-between text-[var(--natural-green)]">
+                  <dt>Coupon</dt>
+                  <dd className="font-medium">-{formatPrice(discountInr)}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-[var(--dark-text)]/70">Shipping</dt>
                 <dd className="font-medium">Free</dd>
               </div>
               <div className="flex justify-between border-t border-black/5 pt-3 text-base font-bold text-[var(--jaggery-brown)]">
                 <dt>Total</dt>
-                <dd>{formatPrice(subtotal)}</dd>
+                <dd>{formatPrice(total)}</dd>
               </div>
             </dl>
 

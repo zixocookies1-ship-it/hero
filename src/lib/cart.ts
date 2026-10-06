@@ -35,20 +35,18 @@ export const clampQuantity = (value: unknown, fallback = 1): number => {
 };
 
 /**
- * Parses persisted lines defensively. Malformed entries are dropped rather than
- * trusted, duplicates collapse to the first occurrence, and slugs that no longer
- * exist in the catalogue are discarded so a deleted product cannot poison the cart.
+ * The whole persisted cart: the lines plus any applied coupon code.
+ *
+ * Both live under one storage key so they are written in a single operation. Two
+ * keys could desync if only one write succeeded, leaving a coupon applied to a
+ * cart that no longer qualifies for it.
  */
-export const parseStoredLines = (raw: string | null): CartLine[] => {
-  if (!raw) return [];
+export type StoredCartState = {
+  lines: CartLine[];
+  coupon: string | null;
+};
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [];
-  }
-
+const parseLineArray = (parsed: unknown): CartLine[] => {
   if (!Array.isArray(parsed)) return [];
 
   const seen = new Set<string>();
@@ -72,6 +70,49 @@ export const parseStoredLines = (raw: string | null): CartLine[] => {
 
   return lines;
 };
+
+/**
+ * Parses persisted state defensively, supporting both the current object shape
+ * and the original bare array of lines, so a cart saved before this change still
+ * loads. Malformed entries are dropped rather than trusted, duplicates collapse
+ * to the first occurrence, and slugs that no longer exist in the catalogue are
+ * discarded so a deleted product cannot poison the cart.
+ */
+export const parseStoredState = (raw: string | null): StoredCartState => {
+  if (!raw) return { lines: [], coupon: null };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { lines: [], coupon: null };
+  }
+
+  // Legacy shape: a bare array of lines, which carried no coupon.
+  if (Array.isArray(parsed)) {
+    return { lines: parseLineArray(parsed), coupon: null };
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    return { lines: [], coupon: null };
+  }
+
+  const record = parsed as Record<string, unknown>;
+  const coupon =
+    typeof record.coupon === "string" && record.coupon.trim() !== ""
+      ? record.coupon.trim().toUpperCase()
+      : null;
+
+  return { lines: parseLineArray(record.lines), coupon };
+};
+
+/**
+ * Parses persisted lines defensively. Malformed entries are dropped rather than
+ * trusted, duplicates collapse to the first occurrence, and slugs that no longer
+ * exist in the catalogue are discarded so a deleted product cannot poison the cart.
+ */
+export const parseStoredLines = (raw: string | null): CartLine[] =>
+  parseStoredState(raw).lines;
 
 /**
  * Adds `quantity` to the line for `slug`, appending it when absent.

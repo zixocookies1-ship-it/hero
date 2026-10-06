@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { useCart } from "@/context/cart-context";
+import { useCoupon } from "@/hooks/use-coupon";
 import { BRAND } from "@/lib/brand";
 import { formatPrice } from "@/lib/products";
 import { INDIAN_STATES, STATE_PLACEHOLDER } from "@/lib/states";
@@ -17,6 +18,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation";
 import { useRazorpayScript } from "@/components/use-razorpay";
+import CouponField from "@/components/coupon-field";
 
 type Stage = "idle" | "preparing" | "verifying";
 
@@ -47,6 +49,7 @@ export default function CheckoutForm({
 }) {
   const router = useRouter();
   const { lines, detailedLines, clearCart } = useCart();
+  const { code: couponCode, discountInr: couponDiscount } = useCoupon();
   const { ready: scriptReady, failed: scriptFailed, open: openRazorpay } = useRazorpayScript();
 
   const [details, setDetails] = useState<CheckoutDetails>(emptyDetails);
@@ -76,11 +79,15 @@ export default function CheckoutForm({
       mrpTotal,
       subtotal,
       discount: mrpTotal - subtotal,
+      couponDiscount: Math.min(Math.max(0, couponDiscount), subtotal),
+      couponCode,
       shipping,
       shippingFree,
-      total: subtotal + shipping,
+      // Delivery is still decided from the pre-discount subtotal, matching
+      // applyCoupon() on the server, so a coupon never changes the shipping owed.
+      total: subtotal - Math.min(Math.max(0, couponDiscount), subtotal) + shipping,
     };
-  }, [detailedLines, shippingFeeInr, freeAboveInr]);
+  }, [detailedLines, shippingFeeInr, freeAboveInr, couponDiscount, couponCode]);
 
   const update = (field: keyof CheckoutDetails) => (value: string) => {
     setDetails((current) => ({ ...current, [field]: value }));
@@ -168,6 +175,9 @@ export default function CheckoutForm({
           body: JSON.stringify({
             cart: lines.map((line) => ({ slug: line.slug, quantity: line.quantity })),
             details: normalised,
+            // The server re-reads the code and re-runs every rule against a freshly
+            // priced cart. Sending it is a request, never a discount.
+            couponCode: couponCode ?? "",
           }),
         });
 
@@ -519,6 +529,10 @@ export default function CheckoutForm({
 
         <CheckoutLines />
 
+        <div className="mt-6 border-t border-black/5 pt-5">
+          <CouponField />
+        </div>
+
         <dl className="mt-6 space-y-3 border-t border-black/5 pt-5 text-sm">
           <div className="flex justify-between">
             <dt className="text-[var(--dark-text)]/70">MRP total</dt>
@@ -534,6 +548,16 @@ export default function CheckoutForm({
             <dt className="text-[var(--dark-text)]/70">Subtotal</dt>
             <dd className="font-medium">{formatPrice(preview.subtotal)}</dd>
           </div>
+          {preview.couponDiscount > 0 && (
+            <div className="flex justify-between">
+              <dt className="text-[var(--dark-text)]/70">
+                Coupon{preview.couponCode ? ` (${preview.couponCode})` : ""}
+              </dt>
+              <dd className="font-medium text-[var(--natural-green)]">
+                &minus; {formatPrice(preview.couponDiscount)}
+              </dd>
+            </div>
+          )}
           <div className="flex justify-between">
             <dt className="text-[var(--dark-text)]/70">Shipping</dt>
             <dd className="font-medium">

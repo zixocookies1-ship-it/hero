@@ -22,6 +22,7 @@ import {
   detailedLines,
   itemCount,
   parseStoredLines,
+  parseStoredState,
   quantityOfLine,
   removeLine,
   savings,
@@ -157,6 +158,58 @@ test("parseStoredLines collapses duplicate slugs instead of double counting", ()
   ]);
 
   assert.deepEqual(parseStoredLines(stored), [{ slug: slugA, quantity: 2 }]);
+});
+
+// 3b. The single blob that carries lines and coupon together.
+test("parseStoredState reads the current object shape", () => {
+  const stored = JSON.stringify({
+    lines: [{ slug: slugA, quantity: 2 }],
+    coupon: "save10",
+  });
+
+  const state = parseStoredState(stored);
+
+  assert.deepEqual(state.lines, [{ slug: slugA, quantity: 2 }]);
+  assert.equal(state.coupon, "SAVE10", "the coupon is normalised on the way in");
+});
+
+test("parseStoredState reads a cart saved before coupons existed", () => {
+  const legacy = JSON.stringify([{ slug: slugA, quantity: 1 }, { slug: slugB, quantity: 3 }]);
+
+  const state = parseStoredState(legacy);
+
+  assert.deepEqual(state.lines, [
+    { slug: slugA, quantity: 1 },
+    { slug: slugB, quantity: 3 },
+  ]);
+  assert.equal(state.coupon, null, "a legacy cart carries no coupon");
+});
+
+test("parseStoredState drops unusable storage instead of trusting it", () => {
+  assert.deepEqual(parseStoredState(null), { lines: [], coupon: null });
+  assert.deepEqual(parseStoredState("{not json"), { lines: [], coupon: null });
+  assert.deepEqual(parseStoredState('"a string"'), { lines: [], coupon: null });
+  assert.deepEqual(parseStoredState("123"), { lines: [], coupon: null });
+});
+
+test("parseStoredState drops a malformed coupon without dropping the cart", () => {
+  const lines = [{ slug: slugA, quantity: 1 }];
+
+  assert.equal(
+    parseStoredState(JSON.stringify({ lines, coupon: "   " })).coupon,
+    null,
+    "blank is not a code"
+  );
+  assert.equal(
+    parseStoredState(JSON.stringify({ lines, coupon: 42 })).coupon,
+    null,
+    "a non-string is not a code"
+  );
+  assert.equal(
+    parseStoredState(JSON.stringify({ lines, coupon: 42 })).lines.length,
+    1,
+    "a bad coupon must not cost the shopper their cart"
+  );
 });
 
 // 4. Quantity controls.

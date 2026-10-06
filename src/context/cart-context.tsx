@@ -13,7 +13,7 @@ import {
   clearLines,
   detailedLines as detailLines,
   itemCount as countLines,
-  parseStoredLines,
+  parseStoredState,
   quantityOfLine,
   removeLine,
   savings as totalSavings,
@@ -21,6 +21,7 @@ import {
   subtotal as sumLines,
   type CartDetail,
   type CartLine,
+  type StoredCartState,
 } from "@/lib/cart";
 
 export type { CartLine } from "@/lib/cart";
@@ -42,6 +43,9 @@ type CartContextValue = {
   clearCart: () => void;
   quantityOf: (slug: string) => number;
   detailedLines: CartDetail[];
+  /** Coupon the shopper has applied, persisted so it survives navigation. */
+  couponCode: string | null;
+  setCouponCode: (code: string | null) => void;
 };
 
 /**
@@ -52,31 +56,34 @@ type CartContextValue = {
 const STORAGE_KEY = "cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
-const EMPTY: CartLine[] = [];
+const EMPTY_LINES: CartLine[] = [];
+const EMPTY_STATE: StoredCartState = { lines: EMPTY_LINES, coupon: null };
 
 /**
  * useSyncExternalStore requires a referentially stable snapshot, so the parsed
  * result is cached against the exact raw string. Identical storage contents must
- * return the same array instance or React re-renders in a loop.
+ * return the same array instance or React re-renders in a loop. The whole state
+ * is cached rather than just the lines, so lines and coupon always come from one
+ * consistent parse of the same write.
  */
 let cachedRaw: string | null = null;
-let cachedLines: CartLine[] = EMPTY;
+let cachedState: StoredCartState = EMPTY_STATE;
 let cachePrimed = false;
 
-const readStoredLines = (): CartLine[] => {
+const readStoredState = (): StoredCartState => {
   let raw: string | null = null;
   try {
     raw = window.localStorage.getItem(STORAGE_KEY);
   } catch {
-    return EMPTY;
+    return EMPTY_STATE;
   }
 
-  if (cachePrimed && raw === cachedRaw) return cachedLines;
+  if (cachePrimed && raw === cachedRaw) return cachedState;
 
   cachedRaw = raw;
-  cachedLines = parseStoredLines(raw);
+  cachedState = parseStoredState(raw);
   cachePrimed = true;
-  return cachedLines;
+  return cachedState;
 };
 
 const listeners = new Set<() => void>();
@@ -95,12 +102,21 @@ const subscribe = (onStoreChange: () => void) => {
   };
 };
 
-const getSnapshot = (): CartLine[] => readStoredLines();
+const getSnapshot = (): CartLine[] => readStoredState().lines;
 // The server cannot read localStorage; it renders the empty-cart placeholder and
 // the first client render picks up the real cart.
-const getServerSnapshot = (): CartLine[] => EMPTY;
+const getServerSnapshot = (): CartLine[] => EMPTY_LINES;
 
-const writeLines = (next: CartLine[]) => {
+const getCouponSnapshot = (): string | null => readStoredState().coupon;
+const getServerCouponSnapshot = (): string | null => null;
+
+/**
+ * Lines and coupon are written as one object under one key in a single setItem.
+ * Two keys could desync if only one write succeeds, leaving a coupon applied to a
+ * cart that no longer qualifies for it. The coupon rides along as a plain string,
+ * which is referentially stable for useSyncExternalStore.
+ */
+const writeState = (next: StoredCartState) => {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
@@ -114,12 +130,19 @@ const writeLines = (next: CartLine[]) => {
 /**
  * Every mutation funnels through here. The reducer receives the lines currently
  * persisted, which is the storage equivalent of a functional state update: two
- * clicks in one tick cannot both act on a stale snapshot.
+ * clicks in one tick cannot both act on a stale snapshot. The existing coupon is
+ * carried through untouched, so editing a quantity never silently drops a discount
+ * that is still valid.
  */
 const mutate = (reduce: (current: CartLine[]) => CartLine[]): CartLine[] => {
-  const next = reduce(readStoredLines());
-  writeLines(next);
-  return next;
+  const current = readStoredState();
+  const nextLines = reduce(current.lines);
+  writeState({ lines: nextLines, coupon: current.coupon });
+  return nextLines;
+};
+
+const writeCoupon = (code: string | null) => {
+  writeState({ lines: readStoredState().lines, coupon: code });
 };
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -155,7 +178,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => {
-    writeLines(clearLines());
+    // One write clears both: an emptied cart cannot satisfy a minimum-order rule,
+    // so the coupon must not outlive the lines it was applied to.
+    writeState({ lines: clearLines(), coupon: null });
+  }, []);
+
+  const couponCode = useSyncExternalStore(
+    subscribe,
+    getCouponSnapshot,
+    getServerCouponSnapshot
+  );
+
+  const setCouponCode = useCallback((code: string | null) => {
+    writeCoupon(
+      typeof code === "string" && code.trim() !== "" ? code.trim().toUpperCase() : null
+    );
   }, []);
 
   const detailed = useMemo(() => detailLines(lines), [lines]);
@@ -181,6 +218,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearCart,
       quantityOf,
       detailedLines: detailed,
+      couponCode,
+      setCouponCode,
     }),
     [
       lines,
@@ -192,6 +231,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem,
       clearCart,
       quantityOf,
+      couponCode,
+      setCouponCode,
     ]
   );
 

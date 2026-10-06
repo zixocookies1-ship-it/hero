@@ -22,6 +22,8 @@ export type Pricing = {
   productDiscount: number;
   subtotal: number;
   couponDiscount: number;
+  /** Normalised code that produced `couponDiscount`, or null. */
+  couponCode: string | null;
   deliveryFee: number;
   shippingFree: boolean;
   total: number;
@@ -121,9 +123,10 @@ export function priceCart(
   const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
-  // Coupons are not enabled yet, so there is never a coupon discount. The field
-  // exists so the server total and the stored order stay correct when it lands.
+  // Coupons are resolved against the database before pricing is finalised, then
+  // folded in with applyCoupon(). A bare cart therefore never has a discount.
   const couponDiscount = 0;
+  const couponCode = null;
 
   const policy = getShippingPolicy(env);
   const shippingFree = policy.freeAboveInr !== null && subtotal >= policy.freeAboveInr;
@@ -138,8 +141,40 @@ export function priceCart(
     productDiscount: mrpTotal - subtotal,
     subtotal,
     couponDiscount,
+    couponCode,
     deliveryFee,
     shippingFree,
+    total,
+    totalInPaise: toPaise(total),
+  };
+}
+
+/**
+ * Folds an already-resolved coupon discount into a priced cart.
+ *
+ * The discount is clamped to the subtotal here as well as in evaluateCoupon(),
+ * because this is the function that produces the number that gets charged. The
+ * free-shipping threshold deliberately still reads the pre-discount subtotal, so
+ * a coupon cannot tip an order under the threshold and remove the delivery fee
+ * that the shopper did not earn.
+ */
+export function applyCoupon(
+  pricing: Pricing,
+  discountInr: number,
+  code: string | null
+): Pricing {
+  const requested = Number(discountInr);
+  const safe = Number.isFinite(requested) ? requested : 0;
+  const couponDiscount = Math.max(0, Math.min(Math.round(safe), Math.floor(pricing.subtotal)));
+
+  if (couponDiscount === 0) return pricing;
+
+  const total = Math.max(0, pricing.subtotal - couponDiscount + pricing.deliveryFee);
+
+  return {
+    ...pricing,
+    couponDiscount,
+    couponCode: code && code.trim() ? code.trim().toUpperCase() : null,
     total,
     totalInPaise: toPaise(total),
   };

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { databaseConfigured, razorpayConfigured } from "@/lib/env";
-import { priceCart, PricingError, type CartInputLine } from "@/lib/pricing";
+import { evaluateCoupon } from "@/lib/coupons";
+import { databaseEnvPresence } from "@/lib/mongo-diagnostics";
+import { applyCoupon, priceCart, PricingError, type CartInputLine } from "@/lib/pricing";
 import {
   createPendingOrder,
   attachRazorpayOrderId,
+  findCouponByCode,
   markPaymentFailedByOrderId,
+  recordCouponUsage,
 } from "@/lib/orders";
 import { createRazorpayOrder, getRazorpayKeyId } from "@/lib/razorpay-server";
 import {
@@ -34,8 +38,15 @@ function readCartLines(payload: unknown): CartInputLine[] {
 
 export async function POST(request: Request) {
   if (!databaseConfigured()) {
+    // The shopper gets a neutral message; the operator gets the actual reason,
+    // because "not configured" is nearly always a variable that never reached this
+    // runtime rather than an application that is genuinely unconfigured.
+    console.error(
+      "[checkout] cannot create order: MONGODB_URI is not configured in this runtime",
+      { envPresence: databaseEnvPresence(), vercel: Boolean(process.env.VERCEL) }
+    );
     return NextResponse.json(
-      { error: "Orders are not configured yet. Please contact us." },
+      { error: "We could not start your order. Please try again shortly.", code: "orders_unavailable" },
       { status: 503 }
     );
   }
@@ -54,7 +65,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const body = (payload ?? {}) as { details?: Record<string, unknown> };
+  const body = (payload ?? {}) as {
+    details?: Record<string, unknown>;
+    couponCode?: unknown;
+  };
   const details = normaliseCheckoutDetails(body.details ?? {});
 
   // The browser runs the same validation, but the server is the authority.
@@ -68,9 +82,9 @@ export async function POST(request: Request) {
 
   // Amounts are recalculated from the catalogue. Anything the browser claims
   // about price, discount or shipping is ignored.
-  let pricing;
+  let base;
   try {
-    pricing = priceCart(readCartLines(payload));
+    base = priceCart(readCartLines(payload));
   } catch (error) {
     if (error instanceof PricingError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 });
@@ -78,15 +92,63 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not price your cart." }, { status: 500 });
   }
 
+  // The coupon is re-checked here, not trusted from the validate call. The code
+  // is all the client sends; whether it applies, and for how much, is decided
+  // again against the freshly priced subtotal.
+  let pricing = base;
+  let coupon: { id: string; code: string } | null = null;
+  const requestedCode = typeof body.couponCode === "string" ? body.couponCode : "";
+
+  if (requestedCode.trim()) {
+    let found: Awaited<ReturnType<typeof findCouponByCode>>;
+    try {
+      found = await findCouponByCode(requestedCode);
+    } catch (error) {
+      console.error("coupon lookup failed", error);
+      return NextResponse.json(
+        { error: "Could not check that coupon. Please try again.", code: "coupon_lookup_failed" },
+        { status: 500 }
+      );
+    }
+
+    const verdict = evaluateCoupon(found, requestedCode, base.subtotal);
+
+    if (!verdict.ok) {
+      return NextResponse.json(
+        { error: verdict.message, code: "coupon_rejected", reason: verdict.reason },
+        { status: 422 }
+      );
+    }
+
+    // evaluateCoupon only accepts a coupon that exists, so this is unreachable.
+    if (!found) {
+      return NextResponse.json(
+        { error: "That coupon is not available.", code: "coupon_rejected" },
+        { status: 422 }
+      );
+    }
+
+    pricing = applyCoupon(base, verdict.discountInr, verdict.code);
+    coupon = { id: found.id, code: verdict.code };
+  }
+
   let pending: { id: string; orderId: string };
   try {
-    pending = await createPendingOrder({ pricing, details });
+    pending = await createPendingOrder({ pricing, details, coupon });
   } catch (error) {
     console.error("createPendingOrder failed", error);
     return NextResponse.json(
       { error: "We could not start your order. Please try again." },
       { status: 500 }
     );
+  }
+
+  if (coupon) {
+    // Best effort: the order is already created, so a failure to count the
+    // redemption must not fail the checkout.
+    await recordCouponUsage(coupon.id).catch((error) => {
+      console.error("recordCouponUsage failed", { orderId: pending.orderId, error });
+    });
   }
 
   try {
@@ -108,6 +170,7 @@ export async function POST(request: Request) {
         subtotal: pricing.subtotal,
         discount: pricing.productDiscount,
         couponDiscount: pricing.couponDiscount,
+        couponCode: pricing.couponCode,
         deliveryFee: pricing.deliveryFee,
         total: pricing.total,
       },
