@@ -1,5 +1,4 @@
 ﻿import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductActions from "@/components/product-actions";
 import ProductCard from "@/components/product-card";
@@ -44,26 +43,6 @@ export default async function ProductDetailPage({
   return (
     <main className="pt-40 pb-24">
       <div className="mx-auto max-w-7xl px-6">
-        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-[var(--dark-text)]/60">
-          <ol className="flex flex-wrap items-center gap-2">
-            <li>
-              <Link href="/" className="hover:text-[var(--ginger-terracotta)]">
-                Home
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li>
-              <Link href="/products" className="hover:text-[var(--ginger-terracotta)]">
-                Products
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" className="text-[var(--dark-text)]">
-              {product.name}
-            </li>
-          </ol>
-        </nav>
-
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <ProductGallery images={product.images} alt={product.name} />
 
