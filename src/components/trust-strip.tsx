@@ -48,7 +48,7 @@ export default async function TrustStrip() {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {items.map((item, index) => (
             <div
-              key={item.title}
+              key={`${index}-${item.title}`}
               style={{ animationDelay: `${index * 0.7}s` }}
               className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-shadow hover:shadow-md motion-safe:animate-floaty"
             >

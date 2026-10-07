@@ -1,5 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import Image from "next/image";
 import { verifyAdminSession, ADMIN_COOKIE, adminIsConfigured } from "@/lib/admin-auth";
 import AdminLoginForm from "@/components/admin-login-form";
 
@@ -32,6 +33,14 @@ export default async function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--warm-cream)] px-6">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <Image
+          src="/images/logo.png?v=2"
+          alt="Nature's Choice Jaggery"
+          width={253}
+          height={203}
+          priority
+          className="mx-auto mb-6 h-20 w-auto"
+        />
         <div className="mb-8 text-center">
           <h1 className="font-serif text-3xl font-bold text-[var(--jaggery-brown)]">
             Nature&apos;s Choice Admin

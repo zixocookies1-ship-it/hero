@@ -91,7 +91,7 @@ export default async function Home() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 md:hidden"
+          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100 md:hidden"
         />
         <Image
           src={hero.image || "/images/hero-banner.png"}
@@ -99,7 +99,7 @@ export default async function Home() {
           fill
           priority
           sizes="100vw"
-          className="hidden object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 md:block"
+          className="hidden object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100 md:block"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
         <div className="relative z-10 w-full px-6 py-28">

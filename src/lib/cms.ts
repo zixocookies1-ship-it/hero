@@ -252,7 +252,10 @@ export const loadSettingsUncached = async (): Promise<
 export const loadSettings = cache(loadSettingsUncached);
 
 export const loadBrandUncached = async (): Promise<Brand> => {
-  const settings = await loadSettingsUncached();
+  // Through the memoised loader, not the raw one: the home request also reads
+  // settings for the announcement strip, and without this the same row is
+  // queried twice per render.
+  const settings = await loadSettings();
   if (!settings) return FALLBACK_BRAND;
 
     const social = (settings.social && typeof settings.social === "object" && !Array.isArray(settings.social)
@@ -336,7 +339,7 @@ const FALLBACK_ANNOUNCEMENTS = [
 ];
 
 export const loadAnnouncementsUncached = async (): Promise<string[]> => {
-  const settings = await loadSettingsUncached();
+  const settings = await loadSettings();
   if (!settings) return FALLBACK_ANNOUNCEMENTS;
   const split = splitAnnouncements(settings.announcement ?? "");
   return split.length > 0 ? split : [];

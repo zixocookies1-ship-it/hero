@@ -32,8 +32,9 @@ export default function ProductGallery({
   };
 
   useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activeThumbRef.current?.scrollIntoView({
-      behavior: "smooth",
+      behavior: reduced ? "auto" : "smooth",
       block: "nearest",
       inline: "center",
     });
@@ -60,16 +61,16 @@ export default function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+        <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
           {images.map((image, index) => (
             <button
-              key={image}
+              key={`${index}-${image}`}
               ref={index === activeIndex ? activeThumbRef : undefined}
               type="button"
               onClick={() => setActiveIndex(index)}
               aria-label={`Show image ${index + 1}`}
               aria-current={index === activeIndex}
-              className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-[var(--warm-cream)] transition-colors ${
+              className={`relative aspect-square w-20 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-[var(--warm-cream)] transition-colors ${
                 index === activeIndex
                   ? "border-[var(--ginger-terracotta)]"
                   : "border-black/5 hover:border-[var(--ginger-terracotta)]/50"
