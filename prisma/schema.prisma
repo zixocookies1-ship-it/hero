@@ -284,6 +284,43 @@ model BusinessSettings {
 }
 
 /**
+ * A purchasable bundle of products sold as one line. The storefront lists active
+ * combos (home + products page), the cart and checkout price them, and the
+ * create-order API charges them exactly like a product.
+ *
+ * `items` is a JSON list of {"slug", "name", "quantity"} so a combo keeps
+ * human-readable contents without needing a relation back to the catalogue. The
+ * slug is what checkout reprices against; the name is cached for receipts. A
+ * combo is deprecated by clearing `isActive` rather than deleting a document,
+ * and deleting one removes it from carts on the next parse because the cart
+ * line carries the combo's ObjectId.
+ *
+ * The collection is populated by the admin Combo editor on first create;
+ * MongoDB creates it on the first insert, so no `db push` is required to read
+ * or write it.
+ */
+model Combo {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String
+  image        String
+  // Money in paise, matching the ProductVariant convention so the cart, the
+  // pricing module and the admin can convert identically.
+  pricePaise   Int
+  mrpPaise     Int
+  items        Json
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  showOnHomepage Boolean @default(true)
+  showOnProducts  Boolean @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("combos")
+}
+
+/**
  * Every editable block of copy on the storefront — hero banner, trust strip,
  * section headings, bullet lists, the footer blurb. One document per section,
  * addressed by `key`.
@@ -386,6 +423,11 @@ model OrderItem {
   productId   String?   @db.ObjectId
   product     Product?  @relation(fields: [productId], references: [id])
   productSlug String
+
+  // "product" for a catalogue line, "combo" for a Combo bundle. Nullable and
+  // without a default so documents written before the field existed still read;
+  // missing means product, which is what every existing order is.
+  kind String?
   name        String
   image       String?
   quantity    Int

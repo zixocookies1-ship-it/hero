@@ -3,12 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import TrustStrip from "@/components/trust-strip";
 import ProductCard from "@/components/product-card";
+import ComboCard from "@/components/combo-card";
 import WhyNaturesChoice from "@/components/why-natures-choice";
 import FarmToJar from "@/components/farm-to-jar";
 import OurStoryPreview from "@/components/our-story-preview";
 import CustomerReviews from "@/components/customer-reviews";
 import FourDecisions from "@/components/four-decisions";
-import { loadCatalogue, loadSections, type Section } from "@/lib/cms";
+import { loadCatalogue, loadCombos, loadSections, type Section } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Nature's Choice Jaggery",
@@ -53,9 +54,10 @@ const FEATURED_FALLBACK: Section = {
 };
 
 export default async function Home() {
-  const [sections, catalogue] = await Promise.all([
+  const [sections, catalogue, combos] = await Promise.all([
     loadSections(),
     loadCatalogue(),
+    loadCombos(),
   ]);
 
   const hero = sections.home_hero ?? HERO_FALLBACK;
@@ -67,6 +69,11 @@ export default async function Home() {
   // behaviour of showing every product stands rather than an empty grid.
   const flagged = catalogue.filter((product) => product.featured === true);
   const displayed = flagged.length > 0 ? flagged : catalogue;
+
+  // Combos the admin published to the homepage, in sortOrder.
+  const homeCombos = combos.filter(
+    (combo) => combo.isActive && combo.showOnHomepage
+  );
 
   // The hero banner photograph is the first catalogue product (Desi
   // Chocolatey). Linking the image itself to that product keeps the whole hero
@@ -165,6 +172,33 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {homeCombos.length > 0 ? (
+        <section className="bg-[var(--warm-cream)] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                  Money savers
+                </p>
+                <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
+                  COMBOS
+                </h2>
+              </div>
+              <p className="max-w-sm text-sm text-[var(--dark-text)]/60">
+                Bundle a few of our flavours and save. Every combo is one line
+                in your cart, charged at the displayed bundle price.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {homeCombos.map((combo) => (
+                <ComboCard key={combo.id} combo={combo} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <WhyNaturesChoice />
 

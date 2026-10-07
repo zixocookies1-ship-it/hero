@@ -1,6 +1,7 @@
 import { getProductBySlug, products, type Product } from "@/lib/products";
+import { comboIdFromCartSlug, isComboCartSlug, type Combo } from "@/lib/combos";
 
-export type CartInputLine = { slug: string; quantity: number };
+export type CartInputLine = { slug: string; quantity: number; kind?: "product" | "combo" };
 
 export type PricedLine = {
   slug: string;
@@ -12,6 +13,10 @@ export type PricedLine = {
   mrp: number;
   unitPrice: number;
   lineTotal: number;
+  /** "combo" for a bundle line, absent for a catalogue product. */
+  kind?: "product" | "combo";
+  /** Combo object id when this line is a bundle. */
+  comboId?: string;
 };
 
 export type Pricing = {
@@ -50,9 +55,11 @@ export const MAX_QUANTITY_PER_LINE = 20;
 const toPaise = (rupees: number): number => Math.round(rupees * 100);
 
 /**
- * Delivery rules come from the environment so the amount charged always matches
- * one centrally configured value. Never hard-coded per request, and never taken
- * from the browser.
+ * Delivery rules come from one centrally configured source. The live flow reads
+ * the MongoDB `shippingconfigurations` document through loadShippingPolicy()
+ * (lib/cms.ts) and hands the result in as `policy`; this env-based function is
+ * the fallback that keeps tests and an unseeded database working. The amount is
+ * never hard-coded per request, and never taken from the browser.
  */
 export function getShippingPolicy(env: NodeJS.ProcessEnv = process.env) {
   const fee = Number(env.SHIPPING_FEE_INR ?? "49");
@@ -74,11 +81,18 @@ export function getShippingPolicy(env: NodeJS.ProcessEnv = process.env) {
  * Turns a browser-supplied cart into a priced order using only catalogue values
  * looked up on the server. Any price, discount or shipping figure supplied by
  * the client is ignored entirely.
+ *
+ * `combos` is the full (active + inactive) combo list from the database; a
+ * combo line is looked up there and rejected when missing or unpublished, the
+ * same way an unknown product slug rejects. `policy` overrides the env-derived
+ * shipping rule when the caller has loaded the live configuration.
  */
 export function priceCart(
   input: CartInputLine[],
   env: NodeJS.ProcessEnv = process.env,
-  catalogue: readonly Product[] = products
+  catalogue: readonly Product[] = products,
+  combos: readonly Combo[] = [],
+  policy?: { feeInr: number; freeAboveInr: number | null }
 ): Pricing {
   const usable = input.filter((line) => line && typeof line.slug === "string");
 
@@ -87,6 +101,39 @@ export function priceCart(
   }
 
   const lines: PricedLine[] = usable.map((line) => {
+    const isComboLine = line.kind === "combo" || isComboCartSlug(line.slug);
+
+    if (isComboLine) {
+      const comboId = comboIdFromCartSlug(line.slug);
+      const combo: Combo | undefined = combos.find((entry) => entry.id === comboId);
+      if (!combo || !combo.isActive) {
+        throw new PricingError(
+          `A combo in your cart is no longer available: ${line.slug}.`,
+          "unknown_product"
+        );
+      }
+
+      const quantity = Number(line.quantity);
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY_PER_LINE) {
+        throw new PricingError(`Invalid quantity for ${combo.name}.`, "invalid_quantity");
+      }
+
+      const comboCount = combo.items.length;
+      return {
+        slug: line.slug,
+        name: combo.name,
+        image: combo.image,
+        quantity,
+        weight: comboCount > 0 ? `${comboCount} items` : "combo",
+        pack: "1 set",
+        mrp: combo.mrpInr,
+        unitPrice: combo.priceInr,
+        lineTotal: combo.priceInr * quantity,
+        kind: "combo",
+        comboId: combo.id,
+      };
+    }
+
     const product: Product | undefined = getProductBySlug(line.slug, catalogue);
     if (!product) {
       throw new PricingError(
@@ -129,9 +176,10 @@ export function priceCart(
   const couponDiscount = 0;
   const couponCode = null;
 
-  const policy = getShippingPolicy(env);
-  const shippingFree = policy.freeAboveInr !== null && subtotal >= policy.freeAboveInr;
-  const deliveryFee = shippingFree ? 0 : policy.feeInr;
+  const activePolicy = policy ?? getShippingPolicy(env);
+  const shippingFree =
+    activePolicy.freeAboveInr !== null && subtotal >= activePolicy.freeAboveInr;
+  const deliveryFee = shippingFree ? 0 : activePolicy.feeInr;
 
   const total = Math.max(0, subtotal - couponDiscount + deliveryFee);
 

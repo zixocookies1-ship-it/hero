@@ -1,4 +1,10 @@
 import { getProductBySlug, products, type Product } from "@/lib/products";
+import {
+  comboCartSlug,
+  comboIdFromCartSlug,
+  isComboCartSlug,
+  type Combo,
+} from "@/lib/combos";
 
 /**
  * Every lookup in this module takes an optional `catalogue` and falls back to
@@ -17,6 +23,11 @@ export type Catalogue = readonly Product[];
  * customer and can never reach the payment API. The server reprices the cart from
  * the catalogue again before creating a Razorpay order.
  *
+ * A combo line uses `kind: "combo"` and the slug `combo-<id>`, so a bundle is
+ * priced from the combos list the same way a product line is priced from the
+ * catalogue. Product lines never carry `kind`, which keeps the stored shape of
+ * every existing cart byte-for-byte identical.
+ *
  * This catalogue has one pack size per flavour (500g / Pack of 1), so there is no
  * variant axis today. If one is added, a variant needs its own slug rather than
  * being folded into display text, otherwise two sizes of one flavour would merge
@@ -25,6 +36,7 @@ export type Catalogue = readonly Product[];
 export type CartLine = {
   slug: string;
   quantity: number;
+  kind?: "product" | "combo";
 };
 
 export const MAX_QUANTITY = 99;
@@ -34,6 +46,21 @@ export type CartDetail = {
   quantity: number;
   lineTotal: number;
 };
+
+/**
+ * One rendered row for the cart, checkout summary and (via the context) the
+ * navbar badge. Products keep the CartDetail shape; combos carry the Combo
+ * document plus the cart slug that quantity/remove ops act on.
+ */
+export type CartEntry =
+  | ({ kind: "product" } & CartDetail)
+  | {
+      kind: "combo";
+      combo: Combo;
+      cartSlug: string;
+      quantity: number;
+      lineTotal: number;
+    };
 
 /** Clamps to a whole number in [1, MAX_QUANTITY]. NaN and Infinity fall back to 1. */
 export const clampQuantity = (value: unknown, fallback = 1): number => {
@@ -69,11 +96,23 @@ const parseLineArray = (
     const record = entry as Record<string, unknown>;
     const slug = record.slug;
     const quantity = Number(record.quantity);
+    const kind = record.kind;
 
     if (typeof slug !== "string" || !slug) continue;
     if (!Number.isFinite(quantity)) continue;
-    if (!getProductBySlug(slug, catalogue)) continue;
     if (seen.has(slug)) continue;
+
+    // Combo lines are validated by their `combo-` prefix at parse time; whether
+    // the combo still exists is decided when details are rendered. Product
+    // lines must resolve in the catalogue, exactly as before.
+    if (kind === "combo" || isComboCartSlug(slug)) {
+      if (!isComboCartSlug(slug)) continue;
+      seen.add(slug);
+      lines.push({ slug, quantity: clampQuantity(quantity), kind: "combo" });
+      continue;
+    }
+
+    if (!getProductBySlug(slug, catalogue)) continue;
 
     seen.add(slug);
     lines.push({ slug, quantity: clampQuantity(quantity) });
@@ -200,6 +239,92 @@ export const detailedLines = (
     return [{ product, quantity: line.quantity, lineTotal: product.sellingPrice * line.quantity }];
   });
 
+/**
+ * Adds a combo to the cart, using the `combo-<id>` slug scheme.
+ *
+ * A combo that is not in the supplied list is dropped, mirroring how addLine
+ * drops product slugs missing from the catalogue.
+ */
+export const addComboLine = (
+  lines: CartLine[],
+  combo: Combo,
+  quantity = 1,
+  combos: readonly Combo[]
+): CartLine[] => {
+  if (!combos.some((entry) => entry.id === combo.id)) return lines;
+
+  const step = clampQuantity(quantity);
+  const slug = comboCartSlug(combo.id);
+  const existing = lines.find((line) => line.slug === slug);
+
+  if (!existing) return [...lines, { slug, quantity: step, kind: "combo" }];
+
+  return lines.map((line) =>
+    line.slug === slug ? { ...line, quantity: clampQuantity(line.quantity + step) } : line
+  );
+};
+
+/** Sets an absolute quantity for a combo line. Zero and below remove it. */
+export const setComboLineQuantity = (
+  lines: CartLine[],
+  comboId: string,
+  quantity: number,
+  combos: readonly Combo[]
+): CartLine[] => {
+  const combo = combos.find((entry) => entry.id === comboId);
+  if (!combo) return lines;
+
+  const slug = comboCartSlug(comboId);
+  const requested = Number(quantity);
+  if (!Number.isFinite(requested) || requested <= 0) {
+    return lines.filter((line) => line.slug !== slug);
+  }
+
+  const safeQuantity = clampQuantity(requested);
+  const exists = lines.some((line) => line.slug === slug);
+
+  if (!exists) return [...lines, { slug, quantity: safeQuantity, kind: "combo" }];
+
+  return lines.map((line) =>
+    line.slug === slug ? { ...line, quantity: safeQuantity } : line
+  );
+};
+
+/**
+ * Every cart row in display order: products first from the catalogue, then any
+ * combos. Unknown product slugs and inactive/missing combos are dropped — a
+ * deleted product or a curated-down combo cannot poison the visible total.
+ */
+export const cartEntries = (
+  lines: CartLine[],
+  catalogue: Catalogue = products,
+  combos: readonly Combo[] = []
+): CartEntry[] => {
+  const productEntries = lines.flatMap((line): CartEntry[] => {
+    if (line.kind === "combo" || isComboCartSlug(line.slug)) return [];
+    const product = getProductBySlug(line.slug, catalogue);
+    if (!product) return [];
+    return [{ kind: "product", product, quantity: line.quantity, lineTotal: product.sellingPrice * line.quantity }];
+  });
+
+  const comboEntries = lines.flatMap((line): CartEntry[] => {
+    if (line.kind !== "combo" && !isComboCartSlug(line.slug)) return [];
+    const combo = combos.find((entry) => entry.id === comboIdFromCartSlug(line.slug));
+    if (!combo || !combo.isActive) return [];
+    return [
+      {
+        kind: "combo",
+        combo,
+        cartSlug: line.slug,
+        quantity: line.quantity,
+        lineTotal: combo.priceInr * line.quantity,
+      },
+    ];
+  });
+
+  return [...productEntries, ...comboEntries];
+};
+
 export const itemCount = (lines: CartLine[]): number =>
   lines.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -213,6 +338,10 @@ export const savings = (details: CartDetail[]): number =>
     0
   );
 
-/** Product ids in cart order, for the server to reprice. */
+/** Cart lines in cart order, for the server to reprice. */
 export const cartPayload = (lines: CartLine[]) =>
-  lines.map((line) => ({ slug: line.slug, quantity: line.quantity }));
+  lines.map((line) =>
+    line.kind === "combo"
+      ? { slug: line.slug, quantity: line.quantity, kind: "combo" as const }
+      : { slug: line.slug, quantity: line.quantity }
+  );

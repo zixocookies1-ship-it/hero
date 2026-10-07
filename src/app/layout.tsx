@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DM_Serif_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
-import { loadCatalogue } from "@/lib/cms";
+import { loadCatalogue, loadCombos } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Nature's Choice Jaggery",
@@ -35,15 +35,19 @@ export default async function RootLayout({
   // One catalogue read per request, handed to the cart so slugs validate and
   // lines price against what the admin currently has published. loadCatalogue
   // falls back to the shipped list rather than throwing, so this await cannot
-  // take the whole tree down if the database is unreachable.
+  // take the whole tree down if the database is unreachable. Combos ride the
+  // same path so a bundle can be added, priced and checked out like a product.
   const catalogue = await loadCatalogue();
+  const combos = await loadCombos();
 
   return (
     <html lang="en">
       <body
         className={`${headingFont.variable} ${bodyFont.variable} flex min-h-screen flex-col bg-[var(--background)] text-[var(--foreground)]`}
       >
-        <CartProvider catalogue={catalogue}>{children}</CartProvider>
+        <CartProvider catalogue={catalogue} combos={combos}>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

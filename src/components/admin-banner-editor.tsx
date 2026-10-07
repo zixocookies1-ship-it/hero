@@ -33,6 +33,62 @@ function parseJsonList(raw: string, name: string): { ok: true; value: unknown[] 
   }
 }
 
+function ImageField({
+  label,
+  value,
+  hint,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-medium text-gray-600">
+        {label}
+        {hint ? <span className="ml-1 text-gray-400">{hint}</span> : null}
+      </span>
+      <input
+        className={inputClass}
+        value={value}
+        placeholder="Paste a URL, or upload a photo below"
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <AdminImageUpload
+          folder="banners"
+          value={value}
+          onChange={onChange}
+          label={value ? "Replace photo" : "Upload photo"}
+        />
+        {value ? (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
+          >
+            Remove
+          </button>
+        ) : (
+          <span className="text-[11px] text-gray-400">
+            Empty means the store ships its default artwork here.
+          </span>
+        )}
+      </div>
+      {value ? (
+        // eslint-disable-next-line @next/next/no-img-element -- admin panel banner preview
+        <img
+          src={value}
+          alt=""
+          className="mt-3 h-28 w-full rounded-md border border-black/10 object-cover"
+        />
+      ) : null}
+    </label>
+  );
+}
+
 /**
  * Editor for every section of storefront copy. Each section expands to text
  * fields for the headline copy plus JSON editors for its bullet list and CTA
@@ -171,38 +227,17 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                     onChange={(e) => update(entry.key, { eyebrow: e.target.value })}
                   />
                 </label>
-                <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">
-                    Desktop image {entry.key === "home_hero" ? "(wide banner)" : ""}
-                  </span>
-                  <input
-                    className={inputClass}
-                    value={entry.image}
-                    placeholder="/images/... or a full URL"
-                    onChange={(e) => update(entry.key, { image: e.target.value })}
-                  />
-                  <AdminImageUpload
-                    folder="banners"
-                    value={entry.image}
-                    onChange={(url) => update(entry.key, { image: url })}
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">
-                    Mobile image {entry.key === "home_hero" ? "(square, optional)" : ""}
-                  </span>
-                  <input
-                    className={inputClass}
-                    value={entry.imageMobile}
-                    placeholder="Optional; defaults to $image on small screens"
-                    onChange={(e) => update(entry.key, { imageMobile: e.target.value })}
-                  />
-                  <AdminImageUpload
-                    folder="banners"
-                    value={entry.imageMobile}
-                    onChange={(url) => update(entry.key, { imageMobile: url })}
-                  />
-                </label>
+                <ImageField
+                  label={`Desktop image${entry.key === "home_hero" ? " (wide banner)" : ""}`}
+                  value={entry.image}
+                  onChange={(url) => update(entry.key, { image: url })}
+                />
+                <ImageField
+                  label="Mobile image"
+                  hint={entry.key === "home_hero" ? "(square, optional)" : ""}
+                  value={entry.imageMobile}
+                  onChange={(url) => update(entry.key, { imageMobile: url })}
+                />
                 <label className="block lg:col-span-2">
                   <span className="mb-1 block text-xs font-medium text-gray-600">
                     Title <span className="text-gray-400">(use the accent field for the coloured word)</span>

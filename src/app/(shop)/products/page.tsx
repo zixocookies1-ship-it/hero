@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import ProductCard from "@/components/product-card";
-import { loadCatalogue } from "@/lib/cms";
+import ComboCard from "@/components/combo-card";
+import { loadCatalogue, loadCombos } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Products - Nature's Choice Jaggery",
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = await loadCatalogue();
+  const [products, combos] = await Promise.all([loadCatalogue(), loadCombos()]);
+  const shopCombos = combos.filter(
+    (combo) => combo.isActive && combo.showOnProducts
+  );
 
   return (
     <main className="pt-40 pb-24">
@@ -32,6 +36,29 @@ export default async function ProductsPage() {
             <ProductCard key={product.slug} product={product} />
           ))}
         </div>
+
+        {shopCombos.length > 0 ? (
+          <section className="mt-16 border-t border-black/5 pt-16">
+            <div className="mb-10 text-center">
+              <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                Money savers
+              </p>
+              <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
+                COMBOS
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base text-[var(--dark-text)]/70">
+                Bundle a few of our flavours and pay a single combo price per
+                set.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {shopCombos.map((combo) => (
+                <ComboCard key={combo.id} combo={combo} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );

@@ -55,7 +55,7 @@ export default function CheckoutForm({
   onlinePaymentsEnabled?: boolean;
 }) {
   const router = useRouter();
-  const { lines, detailedLines, clearCart } = useCart();
+  const { lines, entries, clearCart } = useCart();
   const { code: couponCode, discountInr: couponDiscount } = useCoupon();
   const { ready: scriptReady, failed: scriptFailed, open: openRazorpay } = useRazorpayScript();
 
@@ -75,26 +75,28 @@ export default function CheckoutForm({
   // Display-only estimate. The amount charged always comes back from the server
   // after it reprices the cart from the catalogue.
   const preview = useMemo(() => {
-    const mrpTotal = detailedLines.reduce(
-      (sum, line) => sum + line.product.mrp * line.quantity,
-      0
-    );
-    const subtotal = detailedLines.reduce((sum, line) => sum + line.lineTotal, 0);
-    const shippingFree = freeAboveInr !== null && subtotal >= freeAboveInr;
+    let mrpTotal = 0;
+    let subtotalEstimate = 0;
+    for (const entry of entries) {
+      const mrp = entry.kind === "combo" ? entry.combo.mrpInr : entry.product.mrp;
+      mrpTotal += mrp * entry.quantity;
+      subtotalEstimate += entry.lineTotal;
+    }
+    const shippingFree = freeAboveInr !== null && subtotalEstimate >= freeAboveInr;
     const shipping = shippingFree ? 0 : shippingFeeInr;
     return {
       mrpTotal,
-      subtotal,
-      discount: mrpTotal - subtotal,
-      couponDiscount: Math.min(Math.max(0, couponDiscount), subtotal),
+      subtotal: subtotalEstimate,
+      discount: mrpTotal - subtotalEstimate,
+      couponDiscount: Math.min(Math.max(0, couponDiscount), subtotalEstimate),
       couponCode,
       shipping,
       shippingFree,
       // Delivery is still decided from the pre-discount subtotal, matching
       // applyCoupon() on the server, so a coupon never changes the shipping owed.
-      total: subtotal - Math.min(Math.max(0, couponDiscount), subtotal) + shipping,
+      total: subtotalEstimate - Math.min(Math.max(0, couponDiscount), subtotalEstimate) + shipping,
     };
-  }, [detailedLines, shippingFeeInr, freeAboveInr, couponDiscount, couponCode]);
+  }, [entries, shippingFeeInr, freeAboveInr, couponDiscount, couponCode]);
 
   const update = (field: keyof CheckoutDetails) => (value: string) => {
     setDetails((current) => ({ ...current, [field]: value }));
@@ -180,7 +182,11 @@ export default function CheckoutForm({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            cart: lines.map((line) => ({ slug: line.slug, quantity: line.quantity })),
+            cart: lines.map((line) =>
+              line.kind === "combo"
+                ? { slug: line.slug, quantity: line.quantity, kind: "combo" }
+                : { slug: line.slug, quantity: line.quantity }
+            ),
             details: normalised,
             // The server re-reads the code and re-runs every rule against a freshly
             // priced cart. Sending it is a request, never a discount.
@@ -629,34 +635,51 @@ export default function CheckoutForm({
 type RazorpayOptionsPrefill = { name?: string; contact?: string; email?: string };
 
 function CheckoutLines() {
-  const { detailedLines } = useCart();
+  const { entries } = useCart();
 
   return (
     <ul className="mt-5 space-y-4">
-      {detailedLines.map(({ product, quantity, lineTotal }) => (
-        <li key={product.slug} className="flex items-center gap-3">
-          <span className="relative h-14 w-14 flex-shrink-0 rounded-lg bg-[var(--warm-cream)] p-1.5">
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              sizes="56px"
-              className="object-contain"
-            />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-[var(--dark-text)]">
-              {product.name}
+      {entries.map((entry) => {
+        const slug = entry.kind === "combo" ? entry.cartSlug : entry.product.slug;
+        const name = entry.kind === "combo" ? entry.combo.name : entry.product.name;
+        const image = entry.kind === "combo" ? entry.combo.image : entry.product.images[0];
+        const detail =
+          entry.kind === "combo"
+            ? `${entry.combo.items.length} ${entry.combo.items.length === 1 ? "item" : "items"} \u00d7 ${entry.quantity}`
+            : `${entry.product.weight} \u00d7 ${entry.quantity}`;
+
+        return (
+          <li key={slug} className="flex items-center gap-3">
+            <span className="relative h-14 w-14 flex-shrink-0 rounded-lg bg-[var(--warm-cream)] p-1.5">
+              <Image
+                src={image}
+                alt={name}
+                fill
+                sizes="56px"
+                className="object-contain"
+              />
             </span>
-            <span className="block text-xs text-[var(--dark-text)]/60">
-              {product.weight} &times; {quantity}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-[var(--dark-text)]">
+                {entry.kind === "combo" ? (
+                  <>
+                    {name}{" "}
+                    <span className="ml-1 inline-block rounded-full bg-[var(--jaggery-brown)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                      Combo
+                    </span>
+                  </>
+                ) : (
+                  name
+                )}
+              </span>
+              <span className="block text-xs text-[var(--dark-text)]/60">{detail}</span>
             </span>
-          </span>
-          <span className="text-sm font-semibold text-[var(--jaggery-brown)]">
-            {formatPrice(lineTotal)}
-          </span>
-        </li>
-      ))}
+            <span className="text-sm font-semibold text-[var(--jaggery-brown)]">
+              {formatPrice(entry.lineTotal)}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

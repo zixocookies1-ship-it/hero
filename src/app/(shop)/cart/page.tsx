@@ -9,7 +9,7 @@ import { formatPrice } from "@/lib/products";
 
 export default function CartPage() {
   const {
-    detailedLines,
+    entries,
     itemCount,
     subtotal,
     savings,
@@ -34,7 +34,7 @@ export default function CartPage() {
     );
   }
 
-  if (detailedLines.length === 0) {
+  if (entries.length === 0) {
     return (
       <main className="pt-40 pb-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
@@ -70,76 +70,144 @@ export default function CartPage() {
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
           <ul className="space-y-4">
-            {detailedLines.map(({ product, quantity, lineTotal }) => (
-              <li
-                key={product.slug}
-                className="flex flex-col gap-4 rounded-2xl border border-black/5 bg-[var(--white)] p-4 sm:flex-row sm:items-center"
-              >
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="relative mx-auto h-24 w-24 flex-shrink-0 rounded-xl bg-[var(--warm-cream)] p-2 sm:mx-0"
+            {entries.map((entry) =>
+              entry.kind === "product" ? (
+                <li
+                  key={entry.product.slug}
+                  className="flex flex-col gap-4 rounded-2xl border border-black/5 bg-[var(--white)] p-4 sm:flex-row sm:items-center"
                 >
-                  <Image
-                    src={product.images[0]}
-                    alt={product.name}
-                    fill
-                    sizes="96px"
-                    className="object-contain"
-                  />
-                </Link>
+                  <Link
+                    href={`/products/${entry.product.slug}`}
+                    className="relative mx-auto h-24 w-24 flex-shrink-0 rounded-xl bg-[var(--warm-cream)] p-2 sm:mx-0"
+                  >
+                    <Image
+                      src={entry.product.images[0]}
+                      alt={entry.product.name}
+                      fill
+                      sizes="96px"
+                      className="object-contain"
+                    />
+                  </Link>
 
-                <div className="min-w-0 flex-1 text-center sm:text-left">
-                  <p className="text-xs uppercase tracking-widest text-[var(--ginger-terracotta)]">
-                    {product.variantName}
-                  </p>
-                  <h2 className="mt-1 font-serif text-base font-bold text-[var(--dark-text)]">
-                    <Link href={`/products/${product.slug}`} className="hover:text-[var(--ginger-terracotta)]">
-                      {product.name}
-                    </Link>
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--dark-text)]/60">
-                    {product.weight} &bull; {product.pack} &bull;{" "}
-                    {formatPrice(product.sellingPrice)} each
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-center gap-4">
-                  <div className="flex items-center rounded-full border border-black/10">
-                    <button
-                      type="button"
-                      onClick={() => setQuantity(product.slug, quantity - 1)}
-                      aria-label={`Decrease quantity of ${product.name}`}
-                      className="h-9 w-9 rounded-full text-lg text-[var(--dark-text)] transition-colors hover:bg-[var(--warm-cream)]"
-                    >
-                      &minus;
-                    </button>
-                    <span className="w-8 text-center text-sm font-semibold">
-                      {quantity}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setQuantity(product.slug, quantity + 1)}
-                      aria-label={`Increase quantity of ${product.name}`}
-                      className="h-9 w-9 rounded-full text-lg text-[var(--dark-text)] transition-colors hover:bg-[var(--warm-cream)]"
-                    >
-                      +
-                    </button>
+                  <div className="min-w-0 flex-1 text-center sm:text-left">
+                    <p className="text-xs uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                      {entry.product.variantName}
+                    </p>
+                    <h2 className="mt-1 font-serif text-base font-bold text-[var(--dark-text)]">
+                      <Link href={`/products/${entry.product.slug}`} className="hover:text-[var(--ginger-terracotta)]">
+                        {entry.product.name}
+                      </Link>
+                    </h2>
+                    <p className="mt-1 text-sm text-[var(--dark-text)]/60">
+                      {entry.product.weight} &bull; {entry.product.pack} &bull;{" "}
+                      {formatPrice(entry.product.sellingPrice)} each
+                    </p>
                   </div>
 
-                  <p className="w-20 text-right font-semibold text-[var(--jaggery-brown)]">
-                    {formatPrice(lineTotal)}
-                  </p>
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center rounded-full border border-black/10">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(entry.product.slug, entry.quantity - 1)}
+                        aria-label={`Decrease quantity of ${entry.product.name}`}
+                        className="h-9 w-9 rounded-full text-lg text-[var(--dark-text)] transition-colors hover:bg-[var(--warm-cream)]"
+                      >
+                        &minus;
+                      </button>
+                      <span className="w-8 text-center text-sm font-semibold">
+                        {entry.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(entry.product.slug, entry.quantity + 1)}
+                        aria-label={`Increase quantity of ${entry.product.name}`}
+                        className="h-9 w-9 rounded-full text-lg text-[var(--dark-text)] transition-colors hover:bg-[var(--warm-cream)]"
+                      >
+                        +
+                      </button>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => removeItem(product.slug)}
-                    className="text-sm text-[var(--dark-text)]/50 underline underline-offset-4 transition-colors hover:text-red-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </li>
-            ))}
+                    <p className="w-20 text-right font-semibold text-[var(--jaggery-brown)]">
+                      {formatPrice(entry.lineTotal)}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => removeItem(entry.product.slug)}
+                      className="text-sm text-[var(--dark-text)]/50 underline underline-offset-4 transition-colors hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              ) : (
+                <li
+                  key={entry.cartSlug}
+                  className="flex flex-col gap-4 rounded-2xl border border-black/5 bg-[var(--white)] p-4 sm:flex-row sm:items-center"
+                >
+                  <span className="relative mx-auto h-24 w-24 flex-shrink-0 rounded-xl bg-[var(--warm-cream)] p-2 sm:mx-0">
+                    <Image
+                      src={entry.combo.image}
+                      alt={entry.combo.name}
+                      fill
+                      sizes="96px"
+                      className="object-contain"
+                    />
+                  </span>
+
+                  <div className="min-w-0 flex-1 text-center sm:text-left">
+                    <p className="text-xs uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                      Combo
+                    </p>
+                    <h2 className="mt-1 font-serif text-base font-bold text-[var(--dark-text)]">
+                      {entry.combo.name}
+                    </h2>
+                    <p className="mt-1 text-sm text-[var(--dark-text)]/60">
+                      {entry.combo.items
+                        .map((item) => `${item.quantity} \u00d7 ${item.name}`)
+                        .join(" + ")}{" "}
+                      &bull; {formatPrice(entry.combo.priceInr)} each
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center rounded-full border border-black/10">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(entry.cartSlug, entry.quantity - 1)}
+                        aria-label={`Decrease quantity of ${entry.combo.name}`}
+                        className="h-9 w-9 rounded-full text-lg text-[var(--dark-text)] transition-colors hover:bg-[var(--warm-cream)]"
+                      >
+                        &minus;
+                      </button>
+                      <span className="w-8 text-center text-sm font-semibold">
+                        {entry.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(entry.cartSlug, entry.quantity + 1)}
+                        aria-label={`Increase quantity of ${entry.combo.name}`}
+                        className="h-9 w-9 rounded-full text-lg text-[var(--dark-text)] transition-colors hover:bg-[var(--warm-cream)]"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <p className="w-20 text-right font-semibold text-[var(--jaggery-brown)]">
+                      {formatPrice(entry.lineTotal)}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => removeItem(entry.cartSlug)}
+                      className="text-sm text-[var(--dark-text)]/50 underline underline-offset-4 transition-colors hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              )
+            )}
           </ul>
 
           <aside className="h-fit rounded-2xl border border-black/5 bg-[var(--white)] p-6 lg:sticky lg:top-40">

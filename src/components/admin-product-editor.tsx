@@ -44,6 +44,8 @@ const emptyForm = {
   weightLabel: "",
   packCount: "1",
   inventory: "0",
+  sortOrder: "0",
+  images: [] as string[],
 };
 
 /**
@@ -202,11 +204,15 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           weightLabel: form.weightLabel || null,
           packCount: Number(form.packCount || "1"),
           inventory: Number(form.inventory || "0"),
+          sortOrder: Number(form.sortOrder || "0"),
+          // Upload the gallery before publishing so the product never shows a
+          // broken image while the first variant row is being created.
+          images: form.images,
         }),
       });
       const payload = (await response.json().catch(() => ({}))) as { error?: string };
       if (!response.ok) throw new Error(payload.error ?? "Create failed.");
-      setForm(emptyForm);
+      setForm({ ...emptyForm });
       setResult({ ok: true, text: "Product created and published with its first variant." });
       router.refresh();
     } catch (error) {
@@ -252,7 +258,8 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
         <h3 className="text-sm font-semibold text-[var(--dark-text)]">Add a product</h3>
         <p className="mt-1 text-xs text-gray-500">
           A slug is what the product URL uses (/products/&lt;slug&gt;) and cannot change later.
-          Upload photos after creating it — use the product&apos;s Edit panel.
+          Photos are optional here — the product ships with its own images until you upload a
+          custom gallery (up to six).
         </p>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="block">
@@ -339,6 +346,57 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
               placeholder="Shown on the product page."
             />
           </label>
+          <div className="sm:col-span-2 lg:col-span-4">
+            <span className="mb-1 block text-xs font-medium text-gray-600">Photos (optional)</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <AdminImageUpload
+                folder={`products/${form.slug.trim() || "new-product"}`}
+                value=""
+                onChange={(url) =>
+                  setForm((c) => ({ ...c, images: [...c.images, url].slice(0, 6) }))
+                }
+                label="Add photo"
+              />
+              <span className="text-[11px] text-gray-400">
+                {form.images.length}/6 — the first photo is the primary thumbnail.
+              </span>
+            </div>
+            {form.images.length > 0 ? (
+              <ul className="mt-3 flex flex-wrap gap-3">
+                {form.images.map((image, index) => (
+                  <li key={`${image}-${index}`} className="w-28">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- admin panel thumbs */}
+                    <img
+                      src={image}
+                      alt=""
+                      className="h-28 w-28 rounded-md border border-black/10 object-cover"
+                    />
+                    <div className="mt-1 flex flex-wrap items-center gap-1">
+                      {index === 0 ? (
+                        <span className="rounded-full bg-[var(--jaggery-brown)] px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
+                          primary
+                        </span>
+                      ) : (
+                        <span className="px-2 text-[10px] text-gray-400">photo {index + 1}</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((c) => ({
+                            ...c,
+                            images: c.images.filter((_, entryIndex) => entryIndex !== index),
+                          }))
+                        }
+                        className="ml-auto rounded-full border border-red-200 px-2 py-0.5 text-[10px] font-medium text-red-700 hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
         </div>
         <button
           type="button"

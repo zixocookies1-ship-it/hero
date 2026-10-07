@@ -9,20 +9,23 @@ import {
 } from "react";
 import { getProductBySlug, type Product } from "@/lib/products";
 import {
+  addComboLine,
   addLine,
+  cartEntries,
   clearLines,
   detailedLines as detailLines,
   itemCount as countLines,
   parseStoredState,
   quantityOfLine,
   removeLine,
-  savings as totalSavings,
+  setComboLineQuantity,
   setLineQuantity,
-  subtotal as sumLines,
   type CartDetail,
+  type CartEntry,
   type CartLine,
   type StoredCartState,
 } from "@/lib/cart";
+import { comboCartSlug, comboIdFromCartSlug, isComboCartSlug, type Combo } from "@/lib/combos";
 
 export type { CartLine } from "@/lib/cart";
 export { MAX_QUANTITY } from "@/lib/cart";
@@ -38,11 +41,14 @@ type CartContextValue = {
   subtotal: number;
   savings: number;
   addItem: (slug: string, quantity?: number) => AddResult;
+  addComboItem: (comboId: string, quantity?: number) => AddResult;
   setQuantity: (slug: string, quantity: number) => void;
   removeItem: (slug: string) => void;
   clearCart: () => void;
   quantityOf: (slug: string) => number;
   detailedLines: CartDetail[];
+  /** Every cart row — catalogue products and combos — for cart/checkout views. */
+  entries: CartEntry[];
   /** Coupon the shopper has applied, persisted so it survives navigation. */
   couponCode: string | null;
   setCouponCode: (code: string | null) => void;
@@ -164,9 +170,12 @@ const writeCoupon = (catalogue: readonly Product[], code: string | null) => {
 export function CartProvider({
   children,
   catalogue,
+  combos = [],
 }: {
   children: React.ReactNode;
   catalogue: readonly Product[];
+  /** Every combo (active + inactive) so cart lines price safely against it. */
+  combos?: readonly Combo[];
 }) {
   const readState = useCallback(
     () => readStoredState(catalogue),
@@ -186,7 +195,11 @@ export function CartProvider({
 
   const addItem = useCallback(
     (slug: string, quantity = 1): AddResult => {
-      if (typeof slug !== "string" || !getProductBySlug(slug, catalogue)) {
+      if (typeof slug !== "string" || isComboCartSlug(slug)) {
+        console.error("addItem called with an unknown slug", { slug });
+        return { ok: false, error: "That product is no longer available." };
+      }
+      if (!getProductBySlug(slug, catalogue)) {
         console.error("addItem called with an unknown slug", { slug });
         return { ok: false, error: "That product is no longer available." };
       }
@@ -203,13 +216,37 @@ export function CartProvider({
     [catalogue]
   );
 
+  const addComboItem = useCallback(
+    (comboId: string, quantity = 1): AddResult => {
+      const combo = combos.find((entry) => entry.id === comboId);
+      if (!combo) {
+        console.error("addComboItem called with an unknown combo", { comboId });
+        return { ok: false, error: "That combo is no longer available." };
+      }
+
+      const next = mutate(catalogue, (current) =>
+        addComboLine(current, combo, quantity, combos)
+      );
+
+      return {
+        ok: true,
+        quantity: quantityOfLine(next, comboCartSlug(comboId)),
+      };
+    },
+    [combos, catalogue]
+  );
+
   const setQuantity = useCallback(
     (slug: string, quantity: number) => {
-      mutate(catalogue, (current) =>
-        setLineQuantity(current, slug, quantity, catalogue)
-      );
+      mutate(catalogue, (current) => {
+        if (isComboCartSlug(slug)) {
+          const comboId = comboIdFromCartSlug(slug);
+          if (comboId) return setComboLineQuantity(current, comboId, quantity, combos);
+        }
+        return setLineQuantity(current, slug, quantity, catalogue);
+      });
     },
-    [catalogue]
+    [catalogue, combos]
   );
 
   const removeItem = useCallback(
@@ -245,7 +282,25 @@ export function CartProvider({
     () => detailLines(lines, catalogue),
     [lines, catalogue]
   );
+  const entries = useMemo(
+    () => cartEntries(lines, catalogue, combos),
+    [lines, catalogue, combos]
+  );
   const count = useMemo(() => countLines(lines), [lines]);
+
+  // Derived totals read every entry so a combo contributes its own price, not
+  // just its catalogue value. Both reducers are local to avoid re-allocating.
+  const totals = useMemo(() => {
+    let subtotalValue = 0;
+    let savingsValue = 0;
+    for (const entry of entries) {
+      const mrp = entry.kind === "combo" ? entry.combo.mrpInr : entry.product.mrp;
+      const unit = entry.kind === "combo" ? entry.combo.priceInr : entry.product.sellingPrice;
+      subtotalValue += entry.lineTotal;
+      savingsValue += (mrp - unit) * entry.quantity;
+    }
+    return { subtotalValue, savingsValue };
+  }, [entries]);
 
   // Declared at the top level, not inside useMemo: a hook nested in a memo
   // factory is skipped whenever the deps are unchanged, which breaks hook order.
@@ -259,14 +314,16 @@ export function CartProvider({
       lines,
       hydrated,
       itemCount: count,
-      subtotal: sumLines(detailed),
-      savings: totalSavings(detailed),
+      subtotal: totals.subtotalValue,
+      savings: totals.savingsValue,
       addItem,
+      addComboItem,
       setQuantity,
       removeItem,
       clearCart,
       quantityOf,
       detailedLines: detailed,
+      entries,
       couponCode,
       setCouponCode,
     }),
@@ -274,8 +331,11 @@ export function CartProvider({
       lines,
       hydrated,
       count,
+      totals,
       detailed,
+      entries,
       addItem,
+      addComboItem,
       setQuantity,
       removeItem,
       clearCart,

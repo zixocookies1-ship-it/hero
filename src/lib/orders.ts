@@ -83,6 +83,9 @@ export async function createPendingOrder(params: {
     mrp: line.mrp,
     unitPrice: line.unitPrice,
     lineTotal: line.lineTotal,
+    // Combo lines keep their kind so order cards and receipts can label a
+    // bundle; catalogue products stay undefined (their historic shape).
+    kind: line.kind === "combo" ? "combo" : undefined,
   }));
 
   const created = await prisma.order.create({

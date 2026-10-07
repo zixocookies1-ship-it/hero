@@ -1,8 +1,7 @@
 ﻿import Link from "next/link";
 import CartGate from "@/components/cart-gate";
 import CheckoutForm from "@/components/checkout-form";
-import { getShippingPolicy } from "@/lib/pricing";
-import { loadBrand, loadSettings } from "@/lib/cms";
+import { loadBrand, loadSettings, loadShippingPolicy } from "@/lib/cms";
 
 export const metadata = {
   title: "Checkout - Nature's Choice Jaggery",
@@ -10,7 +9,9 @@ export const metadata = {
 };
 
 export default async function CheckoutPage() {
-  const policy = getShippingPolicy();
+  // The JSON-policy document is the single source for delivery charges: the
+  // admin edits it, the checkout preview shows it, and create-order charges it.
+  const policy = await loadShippingPolicy();
   const brand = await loadBrand();
   // A missing settings document defaults to enabled, so an absent seed never
   // blocks a sale even if the online-payment switch cannot be read.

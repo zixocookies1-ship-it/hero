@@ -3,7 +3,12 @@ import { databaseConfigured, razorpayConfigured } from "@/lib/env";
 import { evaluateCoupon } from "@/lib/coupons";
 import { databaseEnvPresence } from "@/lib/mongo-diagnostics";
 import { applyCoupon, priceCart, PricingError, type CartInputLine } from "@/lib/pricing";
-import { loadCatalogueUncached, loadSettingsUncached } from "@/lib/cms";
+import {
+  loadCatalogueUncached,
+  loadCombosUncached,
+  loadSettingsUncached,
+  loadShippingPolicyUncached,
+} from "@/lib/cms";
 import {
   createPendingOrder,
   attachRazorpayOrderId,
@@ -33,8 +38,15 @@ function readCartLines(payload: unknown): CartInputLine[] {
     if (!entry || typeof entry !== "object") return [];
     const slug = (entry as { slug?: unknown }).slug;
     const quantity = (entry as { quantity?: unknown }).quantity;
+    const kind = (entry as { kind?: unknown }).kind;
     if (typeof slug !== "string") return [];
-    return [{ slug, quantity: Number(quantity) }];
+    return [
+      {
+        slug,
+        quantity: Number(quantity),
+        kind: kind === "combo" ? "combo" : undefined,
+      },
+    ];
   });
 }
 
@@ -118,15 +130,23 @@ export async function POST(request: Request) {
   }
 
   // Amounts are recalculated from the catalogue. Anything the browser claims
-  // about price, discount or shipping is ignored. The catalogue is read fresh
-  // from the database here — this is the number that gets charged, so it must
-  // reflect what the admin has published, not the list baked into the bundle.
+  // about price, discount or shipping is ignored. The catalogue, the combos and
+  // the delivery policy are read fresh from the database here — this is the
+  // number that gets charged, so it must reflect what the admin has published,
+  // not the list baked into the bundle.
   let base;
   try {
+    const [catalogue, combos, policy] = await Promise.all([
+      loadCatalogueUncached(),
+      loadCombosUncached(),
+      loadShippingPolicyUncached(),
+    ]);
     base = priceCart(
       readCartLines(payload),
       process.env,
-      await loadCatalogueUncached()
+      catalogue,
+      combos,
+      { feeInr: policy.feeInr, freeAboveInr: policy.freeAboveInr }
     );
   } catch (error) {
     if (error instanceof PricingError) {

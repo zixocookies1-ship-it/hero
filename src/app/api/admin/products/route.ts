@@ -90,6 +90,9 @@ export async function POST(request: Request) {
   const images = body.images === undefined ? { ok: true as const, value: [] as string[] } : validateImages(body.images);
   if (!images.ok) return NextResponse.json({ error: images.error }, { status: 400 });
 
+  const sortOrder = body.sortOrder === undefined ? { ok: true as const, value: 0 } : asInteger(body.sortOrder, "Position", { min: 0 });
+  if (!sortOrder.ok) return NextResponse.json({ error: sortOrder.message }, { status: 400 });
+
   const isActive = body.isActive === undefined ? { ok: true as const, value: true } : asBoolean(body.isActive, "Published");
   if (!isActive.ok) return NextResponse.json({ error: isActive.message }, { status: 400 });
 
@@ -107,7 +110,7 @@ export async function POST(request: Request) {
         shortDescription: description.value ?? "",
         description: description.value ?? "",
         flavour: flavour.value ?? "",
-        sortOrder: 0,
+        sortOrder: sortOrder.value,
         isActive: isActive.value,
         isFeatured: isFeatured.value,
         isVerified: false,

@@ -2,6 +2,8 @@
 import { prisma } from "@/lib/db";
 import { products as FALLBACK_PRODUCTS, type Product } from "@/lib/products";
 import { BRAND } from "@/lib/brand";
+import { comboDiscountPercent, type Combo, type ComboItem } from "@/lib/combos";
+import { getShippingPolicy } from "@/lib/pricing";
 
 /**
  * The storefront's read path over MongoDB.
@@ -229,6 +231,84 @@ export const loadCatalogueUncached = async (): Promise<Product[]> => {
  */
 export const loadCatalogue = cache(loadCatalogueUncached);
 
+const comboItems = (value: unknown): ComboItem[] => {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const record = entry as Record<string, unknown>;
+    const slug = text(record.slug);
+    if (!slug) return [];
+    const quantity = Number(record.quantity);
+    return [
+      {
+        slug,
+        name: text(record.name),
+        quantity:
+          Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1,
+      },
+    ];
+  });
+};
+
+/**
+ * Turns one `combos` collection row into the shape the storefront, the cart
+ * and the admin share. Money is stored in paise in MongoDB and converted to
+ * whole rupees here, exactly like the catalogue does in toProduct.
+ */
+const toCombo = (row: {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  items: unknown;
+  pricePaise: number;
+  mrpPaise: number;
+  isActive: boolean;
+  isFeatured: boolean;
+  showOnHomepage: boolean;
+  showOnProducts: boolean;
+}): Combo => {
+  const priceInr = Math.round(row.pricePaise / 100);
+  const mrpInr = Math.round(row.mrpPaise / 100);
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    image: row.image || "/images/logo.png",
+    items: comboItems(row.items),
+    priceInr,
+    mrpInr,
+    discountPercent: comboDiscountPercent(mrpInr, priceInr),
+    isActive: row.isActive,
+    isFeatured: row.isFeatured,
+    showOnHomepage: row.showOnHomepage,
+    showOnProducts: row.showOnProducts,
+  };
+};
+
+/**
+ * Every combo in the collection, ordered by `sortOrder`.
+ *
+ * Active and inactive are both returned: the storefront filters to active
+ * ones, while cart and checkout use the full list so a combo can be rejected
+ * (not ignore) once it has been unpublished. A failed query returns an empty
+ * list rather than throwing, so a blank page is never a result of a bad
+ * database state.
+ */
+export const loadCombosUncached = async (): Promise<Combo[]> => {
+  try {
+    const rows = await prisma.combo.findMany({
+      orderBy: { sortOrder: "asc" },
+    });
+    return rows.map(toCombo);
+  } catch (error) {
+    console.error("[cms] combo load failed, showing none", error);
+    return [];
+  }
+};
+
+export const loadCombos = cache(loadCombosUncached);
+
 const FALLBACK_BRAND: Brand = BRAND;
 
 /**
@@ -313,6 +393,46 @@ export const loadSectionsUncached = async (): Promise<SectionMap> => {
  * nothing on screen.
  */
 export const loadSections = cache(loadSectionsUncached);
+
+/**
+ * The delivery rule the storefront actually charges and displays.
+ *
+ * MongoDB's `shippingconfigurations` document is the single source for the
+ * admin-editable settings; the environment variables are only a fallback for
+ * when that collection is missing or unreachable, so an absent seed never
+ * stops a sale. The whole live flow — checkout preview, the amount charged by
+ * create-order — reads one memoised result per request.
+ */
+export type ShippingPolicy = {
+  /** Flat shipping the shopper pays when over the threshold is not met. */
+  feeInr: number;
+  /** Subtotal over which shipping is free. Null means it is always charged. */
+  freeAboveInr: number | null;
+  /** False pauses charging for shipping (e.g. pickup-only mode). */
+  shippingEnabled: boolean;
+};
+
+export const loadShippingPolicyUncached = async (): Promise<ShippingPolicy> => {
+  const env = getShippingPolicy();
+  try {
+    const config = await prisma.shippingConfiguration.findFirst();
+    if (!config) return { feeInr: env.feeInr, freeAboveInr: env.freeAboveInr, shippingEnabled: true };
+
+    const flatPaise = config.flatShippingPaise + config.handlingPaise;
+    return {
+      feeInr: config.shippingEnabled ? Math.round(flatPaise / 100) : 0,
+      freeAboveInr: config.freeShippingEnabled
+        ? Math.round(config.freeShippingThresholdPaise / 100)
+        : null,
+      shippingEnabled: config.shippingEnabled,
+    };
+  } catch (error) {
+    console.error("[cms] shipping config load failed, using environment policy", error);
+    return { feeInr: env.feeInr, freeAboveInr: env.freeAboveInr, shippingEnabled: true };
+  }
+};
+
+export const loadShippingPolicy = cache(loadShippingPolicyUncached);
 
 /**
  * Splits the raw `announcement` setting into the individual marquee messages.
