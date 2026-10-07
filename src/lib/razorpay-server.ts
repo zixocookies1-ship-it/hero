@@ -64,6 +64,22 @@ export async function fetchRazorpayOrder(razorpayOrderId: string) {
 }
 
 /**
+ * Best-effort Razorpay connectivity check for the admin Payments page.
+ *
+ * Listing one order exercises the full request/signing round-trip against the
+ * configured key pair without handing the secret to the browser. The scope is
+ * intentional: count: 1, so zero orders placed here is still a "connected"
+ * result.
+ *
+ * Never logs, echoes or returns the key secret.
+ */
+export async function testRazorpayConnection(): Promise<void> {
+  const instance = getClient();
+  const orders = (await instance.orders.all({ count: 1 })) as { items?: unknown[] };
+  void orders.items;
+}
+
+/**
  * Verifies the Razorpay payment signature exactly as Razorpay documents:
  *
  *   HMAC_SHA256(razorpay_order_id + "|" + razorpay_payment_id, key_secret)

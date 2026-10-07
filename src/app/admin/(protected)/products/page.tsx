@@ -25,6 +25,7 @@ function serialize(product: ProductRow): AdminProductRow {
     name: product.name,
     tagline: product.tagline,
     flavour: product.flavour,
+    description: product.description,
     isActive: product.isActive,
     isFeatured: product.isFeatured,
     sortOrder: product.sortOrder,

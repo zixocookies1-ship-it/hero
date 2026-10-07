@@ -30,6 +30,7 @@ const FALLBACK: Section = {
     "We believe in delivering honest jaggery - pure, natural and unadulterated. From farm to jar, every step is handled with care and tradition.",
   body2: "",
   image: "/images/farm-to-jar.png",
+  imageMobile: "",
   items: FALLBACK_ITEMS,
   links: [],
 };

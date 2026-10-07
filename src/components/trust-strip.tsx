@@ -46,12 +46,16 @@ export default async function TrustStrip() {
     <section className="bg-[var(--warm-cream)] py-14">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div
               key={item.title}
-              className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-shadow hover:shadow-md"
+              style={{ animationDelay: `${index * 0.7}s` }}
+              className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-shadow hover:shadow-md motion-safe:animate-floaty"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ginger-terracotta)]/10 text-[var(--ginger-terracotta)]">
+              <span
+                style={{ animationDelay: `${index * 0.7 + 0.4}s` }}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ginger-terracotta)]/10 text-[var(--ginger-terracotta)] motion-safe:animate-swell"
+              >
                 <svg
                   className="h-4 w-4"
                   fill="none"

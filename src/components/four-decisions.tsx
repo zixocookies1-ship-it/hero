@@ -40,6 +40,7 @@ const FALLBACK: Section = {
     "We did not set out to reinvent jaggery. We made five decisions, and you can taste all of them.",
   body2: "",
   image: "",
+  imageMobile: "",
   items: FALLBACK_ITEMS,
   links: [],
 };

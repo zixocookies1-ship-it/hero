@@ -31,6 +31,7 @@ const FALLBACK: Section = {
     "We trace every batch from sugarcane farms in Uttar Pradesh to your kitchen. The gold-kettle method keeps the natural character of the sugarcane that industrial refining strips away.",
   body2: "",
   image: "/images/farm-to-jar.png",
+  imageMobile: "",
   items: FALLBACK_ITEMS,
   links: [{ label: "SHOP NOW", href: "/products" }],
 };

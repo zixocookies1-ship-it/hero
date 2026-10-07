@@ -13,6 +13,7 @@ export type AdminBannerEntry = {
   body: string;
   body2: string;
   image: string;
+  imageMobile: string;
   itemsJson: string;
   linksJson: string;
 };
@@ -37,11 +38,16 @@ function parseJsonList(raw: string, name: string): { ok: true; value: unknown[] 
  * fields for the headline copy plus JSON editors for its bullet list and CTA
  * links (their shapes differ per section, which is exactly why they are stored
  * as JSON). Saving writes the section straight to MongoDB.
+ *
+ * Reset restores the section to the copy the store shipped with: the API
+ * deletes the document, and every section component falls back to its shipped
+ * content when its document is missing.
  */
 export default function AdminBannerEditor({ sections }: { sections: AdminBannerEntry[] }) {
   const router = useRouter();
   const [drafts, setDrafts] = useState(sections);
   const [busy, setBusy] = useState<string | null>(null);
+  const [resetTarget, setResetTarget] = useState<string | null>(null);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
 
   const update = (key: string, patch: Partial<AdminBannerEntry>) =>
@@ -78,6 +84,7 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
           body: entry.body,
           body2: entry.body2,
           image: entry.image,
+          imageMobile: entry.imageMobile,
           items: items.value,
           links: links.value,
         }),
@@ -99,12 +106,38 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
     }
   };
 
+  const reset = async (entry: AdminBannerEntry) => {
+    setBusy(entry.key);
+    setResult(null);
+    try {
+      const response = await fetch(`/api/admin/sections/${encodeURIComponent(entry.key)}`, {
+        method: "DELETE",
+      });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? "Reset failed.");
+      setResetTarget(null);
+      setResult({
+        ok: true,
+        text: `"${entry.label || entry.key}" reset to the copy the store shipped with.`,
+      });
+      router.refresh();
+    } catch (error) {
+      setResult({
+        ok: false,
+        text: error instanceof Error ? error.message : "Reset failed.",
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {sections.length === 0 ? (
         <div className="rounded-lg bg-white p-10 text-center shadow">
           <p className="text-gray-600">
-            The database answered, and the sections collection is empty.
+            The database answered, and the sections collection is empty — the storefront is
+            showing its shipped copy for every section.
           </p>
         </div>
       ) : (
@@ -139,7 +172,9 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">Image</span>
+                  <span className="mb-1 block text-xs font-medium text-gray-600">
+                    Desktop image {entry.key === "home_hero" ? "(wide banner)" : ""}
+                  </span>
                   <input
                     className={inputClass}
                     value={entry.image}
@@ -150,6 +185,22 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                     folder="banners"
                     value={entry.image}
                     onChange={(url) => update(entry.key, { image: url })}
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-gray-600">
+                    Mobile image {entry.key === "home_hero" ? "(square, optional)" : ""}
+                  </span>
+                  <input
+                    className={inputClass}
+                    value={entry.imageMobile}
+                    placeholder="Optional; defaults to $image on small screens"
+                    onChange={(e) => update(entry.key, { imageMobile: e.target.value })}
+                  />
+                  <AdminImageUpload
+                    folder="banners"
+                    value={entry.imageMobile}
+                    onChange={(url) => update(entry.key, { imageMobile: url })}
                   />
                 </label>
                 <label className="block lg:col-span-2">
@@ -208,7 +259,7 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                 </label>
               </div>
 
-              <div className="mt-4 flex items-center gap-4">
+              <div className="mt-4 flex flex-wrap items-center gap-4">
                 <button
                   type="button"
                   onClick={() => save(entry)}
@@ -217,6 +268,35 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                 >
                   {busy === entry.key ? "Saving…" : "Save section"}
                 </button>
+                {resetTarget === entry.key ? (
+                  <span className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => reset(entry)}
+                      disabled={busy !== null}
+                      className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {busy === entry.key ? "Resetting…" : "Confirm reset"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setResetTarget(null)}
+                      disabled={busy !== null}
+                      className="rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-[var(--dark-text)] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setResetTarget(entry.key)}
+                    disabled={busy !== null}
+                    className="rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Reset to shipped copy
+                  </button>
+                )}
                 {entry.body.includes("{{") ? (
                   <span className="text-xs text-amber-700">
                     This copy uses {"{{placeholders}}"} for live prices and shelf life — keep them.

@@ -19,6 +19,7 @@ const FALLBACK: Section = {
   body2:
     "That simple idea became Nature's Choice Jaggery - traditional Indian jaggery with a delicious chocolatey twist. What started as an idea is slowly becoming a brand we're truly proud of. And honestly, this is just the beginning.",
   image: "/images/hero-banner.png",
+  imageMobile: "",
   items: FALLBACK_ITEMS,
   links: [{ label: "READ OUR STORY", href: "/about" }],
 };

@@ -3,7 +3,7 @@ import { databaseConfigured, razorpayConfigured } from "@/lib/env";
 import { evaluateCoupon } from "@/lib/coupons";
 import { databaseEnvPresence } from "@/lib/mongo-diagnostics";
 import { applyCoupon, priceCart, PricingError, type CartInputLine } from "@/lib/pricing";
-import { loadCatalogueUncached } from "@/lib/cms";
+import { loadCatalogueUncached, loadSettingsUncached } from "@/lib/cms";
 import {
   createPendingOrder,
   attachRazorpayOrderId,
@@ -56,6 +56,20 @@ export async function POST(request: Request) {
   if (!razorpayConfigured()) {
     return NextResponse.json(
       { error: "Online payment is unavailable right now. Please contact us on WhatsApp." },
+      { status: 503 }
+    );
+  }
+
+  // The payment switch lives in the settings document so the owner can stop
+  // online orders from the admin panel without touching code or credentials.
+  // A missing document defaults to enabled so an absent seed never blocks sales.
+  const settingsRow = await loadSettingsUncached();
+  if (settingsRow && settingsRow.onlinePaymentEnabled === false) {
+    return NextResponse.json(
+      {
+        error: "Online payment is switched off for this store right now. Please contact us on WhatsApp.",
+        code: "online_payments_disabled",
+      },
       { status: 503 }
     );
   }

@@ -307,6 +307,10 @@ model Section {
   body        String
   body2       String
   image       String
+  // Optional per-viewport artwork. The hero reads it for small screens and
+  // falls back to `image` when it is empty; every other section ignores it.
+  // Nullable so documents written before the field existed still read.
+  imageMobile String?
   items       Json
   links       Json
   createdAt   DateTime

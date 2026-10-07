@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdminApi } from "@/lib/admin-auth";
-import { asOptionalText, isObject, jsonBody } from "@/lib/admin-api";
+import { asBoolean, asOptionalText, isObject, jsonBody } from "@/lib/admin-api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,6 +57,12 @@ export async function PATCH(request: Request) {
     const value = asOptionalText(body[field], field);
     if (!value.ok) return NextResponse.json({ error: value.message }, { status: 400 });
     (data as Record<string, unknown>)[field] = value.value ?? "";
+  }
+
+  if (body.onlinePaymentEnabled !== undefined) {
+    const flag = asBoolean(body.onlinePaymentEnabled, "Online payments");
+    if (!flag.ok) return NextResponse.json({ error: flag.message }, { status: 400 });
+    data.onlinePaymentEnabled = flag.value;
   }
 
   if (body.social !== undefined) {

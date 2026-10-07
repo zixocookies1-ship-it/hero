@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAdminApi } from "@/lib/admin-auth";
 import {
   SLUG_PATTERN,
+  asBoolean,
   asInteger,
   asOptionalInteger,
   asOptionalText,
@@ -13,6 +14,21 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** Shared image list validation: absolute URLs or /images/ paths, max 10. */
+function validateImages(value: unknown): { ok: true; value: string[] } | { ok: false; error: string } {
+  if (!Array.isArray(value) || value.length > 10) {
+    return { ok: false, error: "Images must be a list of up to 10 URLs." };
+  }
+  const images = value.map((entry) => (typeof entry === "string" ? entry.trim() : ""));
+  if (images.some((entry) => !entry || entry.length > 500)) {
+    return { ok: false, error: "Each image must be a URL or an /images/ path." };
+  }
+  if (images.some((entry) => !/^(https?:\/\/|\/)/.test(entry))) {
+    return { ok: false, error: "Each image must be an absolute URL or an /images/ path." };
+  }
+  return { ok: true, value: images };
+}
 
 /**
  * Creates a product and its first sellable variant in one request.
@@ -71,6 +87,15 @@ export async function POST(request: Request) {
   const description = asOptionalText(body.description, "Description");
   if (!description.ok) return NextResponse.json({ error: description.message }, { status: 400 });
 
+  const images = body.images === undefined ? { ok: true as const, value: [] as string[] } : validateImages(body.images);
+  if (!images.ok) return NextResponse.json({ error: images.error }, { status: 400 });
+
+  const isActive = body.isActive === undefined ? { ok: true as const, value: true } : asBoolean(body.isActive, "Published");
+  if (!isActive.ok) return NextResponse.json({ error: isActive.message }, { status: 400 });
+
+  const isFeatured = body.isFeatured === undefined ? { ok: true as const, value: false } : asBoolean(body.isFeatured, "Featured");
+  if (!isFeatured.ok) return NextResponse.json({ error: isFeatured.message }, { status: 400 });
+
   const now = new Date();
 
   try {
@@ -83,8 +108,8 @@ export async function POST(request: Request) {
         description: description.value ?? "",
         flavour: flavour.value ?? "",
         sortOrder: 0,
-        isActive: true,
-        isFeatured: false,
+        isActive: isActive.value,
+        isFeatured: isFeatured.value,
         isVerified: false,
         seoTitle: name.value,
         seoDescription: description.value ?? "",
@@ -99,6 +124,7 @@ export async function POST(request: Request) {
         ingredients: [],
         howToUse: [],
         nutrition: [],
+        imagePaths: images.value,
         createdAt: now,
         updatedAt: now,
         variants: {

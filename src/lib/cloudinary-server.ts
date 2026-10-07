@@ -47,7 +47,10 @@ export const sanitiseCloudinaryFolder = (folder: string): string =>
     .join("/");
 
 const sanitisePublicId = (value: string): string | undefined => {
-  const cleaned = value.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 60);
+  // Public ids from this store are a folder path plus a hex id, e.g.
+  // "products/desi-chocolatey-jaggery/abc123". Slashes are part of the address,
+  // so they survive; everything else is scrubbed.
+  const cleaned = value.replace(/[^a-zA-Z0-9_/-]/g, "").slice(0, 160);
   return cleaned || undefined;
 };
 
@@ -87,4 +90,15 @@ export async function uploadImage(options: {
   }
 
   return { url: result.secure_url, publicId: result.public_id };
+}
+
+/**
+ * Deletes one image asset from Cloudinary by its public id. Returns true when
+ * the asset existed and was removed, false when it was already gone. Deleting a
+ * pixel never touches the database row that used to reference it — callers
+ * decide whether the reference should also go.
+ */
+export async function destroyImage(publicId: string): Promise<boolean> {
+  const result = await instance().uploader.destroy(sanitisePublicId(publicId) ?? "");
+  return result.result === "ok" || result.result === "not found";
 }

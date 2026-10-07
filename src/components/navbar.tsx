@@ -26,8 +26,8 @@ function CartIcon({ count }: { count: number }) {
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h10"
+          strokeWidth={1.8}
+          d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
         />
       </svg>
       {count > 0 && (
@@ -53,7 +53,7 @@ export default function Navbar({
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <AnnouncementBar messages={announcements} />
-      <nav className="border-b border-black/5 bg-[var(--warm-cream)]/95 backdrop-blur-sm">
+      <nav className="border-b border-black/5 bg-[var(--warm-cream)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" aria-label="Nature's Choice Jaggery home">
           <Image
@@ -61,7 +61,7 @@ export default function Navbar({
             alt=""
             width={96}
             height={96}
-              className="h-20 w-20 object-contain drop-shadow-[0_1px_6px_rgba(90,50,31,0.22)] sm:h-24 sm:w-24"
+              className="h-20 w-20 object-contain mix-blend-multiply sm:h-24 sm:w-24"
             priority
           />
         </Link>

@@ -61,6 +61,7 @@ export type Section = {
   body: string;
   body2: string;
   image: string;
+  imageMobile: string;
   items: SectionItem[];
   links: SectionLink[];
 };
@@ -113,6 +114,7 @@ const toSection = (row: {
   body: string;
   body2: string;
   image: string;
+  imageMobile: string | null;
   items: unknown;
   links: unknown;
 }): Section => ({
@@ -124,6 +126,7 @@ const toSection = (row: {
   body: row.body,
   body2: row.body2,
   image: row.image,
+  imageMobile: row.imageMobile ?? "",
   items: asItems(row.items),
   links: asLinks(row.links),
 });
@@ -228,10 +231,29 @@ export const loadCatalogue = cache(loadCatalogueUncached);
 
 const FALLBACK_BRAND: Brand = BRAND;
 
-export const loadBrandUncached = async (): Promise<Brand> => {
+/**
+ * The single settings document, memoised per request.
+ *
+ * The brand block, the announcement strip and the shipping policy all read
+ * fields from this one row. Reading it once (instead of once per consumer)
+ * removes a database round-trip from every storefront page.
+ */
+export const loadSettingsUncached = async (): Promise<
+  Awaited<ReturnType<typeof prisma.businessSettings.findFirst>>
+> => {
   try {
-    const settings = await prisma.businessSettings.findFirst();
-    if (!settings) return FALLBACK_BRAND;
+    return await prisma.businessSettings.findFirst();
+  } catch (error) {
+    console.error("[cms] settings load failed, using shipped values", error);
+    return null;
+  }
+};
+
+export const loadSettings = cache(loadSettingsUncached);
+
+export const loadBrandUncached = async (): Promise<Brand> => {
+  const settings = await loadSettingsUncached();
+  if (!settings) return FALLBACK_BRAND;
 
     const social = (settings.social && typeof settings.social === "object" && !Array.isArray(settings.social)
       ? (settings.social as Record<string, unknown>)
@@ -263,10 +285,6 @@ export const loadBrandUncached = async (): Promise<Brand> => {
         facebook: text(social.facebook) || FALLBACK_BRAND.social.facebook,
       },
     };
-  } catch (error) {
-    console.error("[cms] brand load failed, using shipped values", error);
-    return FALLBACK_BRAND;
-  }
 };
 
 export const loadBrand = cache(loadBrandUncached);
@@ -318,17 +336,10 @@ const FALLBACK_ANNOUNCEMENTS = [
 ];
 
 export const loadAnnouncementsUncached = async (): Promise<string[]> => {
-  try {
-    const settings = await prisma.businessSettings.findFirst({
-      select: { announcement: true },
-    });
-    if (!settings) return FALLBACK_ANNOUNCEMENTS;
-    const split = splitAnnouncements(settings.announcement ?? "");
-    return split.length > 0 ? split : [];
-  } catch (error) {
-    console.error("[cms] announcement load failed, keeping shipped strip", error);
-    return FALLBACK_ANNOUNCEMENTS;
-  }
+  const settings = await loadSettingsUncached();
+  if (!settings) return FALLBACK_ANNOUNCEMENTS;
+  const split = splitAnnouncements(settings.announcement ?? "");
+  return split.length > 0 ? split : [];
 };
 
 export const loadAnnouncements = cache(loadAnnouncementsUncached);

@@ -40,6 +40,12 @@ export async function PATCH(
   const tagline = asOptionalText(body.tagline, "Tagline");
   if (!tagline.ok) return NextResponse.json({ error: tagline.message }, { status: 400 });
 
+  const shortDescription = asOptionalText(body.shortDescription, "Short description");
+  if (!shortDescription.ok) return NextResponse.json({ error: shortDescription.message }, { status: 400 });
+
+  const description = asOptionalText(body.description, "Description");
+  if (!description.ok) return NextResponse.json({ error: description.message }, { status: 400 });
+
   const flavour = asOptionalText(body.flavour, "Flavour");
   if (!flavour.ok) return NextResponse.json({ error: flavour.message }, { status: 400 });
 
@@ -49,6 +55,8 @@ export async function PATCH(
   const data: Record<string, unknown> = {};
   if (name.value !== null) data.name = name.value;
   if (tagline.value !== null) data.tagline = tagline.value;
+  if (shortDescription.value !== null) data.shortDescription = shortDescription.value;
+  if (description.value !== null) data.description = description.value;
   if (flavour.value !== null) data.flavour = flavour.value;
   if (body.sortOrder !== undefined) data.sortOrder = sortOrder.value;
   if (body.isActive !== undefined) {
@@ -95,5 +103,34 @@ export async function PATCH(
     }
     console.error("[mongo] admin update product failed", error);
     return NextResponse.json({ error: "The product could not be updated." }, { status: 500 });
+  }
+}
+
+/**
+ * Removes a product and its variants permanently. This is the hard delete the
+ * admin Edit/Delete pair promises: it is NOT reversible, so the admin UI shows
+ * a typed two-step confirm before sending it.
+ */
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const email = await requireAdminApi();
+  if (!email) {
+    return NextResponse.json({ error: "Not authorised." }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  try {
+    await prisma.productVariant.deleteMany({ where: { productId: id } });
+    const deleted = await prisma.catalogProduct.deleteMany({ where: { id } });
+    if (deleted.count === 0) {
+      return NextResponse.json({ error: "No product found with that id." }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[mongo] admin delete product failed", error);
+    return NextResponse.json({ error: "The product could not be deleted." }, { status: 500 });
   }
 }

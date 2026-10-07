@@ -108,6 +108,20 @@ test("navbar has no WhatsApp link and uses the larger logo", async () => {
   // 70% larger than the previous h-12 w-12 (48px) / sm:h-14 (56px).
   assert.ok(source.includes("h-20 w-20"), "mobile logo should be h-20 w-20");
   assert.ok(source.includes("sm:h-24 sm:w-24"), "sm+ logo should be sm:h-24 sm:w-24");
+  // The logo holds a light interior, so it is blended into the cream with
+  // mix-blend-multiply instead of glowing white. White glows read as a
+  // whitish plate next to the mark.
+  assert.ok(source.includes("mix-blend-multiply"), "navbar logo blends into the cream");
+  assert.ok(
+    !source.includes("rgba(255,255,255"),
+    "navbar logo must not get a whitish gap behind it"
+  );
+  // The header cart uses the recognisable shopping-cart outline, not the old
+  // hand-bag linework.
+  assert.ok(
+    source.includes("M2.25 3h1.386c.51 0") && source.includes("M6 20.25"),
+    "navbar cart should use a regular cart mark"
+  );
 });
 
 test("footer no longer lists contact details", async () => {
@@ -124,24 +138,28 @@ test("footer no longer lists contact details", async () => {
   assert.ok(source.includes("SocialLinks"), "footer keeps the social links");
 });
 
-test("footer logo is large enough to resolve and has a halo against the brown", async () => {
+test("footer logo is large enough to resolve and blends so it reads on the brown", async () => {
   const source = await read("src/components/footer.tsx");
 
   // Once the baked-in white plate was removed the mark sat directly on the dark
   // brown footer, where the brand green only reaches 2.78:1 and the emblem's
-  // strokes render about 2px wide at 74px. It needs to be bigger to resolve, and
-  // it needs a halo rather than a background to stay off the brand colour.
+  // strokes render about 2px wide at 74px. It needs to be bigger to resolve.
+  // The logo's light interior is dissolved with mix-blend-multiply (no white
+  // halo) so the mark reads on the brown without a whitish glow.
   assert.ok(source.includes("h-24 w-24"), "footer logo should be h-24 w-24 (96px)");
   assert.ok(
     !source.includes("h-[74px]"),
     "the old 74px size resolved the emblem's strokes too thin to read"
   );
-  assert.match(
-    source,
-    /drop-shadow-\[[^\]]*rgba\(255,255,255/,
-    "footer logo needs a light halo so it reads on the brown"
+  assert.ok(
+    source.includes("mix-blend-multiply"),
+    "footer logo blends its interior away on the brown"
   );
-  // The halo must not reintroduce a plate behind the mark.
+  assert.ok(
+    !source.includes("rgba(255,255,255"),
+    "the footer logo must not carry a whitish halo"
+  );
+  // There must be no plate behind the mark either.
   assert.ok(!source.includes("rounded-full bg-"), "no plate behind the footer logo");
   assert.ok(!source.includes("object-cover"), "the logo must not be cropped or scaled to fill");
 });

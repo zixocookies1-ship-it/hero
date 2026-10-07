@@ -44,11 +44,15 @@ export default function CheckoutForm({
   shippingFeeInr,
   freeAboveInr,
   brandName = BRAND.name,
+  onlinePaymentsEnabled = true,
 }: {
   shippingFeeInr: number;
   freeAboveInr: number | null;
   /** Shown on the Razorpay checkout sheet. Loaded from settings by the page. */
   brandName?: string;
+  /** Read from the settings document by the checkout page. When false the
+   *  Razorpay sheet is never opened, and the server refuses to start orders. */
+  onlinePaymentsEnabled?: boolean;
 }) {
   const router = useRouter();
   const { lines, detailedLines, clearCart } = useCart();
@@ -185,7 +189,7 @@ export default function CheckoutForm({
         });
 
         const data = (await response.json().catch(() => null)) as
-          | (CreateOrderResponse & { error?: string; fieldErrors?: FieldErrors })
+          | (CreateOrderResponse & { error?: string; fieldErrors?: FieldErrors; code?: string })
           | null;
 
         if (!response.ok || !data?.razorpayOrderId) {
@@ -194,9 +198,13 @@ export default function CheckoutForm({
             setErrors(data.fieldErrors);
             focusFirstInvalid(data.fieldErrors);
           }
+          setRetryOrder(null);
           setBanner({
             tone: "error",
-            message: data?.error ?? "We could not start the payment. Please try again.",
+            message:
+              data?.code === "online_payments_disabled"
+                ? "Online payment is switched off for this store right now. Please contact us on WhatsApp to place your order."
+                : data?.error ?? "We could not start the payment. Please try again.",
           });
           return;
         }
@@ -272,6 +280,14 @@ export default function CheckoutForm({
       return;
     }
 
+    if (!onlinePaymentsEnabled) {
+      setBanner({
+        tone: "info",
+        message: `Online payments are switched off right now. Please contact us on WhatsApp at ${BRAND.phoneDisplay} to place your order.`,
+      });
+      return;
+    }
+
     setDetails(normalised);
     void startPayment();
   };
@@ -310,6 +326,19 @@ export default function CheckoutForm({
         <p className="mt-1 text-sm text-[var(--dark-text)]/60">
           All fields marked with an asterisk are required.
         </p>
+
+        {!onlinePaymentsEnabled && (
+          <div
+            role="alert"
+            className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            <p>
+              Online payments are paused right now. Continue filling your details and
+              we will confirm your order with you on WhatsApp at{" "}
+              <span className="font-semibold">{BRAND.phoneDisplay}</span>.
+            </p>
+          </div>
+        )}
 
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -502,14 +531,17 @@ export default function CheckoutForm({
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || !onlinePaymentsEnabled}
+            title={onlinePaymentsEnabled ? undefined : "Online payments are switched off"}
             className="w-full rounded-full bg-[var(--jaggery-brown)] px-7 py-3.5 text-sm font-semibold text-[var(--white)] transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {stage === "preparing"
               ? "Preparing secure payment..."
               : stage === "verifying"
                 ? "Verifying payment..."
-                : "PROCEED TO PAYMENT"}
+                : onlinePaymentsEnabled
+                  ? "PROCEED TO PAYMENT"
+                  : "ONLINE PAYMENTS PAUSED"}
           </button>
           <button
             type="button"

@@ -1,20 +1,9 @@
 ﻿import { prisma } from "@/lib/db";
 import { classifyMongoError, type MongoFailure } from "@/lib/mongo-diagnostics";
-import { hasEnv, razorpayConfigured } from "@/lib/env";
 import { AdminDbFailure } from "@/components/admin-db-failure";
+import AdminPaymentSettings from "@/components/admin-payment-settings";
 
 export const dynamic = "force-dynamic";
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-b border-black/5 py-3">
-      <dt className="text-xs uppercase tracking-wide text-gray-500">{label}</dt>
-      <dd className="mt-1 text-sm text-[var(--dark-text)]">
-        {value.trim() ? value : <span className="text-gray-400">not set</span>}
-      </dd>
-    </div>
-  );
-}
 
 export default async function AdminPaymentsPage() {
   let counts = { total: 0, paid: 0, pending: 0, failed: 0 };
@@ -79,39 +68,12 @@ export default async function AdminPaymentsPage() {
         ))}
       </div>
 
-      <div className="mt-6 rounded-lg bg-white p-6 shadow">
-        <h3 className="text-sm font-semibold text-[var(--dark-text)]">Gateway</h3>
-        <dl className="mt-2 divide-y divide-black/5">
-          <Row
-            label="Razorpay credentials"
-            value={razorpayConfigured() ? "present" : "missing — payments cannot be taken"}
-          />
-          <Row
-            label="RAZORPAY_KEY_ID"
-            value={hasEnv("RAZORPAY_KEY_ID") ? "present" : "missing"}
-          />
-          <Row
-            label="RAZORPAY_KEY_SECRET"
-            value={hasEnv("RAZORPAY_KEY_SECRET") ? "present" : "missing"}
-          />
-          <Row
-            label="Online payment enabled in store"
-            value={
-              settings
-                ? settings.onlinePaymentEnabled
-                  ? "yes"
-                  : "no"
-                : "businesssettings collection is empty"
-            }
-          />
-          <Row
-            label="Razorpay display name"
-            value={settings?.razorpayDisplayName ?? ""}
-          />
-        </dl>
-      </div>
+      <AdminPaymentSettings
+          initialOnlinePaymentsEnabled={settings?.onlinePaymentEnabled ?? true}
+          initialDisplayName={settings?.razorpayDisplayName ?? ""}
+        />
 
-      <div className="mt-6 rounded-lg bg-white p-6 shadow">
+        <div className="mt-6 rounded-lg bg-white p-6 shadow">
         <h3 className="text-sm font-semibold text-[var(--dark-text)]">Recent payments</h3>
         {counts.total === 0 ? (
           <p className="mt-3 text-sm text-gray-600">

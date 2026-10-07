@@ -6,18 +6,18 @@ import ProductActions from "@/components/product-actions";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[var(--white)] shadow-sm transition-shadow hover:shadow-xl">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[var(--white)] shadow-sm transition-shadow hover:shadow-xl">
       <Link
         href={`/products/${product.slug}`}
-        className="block bg-[var(--warm-cream)] p-6"
+        className="block bg-[var(--warm-cream)]"
       >
-        <div className="relative mx-auto aspect-square w-full max-w-[240px]">
+        <div className="relative aspect-square w-full overflow-hidden">
           <Image
             src={product.images[0]}
             alt={`${product.name} ${product.weight}`}
             fill
-            sizes="(max-width: 768px) 80vw, 240px"
-            className="object-contain"
+            sizes="(max-width: 768px) 80vw, 300px"
+            className="scale-110 object-cover transition-transform duration-500 ease-out group-hover:scale-125"
             priority={false}
           />
         </div>

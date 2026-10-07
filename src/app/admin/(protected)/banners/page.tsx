@@ -20,6 +20,7 @@ function serialize(section: SectionRow): AdminBannerEntry {
     body: section.body,
     body2: section.body2,
     image: section.image,
+    imageMobile: section.imageMobile ?? "",
     itemsJson: JSON.stringify(section.items ?? [], null, 2),
     linksJson: JSON.stringify(section.links ?? [], null, 2),
   };

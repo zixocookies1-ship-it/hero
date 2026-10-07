@@ -22,6 +22,7 @@ export type AdminProductRow = {
   name: string;
   tagline: string;
   flavour: string;
+  description: string;
   isActive: boolean;
   isFeatured: boolean;
   sortOrder: number;
@@ -37,6 +38,7 @@ const emptyForm = {
   name: "",
   slug: "",
   flavour: "",
+  description: "",
   priceInr: "",
   mrpInr: "",
   weightLabel: "",
@@ -45,19 +47,45 @@ const emptyForm = {
 };
 
 /**
- * Product manager. Editing a price, MRP, inventory, weight or the publish flag
- * here changes what the storefront charges immediately, because the storefront
- * reads these collections on every request.
+ * Turns a Cloudinary CDN URL back into its public id so the same asset can be
+ * replaced in place or deleted later. Returns "" for anything that does not
+ * look like a Cloudinary upload (e.g. a shipped /images/ path).
+ */
+function publicIdFromUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const marker = "/image/upload/";
+    const index = parsed.pathname.indexOf(marker);
+    if (index === -1) return "";
+    return parsed.pathname
+      .slice(index + marker.length)
+      .replace(/^v\d+\//, "")
+      .replace(/\.[a-z0-9]+$/i, "");
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Product manager. Editing a price, MRP, inventory, weight, copy, the photo
+ * set or the publish flag here changes what the storefront shows immediately,
+ * because the storefront reads these collections on every request.
  *
- * "Hide" never deletes a document — this screen cannot destroy data, only
- * unpublish it, so removing a product stays reversible.
+ * Two-step delete: "Delete" then "Confirm delete", because removing a product
+ * removes its variants too and is not reversible. "Hide" never deletes a
+ * document — it only unpublishes, so pausing a product stays reversible.
  */
 export default function AdminProductEditor({ products }: { products: AdminProductRow[] }) {
   const router = useRouter();
   const [drafts, setDrafts] = useState(products);
-  const [busy, setBusy] = useState<null | "save" | "create">(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [busy, setBusy] = useState<null | "save" | "create" | "delete">(null);
   const [form, setForm] = useState(emptyForm);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const toggleExpand = (id: string) =>
+    setExpanded((current) => (current === id ? null : id));
 
   const setProduct = (id: string, patch: Partial<AdminProductRow>) =>
     setDrafts((current) =>
@@ -90,6 +118,7 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           product.name !== original.name ||
           product.tagline !== original.tagline ||
           product.flavour !== original.flavour ||
+          product.description !== original.description ||
           product.isActive !== original.isActive ||
           product.isFeatured !== original.isFeatured ||
           product.sortOrder !== original.sortOrder ||
@@ -102,6 +131,7 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
               name: product.name,
               tagline: product.tagline,
               flavour: product.flavour,
+              description: product.description,
               isActive: product.isActive,
               isFeatured: product.isFeatured,
               sortOrder: product.sortOrder,
@@ -166,6 +196,7 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           name: form.name,
           slug: form.slug,
           flavour: form.flavour || null,
+          description: form.description || null,
           priceInr: form.priceInr ? Number(form.priceInr) : null,
           mrpInr: form.mrpInr ? Number(form.mrpInr) : null,
           weightLabel: form.weightLabel || null,
@@ -185,12 +216,43 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
     }
   };
 
+  const remove = async (id: string) => {
+    setBusy("delete");
+    setResult(null);
+    try {
+      const response = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? "Delete failed.");
+      setDrafts((current) => current.filter((product) => product.id !== id));
+      if (expanded === id) setExpanded(null);
+      setDeleteTarget(null);
+      setResult({ ok: true, text: "Product deleted." });
+      router.refresh();
+    } catch (error) {
+      setResult({ ok: false, text: error instanceof Error ? error.message : "Delete failed." });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const moveToPrimary = (product: AdminProductRow, index: number) => {
+    const next = [...product.images];
+    const [target] = next.splice(index, 1);
+    if (target) setProduct(product.id, { images: [target, ...next] });
+  };
+
+  const removeImage = (product: AdminProductRow, index: number) => {
+    const next = product.images.filter((_, entryIndex) => entryIndex !== index);
+    setProduct(product.id, { images: next });
+  };
+
   return (
     <div>
       <section className="rounded-lg bg-white p-6 shadow">
         <h3 className="text-sm font-semibold text-[var(--dark-text)]">Add a product</h3>
         <p className="mt-1 text-xs text-gray-500">
           A slug is what the product URL uses (/products/&lt;slug&gt;) and cannot change later.
+          Upload photos after creating it — use the product&apos;s Edit panel.
         </p>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="block">
@@ -267,6 +329,16 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
               onChange={(e) => setForm((c) => ({ ...c, inventory: e.target.value }))}
             />
           </label>
+          <label className="block sm:col-span-2 lg:col-span-4">
+            <span className="mb-1 block text-xs font-medium text-gray-600">Description</span>
+            <textarea
+              className={`${inputClass} resize-y`}
+              rows={3}
+              value={form.description}
+              onChange={(e) => setForm((c) => ({ ...c, description: e.target.value }))}
+              placeholder="Shown on the product page."
+            />
+          </label>
         </div>
         <button
           type="button"
@@ -285,227 +357,347 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           </div>
         ) : (
           drafts.map((product) => (
-            <details key={product.id} className="rounded-lg bg-white shadow">
-              <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 px-6 py-4">
-                <span>
-                  <span className="font-serif text-base font-bold text-[var(--jaggery-brown)]">
-                    {product.name}
+            <article key={product.id} className="rounded-lg bg-white shadow">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-4">
+                <span className="flex min-w-0 items-center gap-3">
+                  {product.images[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- admin panel thumb
+                    <img
+                      src={product.images[0]}
+                      alt=""
+                      className="h-12 w-12 flex-shrink-0 rounded-md border border-black/10 object-cover"
+                    />
+                  ) : (
+                    <span className="h-12 w-12 flex-shrink-0 rounded-md border border-dashed border-black/10" />
+                  )}
+                  <span className="min-w-0">
+                    <span className="block truncate font-serif text-base font-bold text-[var(--jaggery-brown)]">
+                      {product.name}
+                    </span>
+                    <span className="block font-mono text-xs text-gray-500">{product.slug}</span>
                   </span>
-                  <span className="ml-2 font-mono text-xs text-gray-500">{product.slug}</span>
                 </span>
-                <span className="flex items-center gap-2">
-                  <span
-                    className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold uppercase ${
-                      product.isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {product.isActive ? "live" : "hidden"}
-                  </span>
+                <span className="flex flex-wrap items-center gap-2">
+                  {product.isActive ? (
+                    <span className="inline-block rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold uppercase text-green-800">
+                      live
+                    </span>
+                  ) : (
+                    <span className="inline-block rounded-full bg-gray-200 px-2.5 py-1 text-xs font-semibold uppercase text-gray-700">
+                      hidden
+                    </span>
+                  )}
                   {product.isFeatured ? (
                     <span className="inline-block rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold uppercase text-amber-800">
                       featured
                     </span>
                   ) : null}
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(product.id)}
+                    disabled={busy !== null}
+                    className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {expanded === product.id ? "Close" : "Edit"}
+                  </button>
+                  {deleteTarget === product.id ? (
+                    <span className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void remove(product.id)}
+                        disabled={busy !== null}
+                        className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {busy === "delete" ? "Deleting…" : "Confirm delete"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(null)}
+                        disabled={busy !== null}
+                        className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(product.id)}
+                      disabled={busy !== null}
+                      className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </span>
-              </summary>
+              </div>
 
-              <div className="space-y-4 border-t border-black/5 px-6 py-5">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">Name</span>
-                    <input
-                      className={inputClass}
-                      value={product.name}
-                      onChange={(e) => setProduct(product.id, { name: e.target.value })}
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">Tagline</span>
-                    <input
-                      className={inputClass}
-                      value={product.tagline}
-                      onChange={(e) => setProduct(product.id, { tagline: e.target.value })}
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">Flavour</span>
-                    <input
-                      className={inputClass}
-                      value={product.flavour}
-                      onChange={(e) => setProduct(product.id, { flavour: e.target.value })}
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">Sort order</span>
-                    <input
-                      className={inputClass}
-                      type="number"
-                      min="0"
-                      value={product.sortOrder}
-                      onChange={(e) =>
-                        setProduct(product.id, {
-                          sortOrder: Number(e.target.value) || 0,
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setProduct(product.id, { isActive: !product.isActive })}
-                    className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
-                  >
-                    {product.isActive ? "Hide from catalogue" : "Publish to catalogue"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setProduct(product.id, { isFeatured: !product.isFeatured })}
-                    className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
-                  >
-                    {product.isFeatured ? "Unmark featured" : "Mark featured"}
-                  </button>
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-black/5 bg-gray-50 px-4 py-3">
-                  <div>
-                    <p className="text-xs font-semibold text-[var(--dark-text)]">Photos</p>
-                    <p className="mt-0.5 text-[11px] text-gray-500">
-                      Stored and served from Cloudinary. The live storefront shows an empty
-                      gallery&apos;s shipped images instead.
-                    </p>
+              {expanded === product.id ? (
+                <div className="space-y-4 border-t border-black/5 px-6 py-5">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-600">Name</span>
+                      <input
+                        className={inputClass}
+                        value={product.name}
+                        onChange={(e) => setProduct(product.id, { name: e.target.value })}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-600">Tagline</span>
+                      <input
+                        className={inputClass}
+                        value={product.tagline}
+                        onChange={(e) => setProduct(product.id, { tagline: e.target.value })}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-600">Flavour</span>
+                      <input
+                        className={inputClass}
+                        value={product.flavour}
+                        onChange={(e) => setProduct(product.id, { flavour: e.target.value })}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-600">Sort order</span>
+                      <input
+                        className={inputClass}
+                        type="number"
+                        min="0"
+                        value={product.sortOrder}
+                        onChange={(e) =>
+                          setProduct(product.id, {
+                            sortOrder: Number(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="block sm:col-span-2 lg:col-span-2">
+                      <span className="mb-1 block text-xs font-medium text-gray-600">Description</span>
+                      <textarea
+                        className={`${inputClass} resize-y`}
+                        rows={3}
+                        value={product.description}
+                        onChange={(e) =>
+                          setProduct(product.id, { description: e.target.value })
+                        }
+                      />
+                    </label>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <AdminImageUpload
-                      folder={`products/${product.slug}`}
-                      value={product.images[0] ?? ""}
-                      onChange={(url) =>
-                        setProduct(product.id, {
-                          images: [url, ...product.images.filter((entry) => entry !== url)].slice(0, 6),
-                        })
-                      }
-                    />
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setProduct(product.id, { isActive: !product.isActive })}
+                      className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
+                    >
+                      {product.isActive ? "Hide from catalogue" : "Publish to catalogue"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProduct(product.id, { isFeatured: !product.isFeatured })}
+                      className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
+                    >
+                      {product.isFeatured ? "Unmark featured" : "Mark featured"}
+                    </button>
+                  </div>
+
+                  <div className="mt-4 rounded-md border border-black/5 bg-gray-50 px-4 py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--dark-text)]">Photos</p>
+                        <p className="mt-0.5 text-[11px] text-gray-500">
+                          The first photo is the primary thumbnail. All are served from
+                          Cloudinary; an empty gallery shows the shipped images instead.
+                        </p>
+                      </div>
+                      <AdminImageUpload
+                        folder={`products/${product.slug}`}
+                        value=""
+                        onChange={(url) =>
+                          setProduct(product.id, {
+                            images: [...product.images, url].slice(0, 6),
+                          })
+                        }
+                        label="Add photo"
+                      />
+                    </div>
+
+                    {product.images.length > 0 ? (
+                      <ul className="mt-4 flex flex-wrap gap-3">
+                        {product.images.map((image, index) => (
+                          <li key={`${image}-${index}`} className="w-28">
+                            {/* eslint-disable-next-line @next/next/no-img-element -- admin panel thumbs */}
+                            <img
+                              src={image}
+                              alt=""
+                              className="h-28 w-28 rounded-md border border-black/10 object-cover"
+                            />
+                            <div className="mt-1 flex flex-wrap items-center gap-1">
+                              {index === 0 ? (
+                                <span className="rounded-full bg-[var(--jaggery-brown)] px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
+                                  primary
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => moveToPrimary(product, index)}
+                                  className="rounded-full border border-black/10 px-2 py-0.5 text-[10px] font-medium text-[var(--dark-text)] hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
+                                >
+                                  Make primary
+                                </button>
+                              )}
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-1">
+                              <AdminImageUpload
+                                folder={`products/${product.slug}`}
+                                value=""
+                                onChange={(url) =>
+                                  setProduct(product.id, {
+                                    images: product.images.map((entry, entryIndex) =>
+                                      entryIndex === index ? url : entry
+                                    ),
+                                  })
+                                }
+                                updateUrl={publicIdFromUrl(image)}
+                                label="Replace"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(product, index)}
+                                className="rounded-full border border-red-200 px-2 py-0.5 text-[10px] font-medium text-red-700 hover:bg-red-50"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-4 text-[11px] text-gray-400">
+                        No custom photos yet — the storefront is showing the shipped images.
+                      </p>
+                    )}
+
                     {product.images.length > 0 ? (
                       <button
                         type="button"
                         onClick={() => setProduct(product.id, { images: [] })}
-                        className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
+                        className="mt-3 rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[var(--dark-text)] transition-colors hover:border-[var(--ginger-terracotta)] hover:text-[var(--ginger-terracotta)]"
                       >
                         Reset to shipped images
                       </button>
                     ) : null}
                   </div>
-                </div>
 
-                <div className="overflow-x-auto rounded-md border border-black/5">
-                  <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-black/5 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-                        <th className="px-3 py-2 font-semibold">Price (₹)</th>
-                        <th className="px-3 py-2 font-semibold">MRP (₹)</th>
-                        <th className="px-3 py-2 font-semibold">Weight label</th>
-                        <th className="px-3 py-2 font-semibold">Pack</th>
-                        <th className="px-3 py-2 font-semibold">Inventory</th>
-                        <th className="px-3 py-2 font-semibold">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {product.variants.map((variant) => (
-                        <tr key={variant.id} className="border-b border-black/5">
-                          <td className="px-3 py-2">
-                            <input
-                              className={`${inputClass} w-28`}
-                              type="number"
-                              min="1"
-                              value={variant.priceInr}
-                              onChange={(e) =>
-                                setVariant(product.id, variant.id, {
-                                  priceInr: Number(e.target.value) || 0,
-                                })
-                              }
-                            />
-                          </td>
-                          <td className="px-3 py-2">
-                            <input
-                              className={`${inputClass} w-28`}
-                              type="number"
-                              min="1"
-                              value={variant.mrpInr ?? ""}
-                              placeholder="None"
-                              onChange={(e) =>
-                                setVariant(product.id, variant.id, {
-                                  mrpInr: e.target.value ? Number(e.target.value) : null,
-                                })
-                              }
-                            />
-                          </td>
-                          <td className="px-3 py-2">
-                            <input
-                              className={`${inputClass} w-32`}
-                              value={variant.weightLabel}
-                              onChange={(e) =>
-                                setVariant(product.id, variant.id, {
-                                  weightLabel: e.target.value,
-                                })
-                              }
-                            />
-                          </td>
-                          <td className="px-3 py-2">
-                            <input
-                              className={`${inputClass} w-24`}
-                              type="number"
-                              min="1"
-                              value={variant.packCount}
-                              onChange={(e) =>
-                                setVariant(product.id, variant.id, {
-                                  packCount: Number(e.target.value) || 1,
-                                })
-                              }
-                            />
-                          </td>
-                          <td className="px-3 py-2">
-                            <input
-                              className={`${inputClass} w-28`}
-                              type="number"
-                              min="0"
-                              value={variant.inventory}
-                              onChange={(e) =>
-                                setVariant(product.id, variant.id, {
-                                  inventory: Number(e.target.value) || 0,
-                                })
-                              }
-                            />
-                          </td>
-                          <td className="px-3 py-2">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setVariant(product.id, variant.id, {
-                                  isActive: !variant.isActive,
-                                })
-                              }
-                              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                                variant.isActive
-                                  ? "border-green-200 bg-green-50 text-green-800"
-                                  : "border-black/10 text-gray-500 hover:text-[var(--ginger-terracotta)]"
-                              }`}
-                            >
-                              {variant.isActive ? "active" : "hidden"}
-                            </button>
-                            <span className="ml-2 font-mono text-[11px] text-gray-400">
-                              {variant.sku}
-                            </span>
-                          </td>
+                  <div className="overflow-x-auto rounded-md border border-black/5">
+                    <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-black/5 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                          <th className="px-3 py-2 font-semibold">Price (₹)</th>
+                          <th className="px-3 py-2 font-semibold">MRP (₹)</th>
+                          <th className="px-3 py-2 font-semibold">Weight label</th>
+                          <th className="px-3 py-2 font-semibold">Pack</th>
+                          <th className="px-3 py-2 font-semibold">Inventory</th>
+                          <th className="px-3 py-2 font-semibold">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {product.variants.map((variant) => (
+                          <tr key={variant.id} className="border-b border-black/5">
+                            <td className="px-3 py-2">
+                              <input
+                                className={`${inputClass} w-28`}
+                                type="number"
+                                min="1"
+                                value={variant.priceInr}
+                                onChange={(e) =>
+                                  setVariant(product.id, variant.id, {
+                                    priceInr: Number(e.target.value) || 0,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                className={`${inputClass} w-28`}
+                                type="number"
+                                min="1"
+                                value={variant.mrpInr ?? ""}
+                                placeholder="None"
+                                onChange={(e) =>
+                                  setVariant(product.id, variant.id, {
+                                    mrpInr: e.target.value ? Number(e.target.value) : null,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                className={`${inputClass} w-32`}
+                                value={variant.weightLabel}
+                                onChange={(e) =>
+                                  setVariant(product.id, variant.id, {
+                                    weightLabel: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                className={`${inputClass} w-24`}
+                                type="number"
+                                min="1"
+                                value={variant.packCount}
+                                onChange={(e) =>
+                                  setVariant(product.id, variant.id, {
+                                    packCount: Number(e.target.value) || 1,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                className={`${inputClass} w-28`}
+                                type="number"
+                                min="0"
+                                value={variant.inventory}
+                                onChange={(e) =>
+                                  setVariant(product.id, variant.id, {
+                                    inventory: Number(e.target.value) || 0,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setVariant(product.id, variant.id, {
+                                    isActive: !variant.isActive,
+                                  })
+                                }
+                                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                                  variant.isActive
+                                    ? "border-green-200 bg-green-50 text-green-800"
+                                    : "border-black/10 text-gray-500 hover:text-[var(--ginger-terracotta)]"
+                                }`}
+                              >
+                                {variant.isActive ? "active" : "hidden"}
+                              </button>
+                              <span className="ml-2 font-mono text-[11px] text-gray-400">
+                                {variant.sku}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            </details>
+              ) : null}
+            </article>
           ))
         )}
       </div>

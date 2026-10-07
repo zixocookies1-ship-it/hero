@@ -33,7 +33,7 @@ export async function PATCH(
 
   const data: Record<string, unknown> = {};
 
-  const scalar = ["label", "eyebrow", "title", "titleAccent", "body", "body2", "image"] as const;
+  const scalar = ["label", "eyebrow", "title", "titleAccent", "body", "body2", "image", "imageMobile"] as const;
   for (const field of scalar) {
     if (body[field] === undefined) continue;
     const value = asOptionalText(body[field], field);
@@ -84,6 +84,7 @@ export async function PATCH(
         body: (data.body as string) ?? "",
         body2: (data.body2 as string) ?? "",
         image: (data.image as string) ?? "",
+        imageMobile: (data.imageMobile as string) ?? "",
         items: (data.items ?? []) as Prisma.InputJsonValue,
         links: (data.links ?? []) as Prisma.InputJsonValue,
         createdAt: new Date(),
@@ -95,5 +96,37 @@ export async function PATCH(
   } catch (error) {
     console.error("[mongo] admin update section failed", error);
     return NextResponse.json({ error: "The section could not be saved." }, { status: 500 });
+  }
+}
+
+/**
+ * Removes a section document entirely. The storefront never blanks: every
+ * section component falls back to the copy it shipped with when its document
+ * is missing, so "delete" here means "restore this block to the shipped
+ * default", which is exactly what the admin's Reset button promises.
+ */
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ key: string }> }
+) {
+  const email = await requireAdminApi();
+  if (!email) {
+    return NextResponse.json({ error: "Not authorised." }, { status: 401 });
+  }
+
+  const { key } = await params;
+
+  try {
+    const deleted = await prisma.section.deleteMany({ where: { key } });
+    if (deleted.count === 0) {
+      return NextResponse.json(
+        { error: "That section has no document to reset." },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({ ok: true, removed: deleted.count });
+  } catch (error) {
+    console.error("[mongo] admin delete section failed", error);
+    return NextResponse.json({ error: "The section could not be reset." }, { status: 500 });
   }
 }

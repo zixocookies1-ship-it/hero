@@ -50,7 +50,7 @@ export default async function Footer() {
                 alt=""
                 width={96}
                 height={96}
-                className="h-24 w-24 object-contain drop-shadow-[0_0_2px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.4)]"
+                className="h-24 w-24 object-contain mix-blend-multiply"
               />
               <span className="font-heading text-lg font-bold">
                 {brand.name}

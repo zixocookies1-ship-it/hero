@@ -30,6 +30,7 @@ const HERO_FALLBACK: Section = {
     "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals, just honest sweetness from sugarcane farms in Uttar Pradesh.",
   body2: "",
   image: "/images/hero-banner.png",
+  imageMobile: "",
   items: [],
   links: [
     { label: "SHOP NOW", href: "/products" },
@@ -46,6 +47,7 @@ const FEATURED_FALLBACK: Section = {
   body: "",
   body2: "",
   image: "",
+  imageMobile: "",
   items: [],
   links: [{ label: "View all products", href: "/products" }],
 };
@@ -84,12 +86,20 @@ export default async function Home() {
           }
         />
         <Image
+          src={hero.imageMobile || hero.image || "/images/hero-banner.png"}
+          alt={hero.title || "Nature's Choice Jaggery"}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 md:hidden"
+        />
+        <Image
           src={hero.image || "/images/hero-banner.png"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+          className="hidden object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 md:block"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
         <div className="relative z-10 w-full px-6 py-28">
