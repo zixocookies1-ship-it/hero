@@ -65,7 +65,14 @@ export const products: Product[] = [
     sellingPrice: 239,
     discountPercent: 20,
     inStock: true,
-    images: imageSet("desi-chocolatey-jaggery", 6),
+    images: [
+      "/images/products/desi-chocolatey-jaggery/04.jpg",
+      "/images/products/desi-chocolatey-jaggery/02.jpg",
+      "/images/products/desi-chocolatey-jaggery/03.jpg",
+      "/images/products/desi-chocolatey-jaggery/01.jpg",
+      "/images/products/desi-chocolatey-jaggery/05.jpg",
+      "/images/products/desi-chocolatey-jaggery/06.jpg",
+    ],
   },
   {
     slug: "desi-til-chocolatey-jaggery",

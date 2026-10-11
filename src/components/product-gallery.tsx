@@ -14,6 +14,7 @@ export default function ProductGallery({
   const activeImage = images[activeIndex] ?? images[0];
   const touchStartX = useRef<number | null>(null);
   const activeThumbRef = useRef<HTMLButtonElement | null>(null);
+  const stripRef = useRef<HTMLDivElement | null>(null);
 
   const step = (direction: number) => {
     if (images.length < 2) return;
@@ -32,15 +33,21 @@ export default function ProductGallery({
   };
 
   useEffect(() => {
+    const strip = stripRef.current;
+    const thumb = activeThumbRef.current;
+    if (!strip || !thumb) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    activeThumbRef.current?.scrollIntoView({
-      behavior: reduced ? "auto" : "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+    const target = thumb.offsetLeft - (strip.clientWidth - thumb.clientWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
   }, [activeIndex]);
 
-  if (!activeImage) return null;
+  if (!activeImage) {
+    return (
+      <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-black/5 bg-[var(--warm-cream)]">
+        <span className="text-sm text-[var(--dark-text)]/50">No photos yet</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -61,7 +68,10 @@ export default function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+        <div
+          ref={stripRef}
+          className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"
+        >
           {images.map((image, index) => (
             <button
               key={`${index}-${image}`}

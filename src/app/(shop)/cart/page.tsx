@@ -81,7 +81,7 @@ export default function CartPage() {
                     className="relative mx-auto h-24 w-24 flex-shrink-0 rounded-xl bg-[var(--warm-cream)] p-2 sm:mx-0"
                   >
                     <Image
-                      src={entry.product.images[0]}
+                      src={entry.product.images[0] ?? "/images/logo.png"}
                       alt={entry.product.name}
                       fill
                       sizes="96px"

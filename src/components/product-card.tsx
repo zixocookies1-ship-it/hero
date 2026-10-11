@@ -56,21 +56,27 @@ export default function ProductCard({ product }: { product: Product }) {
             onScroll={onStripScroll}
             className="flex aspect-square w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {images.map((src, index) => (
-              <div
-                key={`${product.slug}-${index}-${src}`}
-                className="relative aspect-square w-full shrink-0 snap-center overflow-hidden"
-              >
-                <Image
-                  src={src}
-                  alt={index === active ? `${product.name} ${product.weight}` : ""}
-                  fill
-                  sizes="(max-width: 768px) 80vw, 300px"
-                  className="scale-110 object-cover transition-transform duration-500 ease-out group-hover:scale-125 motion-reduce:group-hover:scale-110"
-                  loading="lazy"
-                />
+            {images.length > 0 ? (
+              images.map((src, index) => (
+                <div
+                  key={`${product.slug}-${index}-${src}`}
+                  className="relative aspect-square w-full shrink-0 snap-center overflow-hidden"
+                >
+                  <Image
+                    src={src}
+                    alt={index === active ? `${product.name} ${product.weight}` : ""}
+                    fill
+                    sizes="(max-width: 768px) 80vw, 300px"
+                    className="scale-110 object-cover transition-transform duration-500 ease-out group-hover:scale-125 motion-reduce:group-hover:scale-110"
+                    loading="lazy"
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="flex aspect-square w-full shrink-0 snap-center items-center justify-center">
+                <span className="text-sm text-[var(--dark-text)]/50">No photos yet</span>
               </div>
-            ))}
+            )}
           </div>
         </Link>
 

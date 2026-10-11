@@ -642,7 +642,10 @@ function CheckoutLines() {
       {entries.map((entry) => {
         const slug = entry.kind === "combo" ? entry.cartSlug : entry.product.slug;
         const name = entry.kind === "combo" ? entry.combo.name : entry.product.name;
-        const image = entry.kind === "combo" ? entry.combo.image : entry.product.images[0];
+        const image =
+          entry.kind === "combo"
+            ? entry.combo.image
+            : (entry.product.images[0] ?? "/images/logo.png");
         const detail =
           entry.kind === "combo"
             ? `${entry.combo.items.length} ${entry.combo.items.length === 1 ? "item" : "items"} \u00d7 ${entry.quantity}`

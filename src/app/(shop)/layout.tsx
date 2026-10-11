@@ -1,5 +1,6 @@
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
+import ScrollToTop from "@/components/scroll-to-top";
 import WhatsAppFloat from "@/components/whatsapp-float";
 import { loadAnnouncements } from "@/lib/cms";
 
@@ -20,6 +21,7 @@ export default async function ShopLayout({
 
   return (
     <>
+      <ScrollToTop />
       <Navbar announcements={announcements} />
       <main className="flex-1">{children}</main>
       <Footer />
