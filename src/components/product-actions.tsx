@@ -96,7 +96,7 @@ export default function ProductActions({
           onClick={handleBuyNow}
           data-testid={`buy-now-${product.slug}`}
           aria-label={`Buy ${product.name} now`}
-          className={`${buttonClass} bg-[var(--ginger-terracotta)] text-[var(--white)] hover:bg-[var(--jaggery-brown)]`}
+          className={`${buttonClass} bg-[var(--jaggery-brown)] text-[var(--white)] hover:bg-[var(--ginger-terracotta)]`}
         >
           BUY NOW
         </button>

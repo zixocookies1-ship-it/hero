@@ -17,7 +17,7 @@ export default function AnnouncementBar({
   if (!messages || messages.length === 0) return null;
 
   return (
-    <div className="relative overflow-hidden bg-[var(--jaggery-brown)]">
+    <div className="relative overflow-hidden bg-[var(--announcement-red)]">
       <div className="flex w-max items-center animate-marquee motion-reduce:animate-none hover:[animation-play-state:paused]">
         {[0, 1].map((group) => (
           <div

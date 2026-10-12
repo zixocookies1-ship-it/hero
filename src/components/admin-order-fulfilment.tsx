@@ -197,7 +197,7 @@ export default function AdminOrderFulfilment({ order }: { order: AdminOrderFulfi
               ? "Create a real Delhivery packet for this order"
               : "Only verified paid orders can be shipped"
           }
-          className="rounded-full bg-[var(--jaggery-brown)] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-full bg-[var(--jaggery-brown)] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {busy ? "Booking…" : "Book Delhivery shipment"}
         </button>

@@ -74,7 +74,7 @@ export default async function FourDecisions() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
-        <div className="relative max-w-5xl rounded-[2rem] border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.9),rgba(227,238,230,0.85))] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_48px_-28px_rgba(23,61,37,0.35)] backdrop-blur-md sm:p-10">
+        <div className="relative max-w-5xl rounded-[2rem] border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.9),rgba(240,247,235,0.85))] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_48px_-28px_rgba(26,18,8,0.35)] backdrop-blur-md sm:p-10">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
             {section.eyebrow}
           </p>
@@ -90,17 +90,17 @@ export default async function FourDecisions() {
           {items.map((decision, index) => (
             <li
               key={`${index}-${decision.title}`}
-              className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(227,238,230,0.88))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(23,61,37,0.4)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(23,61,37,0.5)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7"
+              className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(240,247,235,0.88))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(26,18,8,0.4)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(26,18,8,0.5)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7"
             >
               {/* Warm wash that fades up on hover, under the text. */}
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_100%_at_0%_0%,rgba(45,104,65,0.14),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
+                className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_100%_at_0%_0%,rgba(224,79,56,0.14),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
               />
 
               <span
                 aria-hidden="true"
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--jaggery-brown)] to-[var(--natural-green)] font-serif text-sm font-bold tracking-wider text-[var(--white)] shadow-[0_6px_14px_-6px_rgba(90,50,31,0.7)] ring-1 ring-white/40 transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--jaggery-brown)] to-[var(--ginger-terracotta)] font-serif text-sm font-bold tracking-wider text-[var(--white)] shadow-[0_6px_14px_-6px_rgba(26,18,8,0.7)] ring-1 ring-white/40 transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none"
               >
                 {String(index + 1).padStart(2, "0")}
               </span>

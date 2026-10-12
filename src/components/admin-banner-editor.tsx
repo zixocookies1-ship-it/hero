@@ -299,7 +299,7 @@ export default function AdminBannerEditor({ sections }: { sections: AdminBannerE
                   type="button"
                   onClick={() => save(entry)}
                   disabled={busy !== null}
-                  className="rounded-full bg-[var(--jaggery-brown)] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-[var(--jaggery-brown)] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {busy === entry.key ? "Saving…" : "Save section"}
                 </button>

@@ -201,7 +201,7 @@ export default function AdminSettingsForm({ initial }: { initial: AdminSettingsD
         type="button"
         onClick={save}
         disabled={saving}
-        className="mt-6 rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-6 rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? "Saving…" : "Save settings"}
       </button>

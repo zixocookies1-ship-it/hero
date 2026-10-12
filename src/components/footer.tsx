@@ -31,10 +31,10 @@ export default async function Footer() {
   const heading = "font-heading text-base font-semibold";
 
   return (
-    <footer className="relative overflow-hidden bg-[var(--jaggery-brown)] text-[var(--white)]">
+    <footer className="relative overflow-hidden bg-[var(--footer-ink)] text-[var(--white)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80rem_30rem_at_120%_-10%,rgba(45,104,65,0.35),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80rem_30rem_at_120%_-10%,rgba(224,79,56,0.18),transparent_60%)]"
       />
       <div
         aria-hidden

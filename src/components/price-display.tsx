@@ -32,7 +32,7 @@ export default function PriceDisplay({
       {mrp > sellingPrice && (
         <>
           <span
-            className={`text-sm line-through ${isDark ? "text-[var(--white)]/60" : "text-gray-500"}`}
+            className={`text-sm line-through ${isDark ? "text-[var(--white)]/60" : "text-[var(--dark-text)]/55"}`}
           >
             {formatPrice(mrp)}
           </span>

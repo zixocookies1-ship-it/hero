@@ -402,7 +402,7 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           type="button"
           onClick={create}
           disabled={busy !== null || !form.name.trim() || !form.slug.trim() || !form.priceInr}
-          className="mt-4 rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-4 rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy === "create" ? "Creating…" : "Add product"}
         </button>
@@ -765,7 +765,7 @@ export default function AdminProductEditor({ products }: { products: AdminProduc
           type="button"
           onClick={save}
           disabled={busy !== null}
-          className="rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy === "save" ? "Saving…" : "Save all changes"}
         </button>

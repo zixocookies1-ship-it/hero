@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function PoliciesIndexPage() {
   return (
     <main className="min-h-screen pb-24">
-      <section className="bg-[var(--jaggery-brown)] pb-16 pt-40 text-[var(--white)]">
+      <section className="bg-[var(--forest-green)] pb-16 pt-40 text-[var(--white)]">
         <div className="mx-auto max-w-7xl px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--white)]/70">
             Policies &amp; Legal

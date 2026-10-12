@@ -8,18 +8,28 @@
    * theme can be changed from this one block. To restyle the site background
    * (including the cautionary "warm" tone), edit --background / --warm-cream
    * here and nothing else needs to change.
+   *
+   * --jaggery-brown / --ginger-terracotta carry the CTA + accent roles of the
+   * reference palette (primary terracotta, deep-terracotta for hovers).
+   * --natural-green / --forest-green keep the deep-green roles used on dark
+   * full-bleed sections. --footer-ink / --announcement-red / --gold exist so
+   * those three surfaces keep their own identity instead of inheriting CTA red.
+   * --gold is the review-star fill used by the reference site's star rows.
    */
   :root {
-    --background: #F8FBF7;
-    --foreground: #1F2A23;
-    --jaggery-brown: #173D25;
-    --ginger-terracotta: #2D6841;
-    --warm-cream: #F1F7EF;
+    --background: #FFFFFF;
+    --foreground: #1A1208;
+    --jaggery-brown: #C53E1F;
+    --ginger-terracotta: #B33326;
+    --warm-cream: #FBF9F6;
     --natural-green: #245D36;
-    --dark-text: #1F2A23;
+    --dark-text: #1A1208;
     --forest-green: #173D25;
-    --mint-soft: #E3EEE6;
+    --mint-soft: #F0F7EB;
     --white: #FFFFFF;
+    --footer-ink: #1A1208;
+    --announcement-red: #C9361D;
+    --gold: #FBBB05;
   }
 
   @theme inline {
@@ -33,6 +43,9 @@
     --color-forest-green: var(--forest-green);
     --color-mint-soft: var(--mint-soft);
     --color-white: var(--white);
+    --color-footer-ink: var(--footer-ink);
+    --color-announcement-red: var(--announcement-red);
+    --color-gold: var(--gold);
 
     --font-heading: var(--font-heading-loaded, "DM Serif Display"), "Playfair Display", serif;
     --font-body: var(--font-body-loaded, "Inter"), "Manrope", sans-serif;

@@ -155,7 +155,7 @@ export default function AdminPaymentSettings({
           type="button"
           onClick={save}
           disabled={busy !== null}
-          className="rounded-full bg-[var(--jaggery-brown)] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-[var(--jaggery-brown)] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy === "save" ? "Saving…" : "Save payment settings"}
         </button>

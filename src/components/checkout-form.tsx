@@ -235,7 +235,7 @@ export default function CheckoutForm({
         description: `Order ${order.orderId}`,
         prefill,
         notes: { orderId: order.orderId },
-        theme: { color: "#173D25" },
+        theme: { color: "#C53E1F" },
         retry: { enabled: true },
         handler: (response) => {
           void verifyPayment(response);

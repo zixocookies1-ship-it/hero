@@ -181,7 +181,7 @@ export default function AdminCouponEditor({
           type="button"
           onClick={create}
           disabled={busy || !form.code.trim()}
-          className="mt-4 rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--natural-green)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-4 rounded-full bg-[var(--jaggery-brown)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--ginger-terracotta)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy ? "Working…" : "Create coupon"}
         </button>

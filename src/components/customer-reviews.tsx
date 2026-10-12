@@ -65,7 +65,7 @@ function Stars({ rating, className = "" }: { rating: number; className?: string 
 
   return (
     <span
-      className={`inline-flex items-center gap-0.5 text-[#E0A33E] ${className}`}
+      className={`inline-flex items-center gap-0.5 text-[var(--gold)] ${className}`}
       role="img"
       aria-label={`Rated ${rating} out of 5`}
     >

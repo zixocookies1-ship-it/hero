@@ -41,7 +41,7 @@ export default async function WhyNaturesChoice() {
   const items = section.items.length > 0 ? section.items : FALLBACK_ITEMS;
 
   return (
-    <section className="bg-[var(--jaggery-brown)] py-16">
+    <section className="bg-[var(--forest-green)] py-16">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div>
