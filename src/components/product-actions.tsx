@@ -10,7 +10,7 @@ export default function ProductActions({
   layout = "stacked",
 }: {
   product: Product;
-  layout?: "stacked" | "row";
+  layout?: "stacked" | "row" | "card";
 }) {
   const { addItem, quantityOf, hydrated, openCart } = useCart();
   const router = useRouter();
@@ -48,17 +48,36 @@ export default function ProductActions({
     router.push("/checkout");
   };
 
-  const buttonClass =
+  const base =
     "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ginger-terracotta)]";
 
   const addLabel = inCart ? "ADDED TO CART" : "ADD TO CART";
 
-  const errorNotice =
-    error && (
-      <p role="alert" className="mt-2 text-xs font-medium text-red-600">
-        {error}
-      </p>
+  const errorNotice = error && (
+    <p role="alert" className="mt-2 text-xs font-medium text-red-600">
+      {error}
+    </p>
+  );
+
+  // Card: the reference storefront shows a single, full-width "Add to Cart"
+  // pill in the soft green treatment. Kept separate from the detail page so
+  // each surface matches the reference independently.
+  if (layout === "card") {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={handleAdd}
+          data-testid={`add-to-cart-${product.slug}`}
+          aria-label={`Add ${product.name} to cart`}
+          className={`${base} w-full border-[1.5px] border-[var(--natural-green)]/15 bg-[var(--mint-soft)] !text-xs font-bold uppercase tracking-[0.1em] text-[var(--natural-green)] hover:bg-[var(--dark-text)] hover:text-[var(--white)]`}
+        >
+          {addLabel}
+        </button>
+        {errorNotice}
+      </div>
     );
+  }
 
   if (layout === "row") {
     return (
@@ -69,7 +88,7 @@ export default function ProductActions({
             onClick={handleAdd}
             data-testid={`add-to-cart-${product.slug}`}
             aria-label={`Add ${product.name} to cart`}
-            className={`${buttonClass} bg-[var(--jaggery-brown)] text-[var(--white)] hover:bg-[var(--ginger-terracotta)]`}
+            className={`${base} bg-[var(--jaggery-brown)] text-[var(--white)] hover:bg-[var(--ginger-terracotta)]`}
           >
             {addLabel}
           </button>
@@ -78,7 +97,7 @@ export default function ProductActions({
             onClick={handleBuyNow}
             data-testid={`buy-now-${product.slug}`}
             aria-label={`Buy ${product.name} now`}
-            className={`${buttonClass} border border-[var(--jaggery-brown)] text-[var(--jaggery-brown)] hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]`}
+            className={`${base} border border-[var(--jaggery-brown)] text-[var(--jaggery-brown)] hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]`}
           >
             BUY NOW
           </button>
@@ -93,21 +112,21 @@ export default function ProductActions({
       <div className="flex flex-col gap-2 sm:flex-row">
         <button
           type="button"
-          onClick={handleBuyNow}
-          data-testid={`buy-now-${product.slug}`}
-          aria-label={`Buy ${product.name} now`}
-          className={`${buttonClass} bg-[var(--jaggery-brown)] text-[var(--white)] hover:bg-[var(--ginger-terracotta)]`}
-        >
-          BUY NOW
-        </button>
-        <button
-          type="button"
           onClick={handleAdd}
           data-testid={`add-to-cart-${product.slug}`}
           aria-label={`Add ${product.name} to cart`}
-          className={`${buttonClass} border border-[var(--jaggery-brown)] text-[var(--jaggery-brown)] hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]`}
+          className={`${base} flex-1 bg-[var(--jaggery-brown)] text-[var(--white)] hover:bg-[var(--ginger-terracotta)]`}
         >
           {addLabel}
+        </button>
+        <button
+          type="button"
+          onClick={handleBuyNow}
+          data-testid={`buy-now-${product.slug}`}
+          aria-label={`Buy ${product.name} now`}
+          className={`${base} flex-1 border border-[var(--jaggery-brown)] text-[var(--jaggery-brown)] hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]`}
+        >
+          BUY NOW
         </button>
       </div>
       {errorNotice}

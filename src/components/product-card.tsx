@@ -8,14 +8,15 @@ import PriceDisplay from "@/components/price-display";
 import ProductActions from "@/components/product-actions";
 
 /**
- * Card image strip. One slide per stored image — never duplicated — laid out as
- * a horizontal snap scroller so touch users swipe between photos and dot
- * buttons give mouse users the same control. A single-image product renders
- * the same structure with nothing to scroll, so old records keep working
- * untouched.
+ * Storefront product card, laid out to match the reference shop: a fixed-height
+ * artwork panel on a warm-to-mint wash, the category eyebrow, serif product
+ * name, a short description, the green/red price block and a single full-width
+ * "Add to Cart" pill.
  *
- * Every slide is the same square box with the shared cover+zoom treatment, so
- * any aspect ratio of photo lands at a consistent visual scale across cards.
+ * The image panel is still a horizontal snap scroller — one slide per stored
+ * image, never duplicated — so touch users swipe between photos and the dot
+ * buttons give mouse users the same control. A single-image product renders the
+ * same structure with nothing to scroll, so old records keep working untouched.
  */
 export default function ProductCard({ product }: { product: Product }) {
   // Stored images only — one slide per entry, never duplicated. The loader in
@@ -44,8 +45,8 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[linear-gradient(160deg,var(--white),var(--mint-soft))] shadow-sm transition-shadow hover:shadow-xl">
-      <div className="relative bg-[var(--warm-cream)]">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--dark-text)]/10 bg-[var(--white)] shadow-sm transition-all duration-500 ease-out hover:-translate-y-2 hover:border-[var(--mint-soft)] hover:shadow-xl">
+      <div className="relative bg-[linear-gradient(135deg,var(--warm-cream),var(--mint-soft))]">
         <Link
           href={`/products/${product.slug}`}
           className="block"
@@ -54,26 +55,26 @@ export default function ProductCard({ product }: { product: Product }) {
           <div
             ref={stripRef}
             onScroll={onStripScroll}
-            className="flex aspect-square w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex h-60 w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {images.length > 0 ? (
               images.map((src, index) => (
                 <div
                   key={`${product.slug}-${index}-${src}`}
-                  className="relative aspect-square w-full shrink-0 snap-center overflow-hidden"
+                  className="relative h-60 w-full shrink-0 snap-center overflow-hidden"
                 >
                   <Image
                     src={src}
                     alt={index === active ? `${product.name} ${product.weight}` : ""}
                     fill
-                    sizes="(max-width: 768px) 80vw, 300px"
-                    className="scale-110 object-cover transition-transform duration-500 ease-out group-hover:scale-125 motion-reduce:group-hover:scale-110"
+                    sizes="(max-width: 768px) 80vw, 340px"
+                    className="object-contain p-5 transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100"
                     loading="lazy"
                   />
                 </div>
               ))
             ) : (
-              <div className="flex aspect-square w-full shrink-0 snap-center items-center justify-center">
+              <div className="flex h-60 w-full shrink-0 snap-center items-center justify-center">
                 <span className="text-sm text-[var(--dark-text)]/50">No photos yet</span>
               </div>
             )}
@@ -81,7 +82,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         {isBestSeller(product.slug) ? (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--natural-green)] px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-[var(--white)] shadow-md">
+          <span className="absolute left-3.5 top-3.5 z-10 rounded-full bg-[var(--jaggery-brown)] px-3 py-1 text-[0.63rem] font-semibold uppercase tracking-[0.14em] text-[var(--white)] shadow-md">
             Best Seller
           </span>
         ) : null}
@@ -106,11 +107,11 @@ export default function ProductCard({ product }: { product: Product }) {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
-        <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+      <div className="flex flex-1 flex-col p-5">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--natural-green)]">
           {product.variantName}
         </p>
-        <h3 className="mt-2 font-serif text-lg font-bold text-[var(--dark-text)]">
+        <h3 className="mt-2 font-serif text-xl font-normal leading-tight text-[var(--dark-text)]">
           <Link
             href={`/products/${product.slug}`}
             className="hover:text-[var(--ginger-terracotta)]"
@@ -118,8 +119,8 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </Link>
         </h3>
-        <p className="mt-1 text-sm text-[var(--dark-text)]/60">
-          {product.weight} &bull; {product.pack}
+        <p className="mt-2 line-clamp-2 text-[0.8rem] leading-relaxed text-[var(--dark-text)]/60">
+          {product.description}
         </p>
 
         <div className="mt-4">
@@ -127,12 +128,13 @@ export default function ProductCard({ product }: { product: Product }) {
             sellingPrice={product.sellingPrice}
             mrp={product.mrp}
             discountPercent={product.discountPercent}
+            unit={product.weight}
           />
         </div>
 
         <div className="mt-5 flex-1" />
 
-        <ProductActions product={product} layout="row" />
+        <ProductActions product={product} layout="card" />
       </div>
     </article>
   );

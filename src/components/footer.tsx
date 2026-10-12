@@ -41,14 +41,16 @@ export default async function Footer() {
       <div className="relative mx-auto max-w-7xl px-6 py-10">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2.5">
-              <Image
-                src="/images/logo.png?v=2"
-                alt=""
-                width={56}
-                height={56}
-                className="h-14 w-14 object-contain mix-blend-multiply"
-              />
+            <div className="flex items-center gap-3">
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--white)] p-1.5 shadow-sm">
+                <Image
+                  src="/images/logo.png?v=2"
+                  alt=""
+                  width={56}
+                  height={56}
+                  className="h-full w-full object-contain"
+                />
+              </span>
               <span className="font-heading text-base font-bold">
                 {brand.name}
               </span>

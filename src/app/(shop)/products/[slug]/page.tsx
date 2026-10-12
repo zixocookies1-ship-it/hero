@@ -82,36 +82,38 @@ export default async function ProductDetailPage({
           <ProductGallery images={product.images} alt={product.name} />
 
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--natural-green)]">
               {product.variantName}
+              <span className="text-[var(--dark-text)]/40"> &bull; </span>
+              {product.inStock ? "In Stock" : "Out of Stock"}
             </p>
             <h1 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
               {product.name}
             </h1>
-            <p className="mt-2 text-base text-[var(--dark-text)]/70">
-              {product.weight} &bull; {product.pack}
-            </p>
 
-            <div className="mt-6">
+            <div className="mt-4">
               <PriceDisplay
                 size="lg"
                 sellingPrice={product.sellingPrice}
                 mrp={product.mrp}
                 discountPercent={product.discountPercent}
+                unit={product.weight}
               />
-              <p className="mt-1 text-sm text-[var(--dark-text)]/60">Inclusive of all taxes</p>
-              <p className="mt-1 text-sm text-[var(--dark-text)]/60">{deliveryNote}</p>
+              <p className="mt-2 text-sm text-[var(--dark-text)]/60">Inclusive of all taxes</p>
             </div>
 
             <p className="mt-6 text-base leading-relaxed text-[var(--dark-text)]/80">
               {product.description}
             </p>
 
-            <ul className="mt-6 space-y-2.5">
+            <div className="mt-6 space-y-2.5">
               {product.highlights.map((highlight) => (
-                <li key={highlight} className="flex items-start gap-3 text-sm text-[var(--dark-text)]/85">
+                <p
+                  key={highlight}
+                  className="flex items-start gap-3 text-sm text-[var(--dark-text)]/85"
+                >
                   <svg
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--ginger-terracotta)]"
+                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--natural-green)]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -120,26 +122,34 @@ export default async function ProductDetailPage({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   {highlight}
-                </li>
+                </p>
               ))}
-            </ul>
+              <p className="flex items-start gap-3 text-sm font-medium text-[var(--natural-green)]">
+                <svg
+                  className="mt-0.5 h-4 w-4 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.8}
+                    d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375A1.125 1.125 0 012.25 17.625V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+                  />
+                </svg>
+                {deliveryNote}
+              </p>
+            </div>
 
-            <div className="mt-8 border-t border-black/5 pt-6">
-              <p className="mb-3 text-sm font-medium text-[var(--dark-text)]">
+            <div className="mt-6 border-t border-black/5 pt-6">
+              <p className="mb-2 text-sm font-medium text-[var(--dark-text)]">
                 Ingredients
               </p>
               <p className="text-sm leading-relaxed text-[var(--dark-text)]/70">
                 {product.ingredients}
               </p>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <span className="rounded-full bg-[var(--natural-green)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[var(--natural-green)]">
-                {product.inStock ? "In stock" : "Out of stock"}
-              </span>
-              <span className="text-sm text-[var(--dark-text)]/60">
-                Category: Jaggery &bull; Traditional
-              </span>
             </div>
 
             <div className="mt-6">

@@ -139,28 +139,32 @@ test("footer no longer lists contact details", async () => {
   assert.ok(source.includes("SocialLinks"), "footer keeps the social links");
 });
 
-test("footer logo is large enough to resolve and blends so it reads on the dark footer", async () => {
+test("footer logo sits on a light chip so it reads on the dark footer", async () => {
   const source = await read("src/components/footer.tsx");
 
-  // The footer was scaled down, so the mark is 56px (down from 96px). It still
-  // needs to resolve, so the old 74px size must not return either. The logo's
-  // interior is dissolved with mix-blend-multiply (no white halo) so the mark
-  // reads on the dark footer without a whitish glow.
+  // The footer was scaled down, so the chip is 56px (down from 96px). The old
+  // 74px size must not return either.
   assert.ok(source.includes("h-14 w-14"), "footer logo should be h-14 w-14 (56px)");
   assert.ok(
     !source.includes("h-[74px]"),
     "the old 74px size resolved the emblem's strokes too thin to read"
   );
+  // The light-green mark is unreadable multiplied straight onto the near-black
+  // footer, so it now sits on its own light chip instead of blending away.
   assert.ok(
-    source.includes("mix-blend-multiply"),
-    "footer logo blends its interior away on the dark footer"
+    source.includes("bg-[var(--white)]"),
+    "footer logo needs its own light chip so it stays visible"
+  );
+  assert.ok(
+    !source.includes("mix-blend-multiply"),
+    "the footer logo is no longer multiplied into the dark footer"
   );
   assert.ok(
     !source.includes("rgba(255,255,255"),
     "the footer logo must not carry a whitish halo"
   );
-  // There must be no plate behind the mark either.
-  assert.ok(!source.includes("rounded-full bg-"), "no plate behind the footer logo");
+  // There must be no full-round plate behind the mark either.
+  assert.ok(!source.includes("rounded-full bg-"), "no round plate behind the footer logo");
   assert.ok(!source.includes("object-cover"), "the logo must not be cropped or scaled to fill");
 });
 
