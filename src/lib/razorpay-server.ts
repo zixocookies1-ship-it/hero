@@ -64,6 +64,54 @@ export async function fetchRazorpayOrder(razorpayOrderId: string) {
 }
 
 /**
+ * Fetches a payment from Razorpay's server. This is the authoritative answer to
+ * "was this money actually taken?", so reconciliation paths (webhook, status
+ * polling) confirm capture here rather than trusting anything the browser sent.
+ */
+export async function fetchRazorpayPayment(razorpayPaymentId: string) {
+  return getClient().payments.fetch(razorpayPaymentId);
+}
+
+/**
+ * Reduces a Razorpay SDK failure to safe, loggable fields.
+ *
+ * Razorpay's errors carry the merchant-facing description we need for
+ * diagnostics ("Business - Website mismatch", "Payment details not provided",
+ * bank declines) alongside a request id. The key secret and the payment payload
+ * are never included, so this is safe to write to logs.
+ */
+export function describeRazorpayError(error: unknown): {
+  code: string | null;
+  description: string | null;
+  source: string | null;
+  step: string | null;
+  requestId: string | null;
+  status: number | null;
+} {
+  const raw = (error ?? {}) as {
+    code?: unknown;
+    description?: unknown;
+    source?: unknown;
+    step?: unknown;
+    request_id?: unknown;
+    statusCode?: unknown;
+    status?: unknown;
+    message?: unknown;
+  };
+  const text = (value: unknown) =>
+    typeof value === "string" && value.trim() ? value.trim().slice(0, 300) : null;
+
+  return {
+    code: text(raw.code),
+    description: text(raw.description),
+    source: text(raw.source),
+    step: text(raw.step),
+    requestId: text(raw.request_id),
+    status: typeof raw.statusCode === "number" ? raw.statusCode : null,
+  };
+}
+
+/**
  * Best-effort Razorpay connectivity check for the admin Payments page.
  *
  * Listing one order exercises the full request/signing round-trip against the

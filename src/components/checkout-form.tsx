@@ -28,15 +28,20 @@ type CreateOrderResponse = {
   orderId: string;
   amount: number;
   currency: string;
+  /** Scoped to this order; authorises the status poll and the success page. */
+  receiptToken: string;
 };
 
 type PaymentStatusResponse = {
   ok: boolean;
+  orderId: string;
   paymentStatus: string;
   orderStatus: string;
-  orderId: string;
-  razorpayOrderId?: string;
   receiptToken?: string;
+  /** Razorpay refused the payment for a reason retrying cannot fix. */
+  restricted?: boolean;
+  retryable?: boolean;
+  message?: string;
   error?: string;
 };
 
@@ -49,6 +54,12 @@ const emptyDetails: CheckoutDetails = {
   state: STATE_PLACEHOLDER,
   postalCode: "",
 };
+
+/** How often to ask Razorpay what happened, and for how long before giving up
+ *  and telling the shopper it is still being confirmed. 20 x 3s = one minute,
+ *  which covers a bank 3-D Secure round trip without polling indefinitely. */
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLL_ATTEMPTS = 20;
 
 export default function CheckoutForm({
   shippingFeeInr,
@@ -82,6 +93,7 @@ export default function CheckoutForm({
   // Polling timer for when the Razorpay handler doesn't fire (user closes modal after payment)
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentOrderRef = useRef<CreateOrderResponse | null>(null);
+  const attemptsRef = useRef(0);
   // Refs for stable access in callbacks without triggering re-renders
   const clearCartRef = useRef(clearCart);
   const routerRef = useRef(router);
@@ -96,36 +108,78 @@ export default function CheckoutForm({
   }, []);
 
   const checkPaymentStatus = useCallback(async (order: CreateOrderResponse) => {
+    if (!order.receiptToken) return;
+
     try {
-      const response = await fetch(`/api/razorpay/status/${order.orderId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `/api/razorpay/status/${encodeURIComponent(order.orderId)}?token=${encodeURIComponent(order.receiptToken)}`,
+        { method: "GET", headers: { "Accept": "application/json" } }
+      );
 
       const data = (await response.json().catch(() => null)) as PaymentStatusResponse | null;
+      if (!data?.ok) return; // keep polling; a 401/404 will not fix itself by retrying fast
 
-      if (data?.ok && data.paymentStatus === "paid" && data.receiptToken) {
+      // Only a receiptToken means the server actually settled the row. Anything
+      // else is pending, and must never be shown as a confirmed payment.
+      if (data.paymentStatus === "paid") {
+        if (!data.receiptToken) return;
         stopPolling();
+        setStage("verifying");
         clearCartRef.current();
-        routerRef.current.push(`/order-success/${data.orderId}?token=${encodeURIComponent(data.receiptToken)}`);
+        routerRef.current.push(
+          `/order-success/${data.orderId}?token=${encodeURIComponent(data.receiptToken)}`
+        );
+        return;
+      }
+
+      // A definitive refusal ends the polling. `restricted` means Razorpay will
+      // reject every retry, so the shopper is told to contact us instead of being
+      // invited to try again forever.
+      if (data.paymentStatus === "failed" || data.retryable === false) {
+        stopPolling();
+        setStage("idle");
+        setBanner({
+          tone: data.restricted ? "info" : "error",
+          message:
+            data.message ??
+            "Your payment did not go through and no money has been taken. You can try again.",
+        });
       }
     } catch {
-      // Silently continue polling
+      // Network blip: the interval fires again.
     }
   }, [stopPolling]);
 
+  /**
+   * Keeps asking Razorpay what happened, independently of the modal.
+   *
+   * Deliberately NOT stopped when the sheet closes: paying and then dismissing
+   * the success screen is precisely the case the browser handler misses, so
+   * tearing the loop down on `ondismiss` would reintroduce the bug this exists to
+   * fix. It ends on a settled outcome, on the handler firing, or on the deadline.
+   */
   const startPolling = useCallback((order: CreateOrderResponse) => {
     stopPolling();
+    attemptsRef.current = 0;
     currentOrderRef.current = order;
-    setStage("polling");
 
-    // Poll every 3 seconds
-    pollTimerRef.current = setInterval(() => {
-      checkPaymentStatus(order);
-    }, 3000);
+    const tick = () => {
+      attemptsRef.current += 1;
+      if (attemptsRef.current > MAX_POLL_ATTEMPTS) {
+        stopPolling();
+        setStage("idle");
+        setBanner({
+          tone: "info",
+          message:
+            "We are still confirming your payment with Razorpay. If you were charged, your order is confirmed automatically - please contact us if you need the receipt sooner.",
+        });
+        return;
+      }
+      void checkPaymentStatus(order);
+    };
 
-    // Also check immediately
-    checkPaymentStatus(order);
+    pollTimerRef.current = setInterval(tick, POLL_INTERVAL_MS);
+    tick();
   }, [stopPolling, checkPaymentStatus]);
 
   // Display-only estimate. The amount charged always comes back from the server
@@ -298,33 +352,35 @@ export default function CheckoutForm({
           void verifyPayment(response);
         },
         modal: {
+          // The sheet closing does NOT stop the poll. If the customer paid and
+          // then closed the success screen without pressing Continue, the money is
+          // already taken and the handler will never fire - so we keep asking
+          // Razorpay. Only setStage is reset here, to hand the page back.
           ondismiss: () => {
-            stopPolling();
             setStage("idle");
             setBanner({
               tone: "info",
-              message: "Payment cancelled. Your cart is still here whenever you are ready.",
+              message:
+                "Payment cancelled. Your cart is still here whenever you are ready. If you were charged, we are confirming it now.",
             });
           },
-          onclose: () => {
-            stopPolling();
-            setStage("idle");
-          },
+          onclose: () => setStage("idle"),
         },
       });
-
-      if (opened) {
-        // Start polling in case the user closes the modal after payment
-        // but before clicking "Continue" on Razorpay's success screen
-        startPolling(order);
-      }
 
       if (!opened) {
         setBanner({
           tone: "error",
           message: "The payment window could not be opened. Please try again.",
         });
+        return;
       }
+
+      // Sheet is up. Hold the button in its polling state so a second submit
+      // cannot create a duplicate order, and start watching for a callback that
+      // never arrives.
+      setStage("polling");
+      startPolling(order);
     } catch {
       setStage("idle");
       setBanner({

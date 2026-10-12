@@ -16,7 +16,9 @@ import {
   markPaymentFailedByOrderId,
   recordCouponUsage,
 } from "@/lib/orders";
-import { createRazorpayOrder, getRazorpayKeyId } from "@/lib/razorpay-server";
+import { createRazorpayOrder, describeRazorpayError, getRazorpayKeyId } from "@/lib/razorpay-server";
+import { createReceiptToken } from "@/lib/receipt-token";
+import { isWebsiteRestrictionFailure } from "@/lib/payment-reconciliation";
 import {
   hasErrors,
   normaliseCheckoutDetails,
@@ -229,6 +231,10 @@ export async function POST(request: Request) {
       orderId: pending.orderId,
       amount: pricing.totalInPaise,
       currency: razorpay.currency,
+      // The shopper's own receipt token for this order. It gates the status poll
+      // and the success page, both of which read customer details for this order.
+      // Scoped to the order just created, so it grants nothing about any other.
+      receiptToken: createReceiptToken(pending.orderId),
       pricing: {
         subtotal: pricing.subtotal,
         discount: pricing.productDiscount,
@@ -239,7 +245,11 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("razorpay order creation failed", error);
+    const info = describeRazorpayError(error);
+    console.error("[checkout] razorpay order creation failed", {
+      orderId: pending.orderId,
+      ...info,
+    });
 
     // The local row exists but has no Razorpay order, so nothing can ever settle
     // it. Fail it now rather than leaving it pending forever.
@@ -247,8 +257,14 @@ export async function POST(request: Request) {
       () => undefined
     );
 
+    const restricted = isWebsiteRestrictionFailure(info.description);
     return NextResponse.json(
-      { error: "We could not start the payment. Please try again." },
+      {
+        error: restricted
+          ? "Razorpay has blocked this payment because the website running checkout is not registered to our account. Retrying will not help - please contact us and we will take your order another way."
+          : "We could not start the payment. Please try again.",
+        code: restricted ? "payment_restricted" : "razorpay_create_failed",
+      },
       { status: 502 }
     );
   }
