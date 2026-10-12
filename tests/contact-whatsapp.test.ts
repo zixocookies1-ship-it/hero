@@ -139,22 +139,21 @@ test("footer no longer lists contact details", async () => {
   assert.ok(source.includes("SocialLinks"), "footer keeps the social links");
 });
 
-test("footer logo is large enough to resolve and blends so it reads on the brown", async () => {
+test("footer logo is large enough to resolve and blends so it reads on the dark footer", async () => {
   const source = await read("src/components/footer.tsx");
 
-  // Once the baked-in white plate was removed the mark sat directly on the dark
-  // brown footer, where the brand green only reaches 2.78:1 and the emblem's
-  // strokes render about 2px wide at 74px. It needs to be bigger to resolve.
-  // The logo's light interior is dissolved with mix-blend-multiply (no white
-  // halo) so the mark reads on the brown without a whitish glow.
-  assert.ok(source.includes("h-24 w-24"), "footer logo should be h-24 w-24 (96px)");
+  // The footer was scaled down, so the mark is 56px (down from 96px). It still
+  // needs to resolve, so the old 74px size must not return either. The logo's
+  // interior is dissolved with mix-blend-multiply (no white halo) so the mark
+  // reads on the dark footer without a whitish glow.
+  assert.ok(source.includes("h-14 w-14"), "footer logo should be h-14 w-14 (56px)");
   assert.ok(
     !source.includes("h-[74px]"),
     "the old 74px size resolved the emblem's strokes too thin to read"
   );
   assert.ok(
     source.includes("mix-blend-multiply"),
-    "footer logo blends its interior away on the brown"
+    "footer logo blends its interior away on the dark footer"
   );
   assert.ok(
     !source.includes("rgba(255,255,255"),
