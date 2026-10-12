@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/cart-context";
+import { useToast } from "@/components/toast";
 import { type Product } from "@/lib/products";
 
 export default function ProductActions({
@@ -12,7 +13,8 @@ export default function ProductActions({
   product: Product;
   layout?: "stacked" | "row" | "card";
 }) {
-  const { addItem, quantityOf, hydrated, openCart } = useCart();
+  const { addItem, quantityOf, hydrated } = useCart();
+  const { showToast } = useToast();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -32,9 +34,8 @@ export default function ProductActions({
       setError(result.error);
       return;
     }
-    // Adding surfaces the slide-out cart so the shopper sees the line land with
-    // its quantity, coupon and total. "Buy now" skips this — it navigates.
-    openCart();
+    // Show toast notification instead of opening cart
+    showToast(`${product.name} added to cart`);
   };
 
   const handleBuyNow = () => {
@@ -59,12 +60,10 @@ export default function ProductActions({
     </p>
   );
 
-  // Card: the reference storefront shows a single, full-width "Add to Cart"
-  // pill in the soft green treatment. Kept separate from the detail page so
-  // each surface matches the reference independently.
+  // Card: reference storefront shows "Add to Cart" + "Buy Now" as two pills.
   if (layout === "card") {
     return (
-      <div>
+      <div className="flex flex-col gap-2">
         <button
           type="button"
           onClick={handleAdd}
@@ -73,6 +72,15 @@ export default function ProductActions({
           className={`${base} w-full border-[1.5px] border-[var(--natural-green)]/15 bg-[var(--mint-soft)] !text-xs font-bold uppercase tracking-[0.1em] text-[var(--natural-green)] hover:bg-[var(--dark-text)] hover:text-[var(--white)]`}
         >
           {addLabel}
+        </button>
+        <button
+          type="button"
+          onClick={handleBuyNow}
+          data-testid={`buy-now-${product.slug}`}
+          aria-label={`Buy ${product.name} now`}
+          className={`${base} w-full bg-[var(--jaggery-brown)] text-[var(--white)] hover:bg-[var(--ginger-terracotta)]`}
+        >
+          BUY NOW
         </button>
         {errorNotice}
       </div>

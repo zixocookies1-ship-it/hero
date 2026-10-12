@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Serif_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
+import { ToastProvider } from "@/components/toast";
 import CartDrawer from "@/components/cart-drawer";
 import { loadCatalogue, loadCombos, loadShippingPolicy } from "@/lib/cms";
 import { siteUrl } from "@/lib/env";
@@ -68,12 +69,14 @@ export default async function RootLayout({
         className={`${headingFont.variable} ${bodyFont.variable} flex min-h-screen flex-col bg-[var(--background)] text-[var(--foreground)]`}
       >
         <CartProvider catalogue={catalogue} combos={combos}>
-          {children}
-          <CartDrawer
-            catalogue={catalogue}
-            shippingFeeInr={shipping.feeInr}
-            freeAboveInr={shipping.freeAboveInr}
-          />
+          <ToastProvider>
+            {children}
+            <CartDrawer
+              catalogue={catalogue}
+              shippingFeeInr={shipping.feeInr}
+              freeAboveInr={shipping.freeAboveInr}
+            />
+          </ToastProvider>
         </CartProvider>
       </body>
     </html>

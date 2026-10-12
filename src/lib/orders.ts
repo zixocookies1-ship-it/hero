@@ -20,21 +20,40 @@ export class OrderError extends Error {
 }
 
 /**
- * Allocates the daily order sequence from the Counter collection.
+ * Allocates the next order sequence from the Counter collection.
+ *
+ * The sequence is global, not daily. Order.sequence carries a unique index over
+ * the whole collection, so a counter that reset each day handed out 1 again on
+ * the first order of the next day and collided with the previous day's order -
+ * a P2002 unique-constraint failure ("Order_sequence_key") that surfaced in
+ * checkout as "We could not start your order. Please try again." The human order
+ * number still carries the date (see buildOrderId); only the raw sequence is
+ * global, so it keeps climbing and can never repeat.
  *
  * MongoDB has no autoincrement, so the number is handed out by an atomic
  * findAndModify with upsert. Two concurrent checkouts therefore receive
- * different numbers; there is no read-then-write race, which is what the old
- * database sequence was doing for us.
+ * different numbers; there is no read-then-write race.
  */
-async function nextOrderSequence(when: Date): Promise<number> {
-  const year = when.getFullYear();
-  const month = String(when.getMonth() + 1).padStart(2, "0");
-  const day = String(when.getDate()).padStart(2, "0");
+const ORDER_SEQUENCE_COUNTER = "order-sequence";
+
+async function nextOrderSequence(): Promise<number> {
+  // Lift the counter to the highest sequence already issued before handing out
+  // the next value. Normally a no-op, this keeps the counter self-healing: it
+  // can never re-issue a number that is already taken, even after a restore or
+  // when only an older per-day counter (e.g. "order-20261007") exists.
+  const highest = await prisma.order.aggregate({ _max: { sequence: true } });
+
+  await prisma.$runCommandRaw({
+    findAndModify: "Counter",
+    query: { _id: ORDER_SEQUENCE_COUNTER },
+    update: { $max: { value: highest._max.sequence ?? 0 } },
+    new: true,
+    upsert: true,
+  });
 
   const result = await prisma.$runCommandRaw({
     findAndModify: "Counter",
-    query: { _id: `order-${year}${month}${day}` },
+    query: { _id: ORDER_SEQUENCE_COUNTER },
     update: { $inc: { value: 1 } },
     new: true,
     upsert: true,
@@ -72,7 +91,7 @@ export async function createPendingOrder(params: {
   const { pricing, details } = params;
   const coupon = params.coupon ?? null;
   const createdAt = new Date();
-  const sequence = await nextOrderSequence(createdAt);
+  const sequence = await nextOrderSequence();
   const orderId = buildOrderId(sequence, createdAt);
 
   const items: Prisma.OrderItemCreateWithoutOrderInput[] = pricing.lines.map((line) => ({
