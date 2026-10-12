@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/context/cart-context";
 import { useCoupon } from "@/hooks/use-coupon";
 import { BRAND } from "@/lib/brand";
@@ -20,7 +20,7 @@ import {
 import { useRazorpayScript } from "@/components/use-razorpay";
 import CouponField from "@/components/coupon-field";
 
-type Stage = "idle" | "preparing" | "verifying";
+type Stage = "idle" | "preparing" | "verifying" | "polling";
 
 type CreateOrderResponse = {
   keyId: string;
@@ -28,6 +28,16 @@ type CreateOrderResponse = {
   orderId: string;
   amount: number;
   currency: string;
+};
+
+type PaymentStatusResponse = {
+  ok: boolean;
+  paymentStatus: string;
+  orderStatus: string;
+  orderId: string;
+  razorpayOrderId?: string;
+  receiptToken?: string;
+  error?: string;
 };
 
 const emptyDetails: CheckoutDetails = {
@@ -69,8 +79,54 @@ export default function CheckoutForm({
   // first attempt failed or was dismissed, so the retry button's enabled state
   // depends on this value and it must live in state, not a ref.
   const [retryOrder, setRetryOrder] = useState<CreateOrderResponse | null>(null);
+  // Polling timer for when the Razorpay handler doesn't fire (user closes modal after payment)
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentOrderRef = useRef<CreateOrderResponse | null>(null);
+  // Refs for stable access in callbacks without triggering re-renders
+  const clearCartRef = useRef(clearCart);
+  const routerRef = useRef(router);
 
   const busy = stage !== "idle";
+
+  const stopPolling = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  }, []);
+
+  const checkPaymentStatus = useCallback(async (order: CreateOrderResponse) => {
+    try {
+      const response = await fetch(`/api/razorpay/status/${order.orderId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = (await response.json().catch(() => null)) as PaymentStatusResponse | null;
+
+      if (data?.ok && data.paymentStatus === "paid" && data.receiptToken) {
+        stopPolling();
+        clearCartRef.current();
+        routerRef.current.push(`/order-success/${data.orderId}?token=${encodeURIComponent(data.receiptToken)}`);
+      }
+    } catch {
+      // Silently continue polling
+    }
+  }, [stopPolling]);
+
+  const startPolling = useCallback((order: CreateOrderResponse) => {
+    stopPolling();
+    currentOrderRef.current = order;
+    setStage("polling");
+
+    // Poll every 3 seconds
+    pollTimerRef.current = setInterval(() => {
+      checkPaymentStatus(order);
+    }, 3000);
+
+    // Also check immediately
+    checkPaymentStatus(order);
+  }, [stopPolling, checkPaymentStatus]);
 
   // Display-only estimate. The amount charged always comes back from the server
   // after it reprices the cart from the catalogue.
@@ -238,19 +294,30 @@ export default function CheckoutForm({
         theme: { color: "#C53E1F" },
         retry: { enabled: true },
         handler: (response) => {
+          stopPolling();
           void verifyPayment(response);
         },
         modal: {
           ondismiss: () => {
+            stopPolling();
             setStage("idle");
             setBanner({
               tone: "info",
               message: "Payment cancelled. Your cart is still here whenever you are ready.",
             });
           },
-          onclose: () => setStage("idle"),
+          onclose: () => {
+            stopPolling();
+            setStage("idle");
+          },
         },
       });
+
+      if (opened) {
+        // Start polling in case the user closes the modal after payment
+        // but before clicking "Continue" on Razorpay's success screen
+        startPolling(order);
+      }
 
       if (!opened) {
         setBanner({
@@ -301,6 +368,19 @@ export default function CheckoutForm({
   const retryPayment = () => {
     if (retryOrder) void startPayment(retryOrder);
   };
+
+  // Cleanup polling timer on unmount
+  useEffect(() => {
+    return () => {
+      stopPolling();
+    };
+  }, [stopPolling]);
+
+  // Keep refs in sync with latest values
+  useEffect(() => {
+    clearCartRef.current = clearCart;
+    routerRef.current = router;
+  }, [clearCart, router]);
 
   const fieldClass = (field: keyof CheckoutDetails) =>
     `w-full rounded-xl border bg-[var(--white)] px-4 py-3 text-sm outline-none transition-colors ${
@@ -545,9 +625,11 @@ export default function CheckoutForm({
               ? "Preparing secure payment..."
               : stage === "verifying"
                 ? "Verifying payment..."
-                : onlinePaymentsEnabled
-                  ? "PROCEED TO PAYMENT"
-                  : "ONLINE PAYMENTS PAUSED"}
+                : stage === "polling"
+                  ? "Waiting for payment confirmation..."
+                  : onlinePaymentsEnabled
+                    ? "PROCEED TO PAYMENT"
+                    : "ONLINE PAYMENTS PAUSED"}
           </button>
           <button
             type="button"

@@ -22,6 +22,9 @@ const SECRET_KEYS = [
   "ORDER_SIGNING_SECRET",
   "AUTH_SECRET",
   "RAZORPAY_KEY_SECRET",
+  // Signs webhook deliveries from Razorpay. Anyone holding it could forge a
+  // payment.captured event and mark an order paid, so it is a secret.
+  "RAZORPAY_WEBHOOK_SECRET",
   "DELHIVERY_API_KEY",
   "DELHIVERY_CLIENT_ID",
   "CLOUDINARY_API_SECRET",
