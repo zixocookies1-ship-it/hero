@@ -31,7 +31,7 @@ export default function AnnouncementBar({
                 className="flex items-center gap-4 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--white)]/90"
               >
                 {message}
-                <span aria-hidden className="text-[var(--ginger-terracotta)]">
+                <span aria-hidden className="text-[var(--white)]/50">
                   &bull;
                 </span>
               </span>

@@ -4,19 +4,23 @@ import { useCoupon } from "@/hooks/use-coupon";
 import { formatPrice } from "@/lib/products";
 
 /**
- * Coupon entry. Shared by the cart and the checkout so the code is validated the
- * same way in both places and persisted across the navigation between them.
+ * Coupon entry. Shared by the cart, the slide-out cart and the checkout so the
+ * code is validated the same way in all three and persisted across the
+ * navigation between them. `id` is passed by the caller because more than one
+ * of these can be mounted at once (page cart + drawer), and duplicate ids would
+ * make the label point at the wrong input.
  */
-export default function CouponField() {
+export default function CouponField({ id = "coupon-code" }: { id?: string }) {
   const { code, discountInr, description, status, message, draft, setDraft, apply, remove } =
     useCoupon();
 
   const applied = status === "applied" && code !== null;
+  const messageId = `${id}-message`;
 
   return (
     <div>
       <label
-        htmlFor="coupon-code"
+        htmlFor={id}
         className="block text-[11px] font-semibold uppercase tracking-widest text-[var(--dark-text)]/60"
       >
         Coupon code
@@ -44,8 +48,8 @@ export default function CouponField() {
       ) : (
         <div className="mt-2 flex gap-2">
           <input
-            id="coupon-code"
-            name="coupon-code"
+            id={id}
+            name={id}
             type="text"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
@@ -59,7 +63,7 @@ export default function CouponField() {
             autoComplete="off"
             autoCapitalize="characters"
             spellCheck={false}
-            aria-describedby={message ? "coupon-message" : undefined}
+            aria-describedby={message ? messageId : undefined}
             aria-invalid={status === "error"}
             className="min-w-0 flex-1 rounded-full border border-black/10 bg-[var(--white)] px-4 py-2.5 text-sm uppercase text-[var(--dark-text)] placeholder:normal-case placeholder:text-[var(--dark-text)]/40 focus:border-[var(--jaggery-brown)] focus:outline-none focus:ring-2 focus:ring-[var(--jaggery-brown)]/20"
           />
@@ -76,7 +80,7 @@ export default function CouponField() {
 
       {message && (
         <p
-          id="coupon-message"
+          id={messageId}
           role="status"
           className="mt-2 text-xs text-red-600"
         >

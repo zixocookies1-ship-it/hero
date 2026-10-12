@@ -25,7 +25,7 @@ const FALLBACK: Section = {
   key: "home_process",
   label: "Home - Farm to jar",
   eyebrow: "Farm to jar",
-  title: "A shorter, clearer journey",
+  title: "A Shorter, Clearer Journey",
   titleAccent: "",
   body:
     "We trace every batch from sugarcane farms in Uttar Pradesh to your kitchen. The gold-kettle method keeps the natural character of the sugarcane that industrial refining strips away.",

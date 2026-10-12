@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { type Product } from "@/lib/products";
+import { isBestSeller, type Product } from "@/lib/products";
 import PriceDisplay from "@/components/price-display";
 import ProductActions from "@/components/product-actions";
 
@@ -44,7 +44,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[var(--white)] shadow-sm transition-shadow hover:shadow-xl">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[linear-gradient(160deg,var(--white),var(--mint-soft))] shadow-sm transition-shadow hover:shadow-xl">
       <div className="relative bg-[var(--warm-cream)]">
         <Link
           href={`/products/${product.slug}`}
@@ -79,6 +79,12 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
           </div>
         </Link>
+
+        {isBestSeller(product.slug) ? (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--natural-green)] px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-[var(--white)] shadow-md">
+            Best Seller
+          </span>
+        ) : null}
 
         {images.length > 1 ? (
           <div className="absolute inset-x-0 bottom-2.5 flex justify-center gap-1.5">

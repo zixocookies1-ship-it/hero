@@ -152,3 +152,14 @@ export const formatPrice = (value: number) =>
   }).format(value);
 
 export const TRIO_SLUGS = products.map((product) => product.slug);
+
+/**
+ * Merchandising badge shown on the product card for the current best seller.
+ * Deliberately a slug list instead of the database `isFeatured` flag: the home
+ * page renders the featured subset *instead of* the full catalogue as soon as
+ * anything is flagged, so flagging one product would collapse the grid to a
+ * single card. Adding a slug here only paints the badge.
+ */
+export const BEST_SELLER_SLUGS: readonly string[] = ["desi-til-chocolatey-jaggery"];
+
+export const isBestSeller = (slug: string): boolean => BEST_SELLER_SLUGS.includes(slug);

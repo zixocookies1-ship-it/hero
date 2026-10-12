@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
   useSyncExternalStore,
 } from "react";
 import { getProductBySlug, type Product } from "@/lib/products";
@@ -52,6 +53,11 @@ type CartContextValue = {
   /** Coupon the shopper has applied, persisted so it survives navigation. */
   couponCode: string | null;
   setCouponCode: (code: string | null) => void;
+  /** Slide-out cart visibility, shared so the header, product cards and the
+   *  drawer itself all flip the same panel instead of keeping two states. */
+  cartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 /**
@@ -185,6 +191,11 @@ export function CartProvider({
   const getCouponSnapshot = useCallback(() => readState().coupon, [readState]);
 
   const lines = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // The slide-out cart is transient UI only: it never touches storage, so it
+  // cannot survive a reload or leak between tabs like the lines do.
+  const [cartOpen, setCartOpen] = useState(false);
+  const openCart = useCallback(() => setCartOpen(true), []);
+  const closeCart = useCallback(() => setCartOpen(false), []);
   // Server markup shows the empty-cart placeholder; the first client render
   // already reads storage, so "hydrated" is simply "am I on the client".
   const hydrated = useSyncExternalStore(
@@ -326,6 +337,9 @@ export function CartProvider({
       entries,
       couponCode,
       setCouponCode,
+      cartOpen,
+      openCart,
+      closeCart,
     }),
     [
       lines,
@@ -342,6 +356,9 @@ export function CartProvider({
       quantityOf,
       couponCode,
       setCouponCode,
+      cartOpen,
+      openCart,
+      closeCart,
     ]
   );
 

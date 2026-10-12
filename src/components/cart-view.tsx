@@ -73,7 +73,7 @@ export default function CartView({
     <main className="pt-40 pb-24">
       <div className="mx-auto max-w-6xl px-6">
         <h1 className="text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
-          Your cart
+          Your Cart
         </h1>
         <p className="mt-2 text-sm text-[var(--dark-text)]/60">
           {itemCount} {itemCount === 1 ? "item" : "items"}

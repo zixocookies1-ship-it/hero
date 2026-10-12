@@ -24,7 +24,7 @@ const FALLBACK: Section = {
   key: "home_why",
   label: "Home - Why Nature's Choice",
   eyebrow: "Why choose us",
-  title: "Premium quality you can taste",
+  title: "Premium Quality You Can Taste",
   titleAccent: "",
   body:
     "We believe in delivering honest jaggery - pure, natural and unadulterated. From farm to jar, every step is handled with care and tradition.",
@@ -45,7 +45,7 @@ export default async function WhyNaturesChoice() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+            <p className="text-xs font-medium uppercase tracking-widest text-[var(--white)]/70">
               {section.eyebrow}
             </p>
             <h2 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-[var(--white)]">
@@ -59,7 +59,7 @@ export default async function WhyNaturesChoice() {
               {items.map((reason) => (
                 <li
                   key={reason.title}
-                  className="rounded-2xl border border-[var(--white)]/10 bg-[var(--white)]/5 p-5"
+                  className="rounded-2xl border border-[var(--white)]/10 bg-[linear-gradient(135deg,var(--forest-green),var(--natural-green))] p-5"
                 >
                   <p className="font-semibold text-[var(--white)]">
                     {reason.title}

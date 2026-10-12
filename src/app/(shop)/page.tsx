@@ -6,6 +6,7 @@ import ProductCard from "@/components/product-card";
 import ComboCard from "@/components/combo-card";
 import WhyNaturesChoice from "@/components/why-natures-choice";
 import FarmToJar from "@/components/farm-to-jar";
+import VideoReels from "@/components/video-reels";
 import OurStoryPreview from "@/components/our-story-preview";
 import CustomerReviews from "@/components/customer-reviews";
 import FourDecisions from "@/components/four-decisions";
@@ -27,7 +28,7 @@ const HERO_FALLBACK: Section = {
   label: "Home - Hero banner",
   eyebrow: "Nature's Choice",
   title: "Authentic Indian Jaggery",
-  titleAccent: "made the traditional way",
+  titleAccent: "Made The Traditional Way",
   body:
     "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals, just honest sweetness from sugarcane farms in Uttar Pradesh.",
   body2: "",
@@ -44,7 +45,7 @@ const FEATURED_FALLBACK: Section = {
   key: "home_featured",
   label: "Home - Featured products",
   eyebrow: "Best sellers",
-  title: "Customer favourites",
+  title: "Customer Favourites",
   titleAccent: "",
   body: "",
   body2: "",
@@ -204,6 +205,8 @@ export default async function Home() {
       <WhyNaturesChoice />
 
       <FarmToJar />
+
+      <VideoReels />
 
       <OurStoryPreview />
 

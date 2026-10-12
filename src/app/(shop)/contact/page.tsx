@@ -31,7 +31,7 @@ export default async function ContactPage() {
             Get in touch
           </p>
           <h1 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
-            Let&apos;s connect
+            Let&apos;s Connect
           </h1>
           <p className="mt-4 text-base leading-relaxed text-[var(--dark-text)]/70">
             Questions about our jaggery, a wholesale enquiry, or you just want to

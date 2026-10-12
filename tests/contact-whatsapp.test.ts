@@ -105,9 +105,10 @@ test("navbar has no WhatsApp link and uses the larger logo", async () => {
 
   assert.ok(!source.includes("whatsappLink"), "navbar should not link to WhatsApp");
   assert.ok(!source.includes("WhatsAppIcon"), "navbar should not render a WhatsApp icon");
-  // 70% larger than the previous h-12 w-12 (48px) / sm:h-14 (56px).
-  assert.ok(source.includes("h-20 w-20"), "mobile logo should be h-20 w-20");
-  assert.ok(source.includes("sm:h-24 sm:w-24"), "sm+ logo should be sm:h-24 sm:w-24");
+  // Header is deliberately compact: the logo was trimmed from h-20/h-24 to
+  // h-16/sm:h-20 and the nav uses reduced vertical padding (py-2).
+  assert.ok(source.includes("h-16 w-16"), "mobile logo should be h-16 w-16");
+  assert.ok(source.includes("sm:h-20 sm:w-20"), "sm+ logo should be sm:h-20 sm:w-20");
   // The logo holds a light interior, so it is blended into the cream with
   // mix-blend-multiply instead of glowing white. White glows read as a
   // whitish plate next to the mark.

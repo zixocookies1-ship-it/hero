@@ -60,7 +60,7 @@ export default async function AboutPage() {
             About Nature&apos;s Choice
           </p>
           <h1 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
-            Jaggery the way it was always meant to taste
+            Jaggery The Way It Was Always Meant To Taste
           </h1>
         </div>
 
@@ -70,7 +70,7 @@ export default async function AboutPage() {
               Our story
             </p>
             <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--jaggery-brown)]">
-              Why should jaggery always taste the same?
+              Why Should Jaggery Always Taste The Same?
             </h2>
             <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/75">
               It started with one simple thought — why should jaggery always taste
@@ -137,7 +137,7 @@ export default async function AboutPage() {
             From an idea to chocolatey jaggery
           </p>
           <h2 className="mt-3 text-2xl font-bold text-[var(--dark-text)]">
-            Today, that little idea has grown into three unique flavours
+            Today, That Little Idea Has Grown Into Three Unique Flavours
           </h2>
 
           <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -145,7 +145,7 @@ export default async function AboutPage() {
               <li key={product.slug}>
                 <Link
                   href={`/products/${product.slug}`}
-                  className="block h-full rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-colors hover:border-[var(--ginger-terracotta)]/40"
+                  className="block h-full rounded-2xl border border-black/5 bg-[linear-gradient(160deg,var(--white),var(--mint-soft))] p-5 shadow-sm transition-colors hover:border-[var(--ginger-terracotta)]/40"
                 >
                   <span className="block font-serif text-base font-bold text-[var(--dark-text)]">
                     {product.name}
@@ -162,19 +162,19 @@ export default async function AboutPage() {
             Nature&apos;s Choice Jaggery
           </p>
           <p className="mt-1 text-base text-[var(--dark-text)]/70">
-            Traditional at heart. New in taste.
+            Traditional At Heart. New In Taste.
           </p>
         </section>
 
         <section className="mt-20">
           <h2 className="text-2xl font-bold text-[var(--dark-text)]">
-            Why choose Nature&apos;s Choice
+            Why Choose Nature&apos;s Choice
           </h2>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((value) => (
               <div
                 key={value.title}
-                className="rounded-2xl border border-black/5 bg-[var(--white)] p-6 shadow-sm"
+                className="rounded-2xl border border-black/5 bg-[linear-gradient(160deg,var(--white),var(--mint-soft))] p-6 shadow-sm"
               >
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ginger-terracotta)]/10 text-[var(--ginger-terracotta)]">
                   <svg
@@ -204,7 +204,7 @@ export default async function AboutPage() {
         </section>
 
         <section className="mt-20">
-          <h2 className="text-2xl font-bold text-[var(--dark-text)]">Our process</h2>
+          <h2 className="text-2xl font-bold text-[var(--dark-text)]">Our Process</h2>
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3">
             {process.map((step, index) => (
               <div key={step.title}>
@@ -224,7 +224,7 @@ export default async function AboutPage() {
 
         <section className="mt-20 rounded-2xl border border-black/5 bg-[var(--white)] p-8 shadow-sm">
           <h2 className="text-xl font-bold text-[var(--dark-text)]">
-            Food safety &amp; compliance
+            Food Safety &amp; Compliance
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--dark-text)]/70">
             We are currently finalising our FSSAI licence details and will publish
@@ -242,7 +242,7 @@ export default async function AboutPage() {
 
         <section className="mt-20 rounded-2xl border border-black/5 bg-[var(--warm-cream)] p-8 shadow-sm">
           <h2 className="text-xl font-bold text-[var(--dark-text)]">
-            Come say hello
+            Come Say Hello
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--dark-text)]/70">
             Our workshop and packing unit sits in Azamgarh, Uttar Pradesh. If you

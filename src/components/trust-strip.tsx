@@ -50,7 +50,7 @@ export default async function TrustStrip() {
             <div
               key={`${index}-${item.title}`}
               style={{ animationDelay: `${index * 0.7}s` }}
-              className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-5 shadow-sm transition-shadow hover:shadow-md motion-safe:animate-floaty"
+              className="flex flex-col rounded-2xl border border-black/5 bg-[linear-gradient(160deg,var(--white),var(--mint-soft))] p-5 shadow-sm transition-shadow hover:shadow-md motion-safe:animate-floaty"
             >
               <span
                 style={{ animationDelay: `${index * 0.7 + 0.4}s` }}

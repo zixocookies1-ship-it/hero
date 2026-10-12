@@ -38,7 +38,7 @@ const FALLBACK: SectionItem[] = [
 
 const FALLBACK_HEADER = {
   eyebrow: "Customer reviews",
-  title: "What people say",
+  title: "What People Say",
 };
 
 const toReview = (item: SectionItem): CustomerReview => ({

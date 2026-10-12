@@ -26,7 +26,7 @@ const founders = [
 export default function Founders() {
   return (
     <section className="mt-20">
-      <h2 className="text-2xl font-bold text-[var(--dark-text)]">The people behind it</h2>
+      <h2 className="text-2xl font-bold text-[var(--dark-text)]">The People Behind It</h2>
       <p className="mt-3 max-w-2xl text-base leading-relaxed text-[var(--dark-text)]/70">
         Two people, one shared idea about what Indian jaggery could be.
       </p>

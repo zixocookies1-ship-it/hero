@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { DM_Serif_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
-import { loadCatalogue, loadCombos } from "@/lib/cms";
+import CartDrawer from "@/components/cart-drawer";
+import { loadCatalogue, loadCombos, loadShippingPolicy } from "@/lib/cms";
 import { siteUrl } from "@/lib/env";
 
 const DEFAULT_DESCRIPTION =
@@ -56,6 +57,10 @@ export default async function RootLayout({
   // same path so a bundle can be added, priced and checked out like a product.
   const catalogue = await loadCatalogue();
   const combos = await loadCombos();
+  // The slide-out cart quotes the same shipping rule the cart and checkout
+  // pages use, so it is loaded here once (request-cached) rather than fetched
+  // from the client — no figure is ever read from the browser.
+  const shipping = await loadShippingPolicy();
 
   return (
     <html lang="en">
@@ -64,6 +69,11 @@ export default async function RootLayout({
       >
         <CartProvider catalogue={catalogue} combos={combos}>
           {children}
+          <CartDrawer
+            catalogue={catalogue}
+            shippingFeeInr={shipping.feeInr}
+            freeAboveInr={shipping.freeAboveInr}
+          />
         </CartProvider>
       </body>
     </html>

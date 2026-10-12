@@ -9,7 +9,7 @@ import AnnouncementBar from "@/components/announcement-bar";
 const links = [
   { href: "/", label: "HOME" },
   { href: "/about", label: "ABOUT" },
-  { href: "/products", label: "PRODUCTS" },
+  { href: "/products", label: "SHOP" },
   { href: "/contact", label: "CONTACT" },
 ];
 
@@ -48,20 +48,20 @@ export default function Navbar({
   announcements?: string[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { itemCount } = useCart();
+  const { itemCount, openCart } = useCart();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <AnnouncementBar messages={announcements} />
       <nav className="border-b border-black/5 bg-[var(--warm-cream)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
         <Link href="/" aria-label="Nature's Choice Jaggery home">
           <Image
               src="/images/logo.png?v=2"
             alt=""
             width={96}
             height={96}
-              className="h-20 w-20 object-contain mix-blend-multiply sm:h-24 sm:w-24"
+              className="h-16 w-16 object-contain mix-blend-multiply sm:h-20 sm:w-20"
             priority
           />
         </Link>
@@ -76,15 +76,23 @@ export default function Navbar({
               {link.label}
             </Link>
           ))}
-          <Link href="/cart" className="transition-colors hover:opacity-70">
+          <button
+            type="button"
+            onClick={openCart}
+            className="transition-colors hover:opacity-70"
+          >
             <CartIcon count={itemCount} />
-          </Link>
+          </button>
         </div>
 
         <div className="flex items-center gap-3 md:hidden">
-          <Link href="/cart" className="transition-colors hover:opacity-70">
+          <button
+            type="button"
+            onClick={openCart}
+            className="transition-colors hover:opacity-70"
+          >
             <CartIcon count={itemCount} />
-          </Link>
+          </button>
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
@@ -122,13 +130,16 @@ export default function Navbar({
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/cart"
-              onClick={() => setIsOpen(false)}
-              className="block rounded-lg px-3 py-2.5 text-base font-medium uppercase tracking-wide text-[var(--dark-text)] transition-colors hover:bg-black/5"
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                openCart();
+              }}
+              className="block w-full rounded-lg px-3 py-2.5 text-left text-base font-medium uppercase tracking-wide text-[var(--dark-text)] transition-colors hover:bg-black/5"
             >
               Cart ({itemCount})
-            </Link>
+            </button>
           </nav>
         </div>
       )}

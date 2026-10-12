@@ -24,7 +24,7 @@ export default async function ProductsPage() {
             All Products
           </p>
           <h1 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
-            Three authentic flavours
+            Three Authentic Flavours
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-[var(--dark-text)]/70">
             Every jar is slow-cooked in pure clay pots over natural wood fire,

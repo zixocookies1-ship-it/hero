@@ -8,7 +8,7 @@ import {
   POLICIES,
   type Policy,
 } from "@/lib/policies";
-import { getShippingPolicy } from "@/lib/pricing";
+import { loadShippingPolicy } from "@/lib/cms";
 import { formatPrice } from "@/lib/products";
 
 /**
@@ -43,9 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * the live configured values. A sentence whose token has no configured value
  * (e.g. the free-delivery line when no threshold is set) is dropped whole,
  * rather than rendering a dangling placeholder.
+ *
+ * The figures come from the same loader the cart and checkout use, so the
+ * printed policy can never describe a charge the shopper was not actually
+ * quoted — one configuration, one set of numbers.
  */
-function withLiveShippingCharges(template: Policy): Policy {
-  const shipping = getShippingPolicy();
+async function withLiveShippingCharges(template: Policy): Promise<Policy> {
+  const shipping = await loadShippingPolicy();
   const tokens: Record<string, string | null> = {
     deliveryFee: formatPrice(shipping.feeInr),
     freeAbove:
@@ -83,14 +87,14 @@ export default async function PolicyPage({ params }: Props) {
   const template = getPolicy(slug);
   if (!template) notFound();
 
-  const policy = withLiveShippingCharges(template);
+  const policy = await withLiveShippingCharges(template);
   const draft = isPolicyDraft(template);
 
   return (
     <main className="min-h-screen pb-24">
       <section className="bg-[var(--jaggery-brown)] pb-16 pt-40 text-[var(--white)]">
         <div className="mx-auto max-w-7xl px-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+          <p className="text-xs font-medium uppercase tracking-widest text-[var(--white)]/70">
             Policies &amp; Legal
           </p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold">

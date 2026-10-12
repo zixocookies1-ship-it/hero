@@ -34,7 +34,7 @@ export default async function Footer() {
     <footer className="relative overflow-hidden bg-[var(--jaggery-brown)] text-[var(--white)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80rem_30rem_at_120%_-10%,rgba(200,121,69,0.28),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80rem_30rem_at_120%_-10%,rgba(45,104,65,0.35),transparent_60%)]"
       />
       <div
         aria-hidden
@@ -83,7 +83,7 @@ export default async function Footer() {
                 <li key={product.slug}>
                   <Link
                     href={`/products/${product.slug}`}
-                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                    className="transition-colors hover:text-[var(--white)]"
                   >
                     {product.name}
                   </Link>
@@ -99,7 +99,7 @@ export default async function Footer() {
                 <li key={`${link.href}-${link.label}`}>
                   <Link
                     href={link.href}
-                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                    className="transition-colors hover:text-[var(--white)]"
                   >
                     {link.label}
                   </Link>
@@ -115,7 +115,7 @@ export default async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="transition-colors hover:text-[var(--ginger-terracotta)]"
+                    className="transition-colors hover:text-[var(--white)]"
                   >
                     {link.label}
                   </Link>

@@ -34,7 +34,7 @@ const FALLBACK: Section = {
   key: "home_decisions",
   label: "Home - Five decisions",
   eyebrow: "How we make it",
-  title: "Five decisions that explain the taste",
+  title: "Five Decisions That Explain The Taste",
   titleAccent: "",
   body:
     "We did not set out to reinvent jaggery. We made five decisions, and you can taste all of them.",
@@ -74,11 +74,11 @@ export default async function FourDecisions() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
-        <div className="relative max-w-3xl rounded-[2rem] border border-white/70 bg-[var(--white)]/75 p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_48px_-28px_rgba(90,50,31,0.45)] backdrop-blur-md sm:p-10">
+        <div className="relative max-w-5xl rounded-[2rem] border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.9),rgba(227,238,230,0.85))] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_48px_-28px_rgba(23,61,37,0.35)] backdrop-blur-md sm:p-10">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
             {section.eyebrow}
           </p>
-          <h2 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-[var(--dark-text)]">
+          <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-[var(--dark-text)]">
             {section.title}
           </h2>
           <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/70">
@@ -90,12 +90,12 @@ export default async function FourDecisions() {
           {items.map((decision, index) => (
             <li
               key={`${index}-${decision.title}`}
-              className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[var(--white)]/85 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(90,50,31,0.5)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(90,50,31,0.55)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7"
+              className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(227,238,230,0.88))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(23,61,37,0.4)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(23,61,37,0.5)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7"
             >
               {/* Warm wash that fades up on hover, under the text. */}
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_100%_at_0%_0%,rgba(200,121,69,0.14),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
+                className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_100%_at_0%_0%,rgba(45,104,65,0.14),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
               />
 
               <span
@@ -106,7 +106,7 @@ export default async function FourDecisions() {
               </span>
 
               <div>
-                <h3 className="font-serif text-xl font-bold text-[var(--dark-text)]">
+                <h3 className="font-serif text-xl font-bold text-[var(--natural-green)]">
                   {decision.title}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--dark-text)]/70">

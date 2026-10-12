@@ -44,8 +44,8 @@ export const POLICIES: Policy[] = [
       {
         heading: "Delivery charges",
         body: [
-          "A flat delivery charge of {{deliveryFee}} is added to every order.",
-          "Orders of {{freeAbove}} or more qualify for free delivery.",
+          "The flat delivery charge applied to an order is {{deliveryFee}}.",
+          "Orders of {{freeAbove}} or more are delivered free of charge.",
         ],
       },
       {

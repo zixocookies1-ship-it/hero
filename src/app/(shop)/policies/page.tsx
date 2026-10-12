@@ -15,7 +15,7 @@ export default function PoliciesIndexPage() {
     <main className="min-h-screen pb-24">
       <section className="bg-[var(--jaggery-brown)] pb-16 pt-40 text-[var(--white)]">
         <div className="mx-auto max-w-7xl px-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+          <p className="text-xs font-medium uppercase tracking-widest text-[var(--white)]/70">
             Policies &amp; Legal
           </p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold">

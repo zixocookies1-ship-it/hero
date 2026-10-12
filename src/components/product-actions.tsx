@@ -12,7 +12,7 @@ export default function ProductActions({
   product: Product;
   layout?: "stacked" | "row";
 }) {
-  const { addItem, quantityOf, hydrated } = useCart();
+  const { addItem, quantityOf, hydrated, openCart } = useCart();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +28,13 @@ export default function ProductActions({
 
   const handleAdd = () => {
     const result = addItem(product.slug, 1);
-    if (!result.ok) setError(result.error);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    // Adding surfaces the slide-out cart so the shopper sees the line land with
+    // its quantity, coupon and total. "Buy now" skips this — it navigates.
+    openCart();
   };
 
   const handleBuyNow = () => {

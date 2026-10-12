@@ -12,7 +12,7 @@ import { formatPrice } from "@/lib/products";
  * through cart, checkout and the Razorpay order exactly like a product.
  */
 export default function ComboCard({ combo }: { combo: Combo }) {
-  const { addComboItem, quantityOf, hydrated } = useCart();
+  const { addComboItem, quantityOf, hydrated, openCart } = useCart();
   const [error, setError] = useState<string | null>(null);
 
   const inCart = hydrated && quantityOf(comboCartSlug(combo.id)) > 0;
@@ -25,11 +25,15 @@ export default function ComboCard({ combo }: { combo: Combo }) {
 
   const handleAdd = () => {
     const result = addComboItem(combo.id, 1);
-    if (!result.ok) setError(result.error);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    openCart();
   };
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[var(--white)] shadow-sm">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-[linear-gradient(160deg,var(--white),var(--mint-soft))] shadow-sm">
       <div className="relative aspect-square bg-[var(--warm-cream)] p-4">
         <Image
           src={combo.image}

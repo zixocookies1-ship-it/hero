@@ -35,7 +35,7 @@ const FALLBACK_ITEMS: SectionItem[] = [
   },
 ];
 
-const FALLBACK = { eyebrow: "FAQ", title: "Quick answers" };
+const FALLBACK = { eyebrow: "FAQ", title: "Quick Answers" };
 
 export default function FAQPreview({
   items,

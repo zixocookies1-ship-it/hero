@@ -12,7 +12,7 @@ const FALLBACK: Section = {
   key: "home_story",
   label: "Home - Our story preview",
   eyebrow: "Our story",
-  title: "Traditional at heart. New in taste.",
+  title: "Traditional At Heart. New In Taste.",
   titleAccent: "",
   body:
     "It started with one simple thought - why should jaggery always taste the same? We wanted to keep the goodness and familiarity of traditional jaggery, but give it a new twist that today's generation would genuinely enjoy.",

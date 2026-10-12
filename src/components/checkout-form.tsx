@@ -235,7 +235,7 @@ export default function CheckoutForm({
         description: `Order ${order.orderId}`,
         prefill,
         notes: { orderId: order.orderId },
-        theme: { color: "#5A321F" },
+        theme: { color: "#173D25" },
         retry: { enabled: true },
         handler: (response) => {
           void verifyPayment(response);
@@ -611,7 +611,7 @@ export default function CheckoutForm({
           </div>
         </dl>
 
-        {freeAboveInr !== null && (
+        {freeAboveInr !== null && freeAboveInr > 0 && (
           <p className="mt-3 text-xs text-[var(--dark-text)]/55">
             Free shipping on orders above {formatPrice(freeAboveInr)}.
           </p>
@@ -635,7 +635,7 @@ export default function CheckoutForm({
 type RazorpayOptionsPrefill = { name?: string; contact?: string; email?: string };
 
 function CheckoutLines() {
-  const { entries } = useCart();
+  const { entries, removeItem } = useCart();
 
   return (
     <ul className="mt-5 space-y-4">
@@ -680,6 +680,14 @@ function CheckoutLines() {
             <span className="text-sm font-semibold text-[var(--jaggery-brown)]">
               {formatPrice(entry.lineTotal)}
             </span>
+            <button
+              type="button"
+              onClick={() => removeItem(slug)}
+              aria-label={`Remove ${name} from your order`}
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-black/5 text-base leading-none text-[var(--dark-text)]/45 transition-colors hover:border-[var(--ginger-terracotta)]/50 hover:text-[var(--ginger-terracotta)]"
+            >
+              &times;
+            </button>
           </li>
         );
       })}
