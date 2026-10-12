@@ -3,11 +3,28 @@ import { DM_Serif_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
 import { loadCatalogue, loadCombos } from "@/lib/cms";
+import { siteUrl } from "@/lib/env";
+
+const DEFAULT_DESCRIPTION =
+  "Premium Indian jaggery - traditional gold-kettle method, no preservatives, three authentic flavours.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: "Nature's Choice Jaggery",
-  description:
-    "Premium Indian jaggery - traditional gold-kettle method, no preservatives, three authentic flavours.",
+  description: DEFAULT_DESCRIPTION,
+  applicationName: "Nature's Choice Jaggery",
+  openGraph: {
+    type: "website",
+    siteName: "Nature's Choice Jaggery",
+    locale: "en_IN",
+    title: "Nature's Choice Jaggery",
+    description: DEFAULT_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary",
+    title: "Nature's Choice Jaggery",
+    description: DEFAULT_DESCRIPTION,
+  },
 };
 
 // The design calls for DM Serif Display on headings and Inter for body copy.

@@ -315,3 +315,16 @@ export const POLICY_LINKS = POLICIES.map((policy) => ({
 
 export const getPolicy = (slug: string): Policy | undefined =>
   POLICIES.find((policy) => policy.slug === slug);
+
+/**
+ * True while a policy still carries an unresolved `[to be confirmed]`, `[X–Y]`,
+ * `[X]` or `[city]` placeholder. The detail page shows a clear draft notice on
+ * such pages rather than publishing bracketed figures as if they were decided.
+ */
+export const isPolicyDraft = (policy: Policy): boolean => {
+  const joined = [
+    policy.intro,
+    ...policy.sections.flatMap((section) => section.body),
+  ].join(" ");
+  return joined.includes("[");
+};

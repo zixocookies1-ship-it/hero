@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Policies & Legal | Nature's Choice Jaggery",
   description:
     "Shipping, delivery, returns, cancellations, privacy and terms for Nature's Choice Jaggery.",
+  alternates: { canonical: "/policies" },
 };
 
 export default function PoliciesIndexPage() {

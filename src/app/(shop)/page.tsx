@@ -12,9 +12,10 @@ import FourDecisions from "@/components/four-decisions";
 import { loadCatalogue, loadCombos, loadSections, type Section } from "@/lib/cms";
 
 export const metadata: Metadata = {
-  title: "Nature's Choice Jaggery",
+  title: "Authentic Indian Jaggery - Nature's Choice Jaggery",
   description:
-    "Premium Indian jaggery - traditional gold-kettle method, no preservatives, three authentic flavours.",
+    "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals — Desi Chocolatey, Desi Til and Desi Elaichi, made in Uttar Pradesh.",
+  alternates: { canonical: "/" },
 };
 
 /**
@@ -25,7 +26,7 @@ const HERO_FALLBACK: Section = {
   key: "home_hero",
   label: "Home - Hero banner",
   eyebrow: "Nature's Choice",
-  title: "Authentic Indian Jaggery,",
+  title: "Authentic Indian Jaggery",
   titleAccent: "made the traditional way",
   body:
     "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals, just honest sweetness from sugarcane farms in Uttar Pradesh.",

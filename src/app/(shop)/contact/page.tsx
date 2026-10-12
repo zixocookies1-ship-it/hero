@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Contact - Nature's Choice Jaggery",
   description:
     "Questions about our jaggery, wholesale enquiries or partnerships? Send us a message and we will get back to you.",
+  alternates: { canonical: "/contact" },
 };
 
 export default async function ContactPage() {
@@ -85,7 +86,7 @@ export default async function ContactPage() {
             </div>
           </div>
 
-          <ContactForm whatsappNumber={brand.whatsappNumber} />
+          <ContactForm whatsappNumber={brand.whatsappNumber} email={brand.email} />
         </div>
       </div>
 

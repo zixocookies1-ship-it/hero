@@ -23,12 +23,6 @@ export type Product = {
   images: string[];
 };
 
-const imageSet = (slug: string, count: number) =>
-  Array.from(
-    { length: count },
-    (_, index) => `/images/products/${slug}/${String(index + 1).padStart(2, "0")}.jpeg`
-  );
-
 /**
  * Shelf life in months, quoted on the about page, the trust strip and the FAQ.
  * Kept here as the single value so those three cannot drift apart.
@@ -96,18 +90,25 @@ export const products: Product[] = [
     sellingPrice: 239,
     discountPercent: 20,
     inStock: true,
-    images: imageSet("desi-til-chocolatey-jaggery", 7),
+    images: [
+      "/images/products/desi-til-chocolatey-jaggery/06.jpeg",
+      "/images/products/desi-til-chocolatey-jaggery/02.jpeg",
+      "/images/products/desi-til-chocolatey-jaggery/03.jpeg",
+      "/images/products/desi-til-chocolatey-jaggery/04.jpeg",
+      "/images/products/desi-til-chocolatey-jaggery/05.jpeg",
+      "/images/products/desi-til-chocolatey-jaggery/07.jpeg",
+    ],
   },
   {
     slug: "desi-elaichi-chocolatey-jaggery",
     name: "Desi Elaichi Chocolatey Jaggery",
-    variantName: "Desi Elaichi & Sonth Chocolatey Gud",
+    variantName: "Desi Elaichi Chocolatey Gud",
     shortName: "Desi Elaichi",
     flavourNote: "Cardamom Infused",
     description:
       "Green cardamom and roasted sesame folded into slow-cooked jaggery for an aromatic, gently warming sweetness. A modern finish on an age-old Indian recipe, made for chai, sweets and everyday cooking.",
     ingredients:
-      "Organic sugarcane juice, jaggery, green cardamom, roasted sesame (sonth), cocoa, natural colour.",
+      "Organic sugarcane juice, jaggery, green cardamom, roasted sesame (til), cocoa, natural colour.",
     highlights: [
       "Aromatic cardamom and roasted sesame",
       "No preservatives or chemicals",
@@ -120,7 +121,13 @@ export const products: Product[] = [
     sellingPrice: 239,
     discountPercent: 20,
     inStock: true,
-    images: imageSet("desi-elaichi-chocolatey-jaggery", 6),
+    images: [
+      "/images/products/desi-elaichi-chocolatey-jaggery/02 (1).jpeg",
+      "/images/products/desi-elaichi-chocolatey-jaggery/03 (1).jpeg",
+      "/images/products/desi-elaichi-chocolatey-jaggery/04 (1).jpeg",
+      "/images/products/desi-elaichi-chocolatey-jaggery/05 (1).jpeg",
+      "/images/products/desi-elaichi-chocolatey-jaggery/06 (1).jpeg",
+    ],
   },
 ];
 

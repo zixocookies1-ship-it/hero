@@ -1,11 +1,13 @@
-﻿import Link from "next/link";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import CartGate from "@/components/cart-gate";
 import CheckoutForm from "@/components/checkout-form";
 import { loadBrand, loadSettings, loadShippingPolicy } from "@/lib/cms";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Checkout - Nature's Choice Jaggery",
   description: "Enter your delivery details and pay securely with Razorpay.",
+  robots: { index: false, follow: false },
 };
 
 export default async function CheckoutPage() {

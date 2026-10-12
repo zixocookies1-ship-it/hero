@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Products - Nature's Choice Jaggery",
   description:
     "Shop all three authentic flavours of Nature's Choice Jaggery. 500g packs, traditional gold-kettle method, no preservatives.",
+  alternates: { canonical: "/products" },
 };
 
 export default async function ProductsPage() {

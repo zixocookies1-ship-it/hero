@@ -27,7 +27,7 @@ const FALLBACK_ITEMS: SectionItem[] = [
   },
   {
     title: "Do you ship across India?",
-    text: "Yes. We ship within India, and shipping is free on standard orders. Delivery timelines are confirmed when your order is placed.",
+    text: "Yes. We ship within India. Delivery charges are calculated on your order value and shown at checkout before you pay.",
   },
   {
     title: "What is the difference between the three flavours?",
@@ -46,7 +46,12 @@ export default function FAQPreview({
   eyebrow?: string;
   title?: string;
 }) {
-  const faqs = items && items.length > 0 ? items : FALLBACK_ITEMS;
+  // Empty answers were showing as blank sections when the database held FAQ
+  // items without text. Fall back to the shipped copy whenever nothing usable
+  // is stored, and never render an item that has no answer.
+  const stored = items && items.length > 0 ? items : FALLBACK_ITEMS;
+  const usable = stored.filter((faq) => (faq.text ?? "").trim().length > 0);
+  const faqs = usable.length > 0 ? usable : FALLBACK_ITEMS;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
@@ -66,7 +71,7 @@ export default function FAQPreview({
             const isOpen = openIndex === index;
             return (
               <div
-                key={faq.title}
+                key={`${faq.title}-${index}`}
                 className="overflow-hidden rounded-2xl border border-black/5 bg-[var(--white)] shadow-sm"
               >
                 <button

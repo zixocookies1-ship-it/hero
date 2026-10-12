@@ -32,6 +32,15 @@ export function optionalEnv(name: string): string | undefined {
 
 export const hasEnv = (name: string): boolean => read(name) !== undefined;
 
+/**
+ * Canonical public origin used for canonical URLs, Open Graph links and the
+ * sitemap. Prefer the production domain once the app owns one (set
+ * `NEXT_PUBLIC_SITE_URL`); until then the deployed preview URL is used so
+ * nothing points at a host that does not exist yet.
+ */
+export const siteUrl = (): string =>
+  optionalEnv("NEXT_PUBLIC_SITE_URL") ?? "https://hero3-flame.vercel.app";
+
 /** True when enough is configured to actually take a payment. */
 export const razorpayConfigured = (): boolean =>
   hasEnv("RAZORPAY_KEY_ID") && hasEnv("RAZORPAY_KEY_SECRET");

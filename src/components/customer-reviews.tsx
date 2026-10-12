@@ -32,7 +32,7 @@ const FALLBACK: SectionItem[] = [
     title: "Rohit Verma",
     subtitle: "Desi Elaichi Chocolatey Jaggery",
     rating: 5,
-    text: "I am a tea-drinker's tea drinker's tea drinker, and this has become the default. The elaichi note is present without being sweet.",
+    text: "I am a tea drinker, and this has become the default. The elaichi note is present without being sweet.",
   },
 ];
 

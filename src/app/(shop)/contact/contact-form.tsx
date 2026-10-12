@@ -35,7 +35,13 @@ const validate = (form: typeof initialForm): FieldErrors => {
   return errors;
 };
 
-export default function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
+export default function ContactForm({
+  whatsappNumber,
+  email,
+}: {
+  whatsappNumber: string;
+  email: string;
+}) {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sent, setSent] = useState(false);
@@ -228,10 +234,10 @@ export default function ContactForm({ whatsappNumber }: { whatsappNumber: string
           WhatsApp should have opened with your message ready to send. If it did
           not open, email us at{" "}
           <a
-            href="mailto:support@natureschoicejaggery.com"
+            href={`mailto:${email}`}
             className="underline underline-offset-4"
           >
-            support@natureschoicejaggery.com
+            {email}
           </a>
           .
         </p>

@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "About - Nature's Choice Jaggery",
   description:
     "The story behind Nature's Choice Jaggery - a traditional Indian jaggery brand from Azamgarh, Uttar Pradesh, and its three chocolatey flavours.",
+  alternates: { canonical: "/about" },
 };
 
 const process = [

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import {
   getPolicy,
+  isPolicyDraft,
   POLICIES,
   type Policy,
 } from "@/lib/policies";
@@ -24,8 +25,16 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const policy = getPolicy(slug);
+  if (!policy) {
+    return {
+      title: "Policies",
+      robots: { index: false },
+    };
+  }
   return {
-    title: policy ? `${policy.title} | Nature's Choice Jaggery` : "Policies",
+    title: `${policy.title} | Nature's Choice Jaggery`,
+    description: policy.shortDescription,
+    alternates: { canonical: `/policies/${policy.slug}` },
   };
 }
 
@@ -75,6 +84,7 @@ export default async function PolicyPage({ params }: Props) {
   if (!template) notFound();
 
   const policy = withLiveShippingCharges(template);
+  const draft = isPolicyDraft(template);
 
   return (
     <main className="min-h-screen pb-24">
@@ -120,6 +130,13 @@ export default async function PolicyPage({ params }: Props) {
         </aside>
 
         <article className="rounded-2xl border border-black/5 bg-[var(--white)] p-6 sm:p-10">
+          {draft && (
+            <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900">
+              <strong>Draft — details pending.</strong> The specific figures and
+              timelines on this page are not yet confirmed by us and will be
+              finalised before launch. Contact us for the current details.
+            </div>
+          )}
           {policy.sections.map((section, index) => (
             <section
               key={`${policy.slug}-${index}`}

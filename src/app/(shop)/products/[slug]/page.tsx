@@ -5,7 +5,10 @@ import ProductCard from "@/components/product-card";
 import ProductGallery from "@/components/product-gallery";
 import PriceDisplay from "@/components/price-display";
 import WhatsAppEnquiry from "@/components/whatsapp-enquiry";
-import { loadCatalogue } from "@/lib/cms";
+import { BRAND } from "@/lib/brand";
+import { loadCatalogue, loadShippingPolicy } from "@/lib/cms";
+import { siteUrl } from "@/lib/env";
+import { formatPrice } from "@/lib/products";
 
 export async function generateStaticParams() {
   const products = await loadCatalogue();
@@ -24,6 +27,7 @@ export async function generateMetadata({
   return {
     title: `${product.name} - Nature's Choice Jaggery`,
     description: product.description,
+    alternates: { canonical: `/products/${product.slug}` },
   };
 }
 
@@ -33,12 +37,43 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const products = await loadCatalogue();
+  const [products, policy] = await Promise.all([
+    loadCatalogue(),
+    loadShippingPolicy(),
+  ]);
   const product = products.find((entry) => entry.slug === slug);
 
   if (!product) notFound();
 
   const related = products.filter((item) => item.slug !== product.slug);
+
+  const deliveryNote = (() => {
+    if (!policy.shippingEnabled || policy.feeInr === 0) {
+      return "Free delivery across India";
+    }
+    if (policy.freeAboveInr === null) {
+      return `${formatPrice(policy.feeInr)} flat delivery across India`;
+    }
+    return `${formatPrice(policy.feeInr)} flat delivery across India, free on orders over ${formatPrice(policy.freeAboveInr)}`;
+  })();
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((src) => new URL(src, siteUrl()).toString()),
+    brand: { "@type": "Brand", name: BRAND.name },
+    offers: {
+      "@type": "Offer",
+      url: new URL(`/products/${product.slug}`, siteUrl()).toString(),
+      priceCurrency: "INR",
+      price: product.sellingPrice,
+      availability: product.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+  };
 
   return (
     <main className="pt-40 pb-24">
@@ -65,6 +100,7 @@ export default async function ProductDetailPage({
                 discountPercent={product.discountPercent}
               />
               <p className="mt-1 text-sm text-[var(--dark-text)]/60">Inclusive of all taxes</p>
+              <p className="mt-1 text-sm text-[var(--dark-text)]/60">{deliveryNote}</p>
             </div>
 
             <p className="mt-6 text-base leading-relaxed text-[var(--dark-text)]/80">
@@ -129,6 +165,11 @@ export default async function ProductDetailPage({
           </div>
         </section>
       </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
     </main>
   );
 }
