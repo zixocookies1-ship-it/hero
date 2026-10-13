@@ -10,6 +10,7 @@ import VideoReels from "@/components/video-reels";
 import OurStoryPreview from "@/components/our-story-preview";
 import CustomerReviews from "@/components/customer-reviews";
 import FourDecisions from "@/components/four-decisions";
+import TrustBadges from "@/components/trust-badges";
 import { loadCatalogue, loadCombos, loadSections, type Section } from "@/lib/cms";
 
 export const metadata: Metadata = {
@@ -213,6 +214,8 @@ export default async function Home() {
       <FourDecisions />
 
       <CustomerReviews />
+
+      <TrustBadges />
     </>
   );
 }
