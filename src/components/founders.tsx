@@ -1,8 +1,11 @@
+import Image from "next/image";
+
 const founders = [
   {
     name: "Ruby Gupta",
     role: "Founder, Nature's Choice Jaggery",
     initials: "RG",
+    image: "/images/founder.PNG",
     paragraphs: [
       "Ruby started this journey with a simple belief — traditional Indian flavours can have a place in the modern world too.",
       "Her vision was to create something familiar, but different. Something that could make people look at jaggery in a completely new way.",
@@ -14,6 +17,7 @@ const founders = [
     name: "Vijay Gupta",
     role: "Co-Founder, Nature's Choice Jaggery",
     initials: "VG",
+    image: "/images/cofounder.PNG",
     paragraphs: [
       "For Vijay, this journey has been about turning an idea into something real — from developing the product to packaging it, taking it to customers, and building the brand step by step.",
       "There’s been a lot to learn along the way, but one thing has stayed constant — build something people can genuinely trust and enjoy.",
@@ -38,11 +42,14 @@ export default function Founders() {
             className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-7 shadow-sm"
           >
             <div className="flex items-center gap-4">
-              <span
-                aria-hidden="true"
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--jaggery-brown)] font-serif text-lg font-bold text-[var(--white)]"
-              >
-                {founder.initials}
+              <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)]">
+                <Image
+                  src={founder.image}
+                  alt={founder.name}
+                  fill
+                  sizes="96px"
+                  className="object-cover object-top"
+                />
               </span>
               <div>
                 <h3 className="font-serif text-xl font-bold text-[var(--dark-text)]">
