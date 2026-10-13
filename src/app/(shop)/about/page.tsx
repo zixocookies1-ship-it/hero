@@ -64,8 +64,9 @@ export default async function AboutPage() {
           </h1>
         </div>
 
-        <section className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <div>
+        <section className="overflow-hidden rounded-[2rem] border border-black/5 bg-[var(--warm-cream)] p-6 shadow-[0_18px_44px_-32px_rgba(26,18,8,0.35)] sm:p-10 lg:p-12">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+            <div>
             <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
               Our story
             </p>
@@ -127,6 +128,7 @@ export default async function AboutPage() {
               height={800}
               className="h-full w-full rounded-xl object-cover"
             />
+          </div>
           </div>
         </section>
 

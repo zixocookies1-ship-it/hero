@@ -28,6 +28,10 @@ prisma/dev.db-wal
 
 # test output
 /tmp
+tmp-*.log
+tmp-*.txt
+tmp-*.ts
+
 
 # misc
 .DS_Store

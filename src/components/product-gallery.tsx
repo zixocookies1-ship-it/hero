@@ -52,7 +52,7 @@ export default function ProductGallery({
   return (
     <div className="flex flex-col gap-3">
       <div
-        className="relative mx-auto aspect-square w-full max-w-[286px] touch-pan-y overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)]"
+        className="relative mx-auto aspect-square w-full max-w-[458px] touch-pan-y overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)]"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -61,7 +61,7 @@ export default function ProductGallery({
           src={activeImage}
           alt={`${alt} - view ${activeIndex + 1}`}
           fill
-          sizes="(max-width: 1024px) 90vw, 286px"
+          sizes="(max-width: 1024px) 90vw, 458px"
           className="scale-100 object-cover transition-transform duration-300"
           priority
         />
@@ -80,7 +80,7 @@ export default function ProductGallery({
               onClick={() => setActiveIndex(index)}
               aria-label={`Show image ${index + 1}`}
               aria-current={index === activeIndex}
-              className={`relative aspect-square w-12 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-[var(--warm-cream)] transition-colors ${
+              className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-[var(--warm-cream)] transition-colors ${
                 index === activeIndex
                   ? "border-[var(--ginger-terracotta)]"
                   : "border-black/5 hover:border-[var(--ginger-terracotta)]/50"
