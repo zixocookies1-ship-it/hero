@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   body:
     "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals, just honest sweetness from sugarcane farms in Uttar Pradesh.",
   body2: "",
-  image: "/images/hero banner.jpeg",
+  image: "/images/hero.jpeg",
   imageMobile: "",
   items: [],
   links: [
@@ -96,7 +96,7 @@ export default async function Home() {
           }
         />
         <Image
-          src={hero.imageMobile || hero.image || "/images/hero banner.jpeg"}
+          src={hero.imageMobile || hero.image || "/images/hero.jpeg"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
@@ -104,7 +104,7 @@ export default async function Home() {
           className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100 md:hidden"
         />
         <Image
-          src={hero.image || "/images/hero banner.jpeg"}
+          src={hero.image || "/images/hero.jpeg"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
