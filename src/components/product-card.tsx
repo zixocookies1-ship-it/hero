@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--dark-text)]/10 bg-[var(--white)] shadow-sm transition-all duration-500 ease-out hover:-translate-y-2 hover:border-[var(--mint-soft)] hover:shadow-xl">
-      <div className="relative bg-[linear-gradient(135deg,var(--warm-cream),var(--mint-soft))]">
+      <div className="relative aspect-[4/3] w-full bg-[linear-gradient(135deg,var(--warm-cream),var(--mint-soft))]">
         <Link
           href={`/products/${product.slug}`}
           className="block"
@@ -55,26 +55,26 @@ export default function ProductCard({ product }: { product: Product }) {
           <div
             ref={stripRef}
             onScroll={onStripScroll}
-            className="flex h-60 w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {images.length > 0 ? (
               images.map((src, index) => (
                 <div
                   key={`${product.slug}-${index}-${src}`}
-                  className="relative h-60 w-full shrink-0 snap-center overflow-hidden"
+                  className="relative h-full w-full shrink-0 snap-center overflow-hidden"
                 >
-                  <Image
-                    src={src}
-                    alt={index === active ? `${product.name} ${product.weight}` : ""}
-                    fill
-                    sizes="(max-width: 768px) 80vw, 340px"
-                    className="object-contain p-5 transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100"
-                    loading="lazy"
-                  />
+                   <Image
+                     src={src}
+                     alt={index === active ? `${product.name} ${product.weight}` : ""}
+                     fill
+                     sizes="(max-width: 768px) 80vw, 280px"
+                     className="object-cover object-center"
+                     loading="lazy"
+                   />
                 </div>
               ))
             ) : (
-              <div className="flex h-60 w-full shrink-0 snap-center items-center justify-center">
+              <div className="flex h-full w-full shrink-0 snap-center items-center justify-center">
                 <span className="text-sm text-[var(--dark-text)]/50">No photos yet</span>
               </div>
             )}
@@ -107,11 +107,11 @@ export default function ProductCard({ product }: { product: Product }) {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4">
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--natural-green)]">
           {product.variantName}
         </p>
-        <h3 className="mt-2 font-serif text-xl font-normal leading-tight text-[var(--dark-text)]">
+        <h3 className="mt-1.5 font-serif text-lg font-normal leading-tight text-[var(--dark-text)]">
           <Link
             href={`/products/${product.slug}`}
             className="hover:text-[var(--ginger-terracotta)]"
@@ -119,11 +119,11 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </Link>
         </h3>
-        <p className="mt-2 line-clamp-2 text-[0.8rem] leading-relaxed text-[var(--dark-text)]/60">
+        <p className="mt-1 line-clamp-2 text-[0.75rem] leading-relaxed text-[var(--dark-text)]/60">
           {product.description}
         </p>
 
-        <div className="mt-4">
+        <div className="mt-3">
           <PriceDisplay
             sellingPrice={product.sellingPrice}
             mrp={product.mrp}
@@ -132,7 +132,7 @@ export default function ProductCard({ product }: { product: Product }) {
           />
         </div>
 
-        <div className="mt-5 flex-1" />
+        <div className="mt-3 flex-1" />
 
         <ProductActions product={product} layout="card" />
       </div>

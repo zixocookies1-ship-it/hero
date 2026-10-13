@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  * Copy the hero shipped with. Used only when the `home_hero` document is
  * missing or the database is unreachable, so the section never renders blank.
  */
-const HERO_FALLBACK: Section = {
+  const HERO_FALLBACK: Section = {
   key: "home_hero",
   label: "Home - Hero banner",
   eyebrow: "Nature's Choice",
@@ -33,7 +33,7 @@ const HERO_FALLBACK: Section = {
   body:
     "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals, just honest sweetness from sugarcane farms in Uttar Pradesh.",
   body2: "",
-  image: "/images/hero-banner.png",
+  image: "/images/hero banner.jpeg",
   imageMobile: "",
   items: [],
   links: [
@@ -85,7 +85,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="group relative flex min-h-[92vh] items-center justify-center overflow-hidden">
+      <section className="group relative flex min-h-screen items-center justify-center overflow-hidden">
         <Link
           href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
           className="absolute inset-0 z-[5]"
@@ -96,7 +96,7 @@ export default async function Home() {
           }
         />
         <Image
-          src={hero.imageMobile || hero.image || "/images/hero-banner.png"}
+          src={hero.imageMobile || hero.image || "/images/hero banner.jpeg"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
@@ -104,7 +104,7 @@ export default async function Home() {
           className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100 md:hidden"
         />
         <Image
-          src={hero.image || "/images/hero-banner.png"}
+          src={hero.image || "/images/hero banner.jpeg"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
@@ -168,7 +168,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {displayed.map((product) => (
               <ProductCard key={product.slug} product={product} />
             ))}

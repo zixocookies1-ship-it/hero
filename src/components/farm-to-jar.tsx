@@ -45,52 +45,57 @@ export default async function FarmToJar() {
   return (
     <section className="bg-[var(--white)] py-16">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl bg-[var(--warm-cream)] p-4">
-            <Image
-              src={section.image || "/images/farm-to-jar.png"}
-              alt="From sugarcane farm to jar"
-              width={1200}
-              height={800}
-              className="h-full w-full rounded-xl object-cover"
-            />
-          </div>
+        {/* Framed so the section reads as one object rather than floating copy on
+            a white page. The herbal fill is the lightest brand tone, so it adds
+            depth without competing with the terracotta CTAs. */}
+        <div className="rounded-3xl border border-[var(--natural-green)]/10 bg-[var(--mint-soft)] p-6 sm:p-10 lg:p-12">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+            <div className="overflow-hidden rounded-2xl bg-[var(--white)] p-4">
+              <Image
+                src={section.image || "/images/farm-to-jar.png"}
+                alt="From sugarcane farm to jar"
+                width={1200}
+                height={800}
+                className="h-full w-full rounded-xl object-cover"
+              />
+            </div>
 
-          <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
-              {section.eyebrow}
-            </p>
-            <h2 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
-              {section.title}
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/70">
-              {section.body}
-            </p>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
+                {section.eyebrow}
+              </p>
+              <h2 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
+                {section.title}
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-[var(--dark-text)]/70">
+                {section.body}
+              </p>
 
-            <ol className="mt-8 space-y-5">
-              {steps.map((step, index) => (
-                <li key={step.title} className="flex gap-4">
-                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[var(--jaggery-brown)] text-sm font-bold text-[var(--white)]">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-[var(--dark-text)]">
-                      {step.title}
-                    </p>
-                    <p className="mt-0.5 text-sm text-[var(--dark-text)]/65">
-                      {step.text}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+              <ol className="mt-7 space-y-4">
+                {steps.map((step, index) => (
+                  <li key={step.title} className="flex gap-4">
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[var(--jaggery-brown)] text-sm font-bold text-[var(--white)]">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-[var(--dark-text)]">
+                        {step.title}
+                      </p>
+                      <p className="mt-0.5 text-sm text-[var(--dark-text)]/65">
+                        {step.text}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
 
-            <Link
-              href={cta.href}
-              className="mt-8 inline-block rounded-full bg-[var(--jaggery-brown)] px-7 py-3.5 text-sm font-semibold text-[var(--white)] transition-colors hover:bg-[var(--ginger-terracotta)]"
-            >
-              {cta.label}
-            </Link>
+              <Link
+                href={cta.href}
+                className="mt-7 inline-block rounded-full bg-[var(--jaggery-brown)] px-7 py-3.5 text-sm font-semibold text-[var(--white)] transition-colors hover:bg-[var(--ginger-terracotta)]"
+              >
+                {cta.label}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

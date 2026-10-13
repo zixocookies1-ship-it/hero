@@ -50,9 +50,9 @@ export default function ProductGallery({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div
-        className="relative aspect-square w-full touch-pan-y overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)]"
+        className="relative mx-auto aspect-square w-full max-w-[286px] touch-pan-y overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)]"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -61,8 +61,8 @@ export default function ProductGallery({
           src={activeImage}
           alt={`${alt} - view ${activeIndex + 1}`}
           fill
-          sizes="(max-width: 1024px) 90vw, 520px"
-          className="scale-105 object-cover transition-transform duration-300"
+          sizes="(max-width: 1024px) 90vw, 286px"
+          className="scale-100 object-cover transition-transform duration-300"
           priority
         />
       </div>
@@ -70,7 +70,7 @@ export default function ProductGallery({
       {images.length > 1 && (
         <div
           ref={stripRef}
-          className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"
+          className="-mx-1 flex snap-x snap-mandatory justify-center gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"
         >
           {images.map((image, index) => (
             <button
@@ -80,7 +80,7 @@ export default function ProductGallery({
               onClick={() => setActiveIndex(index)}
               aria-label={`Show image ${index + 1}`}
               aria-current={index === activeIndex}
-              className={`relative aspect-square w-20 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-[var(--warm-cream)] transition-colors ${
+              className={`relative aspect-square w-12 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-[var(--warm-cream)] transition-colors ${
                 index === activeIndex
                   ? "border-[var(--ginger-terracotta)]"
                   : "border-black/5 hover:border-[var(--ginger-terracotta)]/50"
@@ -90,7 +90,7 @@ export default function ProductGallery({
                 src={image}
                 alt=""
                 fill
-                sizes="80px"
+                sizes="64px"
                 className="scale-110 object-cover"
               />
             </button>

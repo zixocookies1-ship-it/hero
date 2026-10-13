@@ -28,7 +28,7 @@ export default async function Footer() {
   const heading = "font-heading text-sm font-semibold";
 
   return (
-    <footer className="relative overflow-hidden bg-[var(--footer-ink)] text-[var(--white)]">
+    <footer className="relative overflow-hidden bg-[var(--forest-green)] text-[var(--white)]">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(80rem_30rem_at_120%_-10%,rgba(224,79,56,0.18),transparent_60%)]"

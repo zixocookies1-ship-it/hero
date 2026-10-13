@@ -76,9 +76,9 @@ export default async function ProductDetailPage({
   };
 
   return (
-    <main className="pt-40 pb-24">
+    <main className="pt-28 pb-20">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <ProductGallery images={product.images} alt={product.name} />
 
           <div>
@@ -87,11 +87,11 @@ export default async function ProductDetailPage({
               <span className="text-[var(--dark-text)]/40"> &bull; </span>
               {product.inStock ? "In Stock" : "Out of Stock"}
             </p>
-            <h1 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
+            <h1 className="mt-2 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
               {product.name}
             </h1>
 
-            <div className="mt-4">
+            <div className="mt-3">
               <PriceDisplay
                 size="lg"
                 sellingPrice={product.sellingPrice}
@@ -99,14 +99,17 @@ export default async function ProductDetailPage({
                 discountPercent={product.discountPercent}
                 unit={product.weight}
               />
-              <p className="mt-2 text-sm text-[var(--dark-text)]/60">Inclusive of all taxes</p>
+              <p className="mt-1.5 text-sm text-[var(--dark-text)]/60">Inclusive of all taxes</p>
             </div>
 
-            <p className="mt-6 text-base leading-relaxed text-[var(--dark-text)]/80">
+            <p className="mt-5 text-base leading-relaxed text-[var(--dark-text)]/80">
               {product.description}
             </p>
 
-            <div className="mt-6 space-y-2.5">
+            {/* Benefits are framed so the scannable list reads as one block rather
+                than loose lines floating between the description and the CTA. */}
+            <div className="mt-5 rounded-2xl border border-[var(--natural-green)]/12 bg-[var(--mint-soft)] p-5">
+              <div className="space-y-2.5">
               {product.highlights.map((highlight) => (
                 <p
                   key={highlight}
@@ -141,10 +144,11 @@ export default async function ProductDetailPage({
                 </svg>
                 {deliveryNote}
               </p>
+              </div>
             </div>
 
-            <div className="mt-6 border-t border-black/5 pt-6">
-              <p className="mb-2 text-sm font-medium text-[var(--dark-text)]">
+            <div className="mt-5 border-t border-black/5 pt-5">
+              <p className="mb-1.5 text-sm font-medium text-[var(--dark-text)]">
                 Ingredients
               </p>
               <p className="text-sm leading-relaxed text-[var(--dark-text)]/70">
@@ -152,23 +156,23 @@ export default async function ProductDetailPage({
               </p>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-5">
               <ProductActions product={product} />
             </div>
 
-            <div className="mt-4">
+            <div className="mt-3">
               <WhatsAppEnquiry product={product} />
             </div>
           </div>
         </div>
 
-        <section className="mt-24">
-          <div className="mb-8 text-center">
+        <section className="mt-20">
+          <div className="mb-6 text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
               You may also like
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((item) => (
               <ProductCard key={item.slug} product={item} />
             ))}
