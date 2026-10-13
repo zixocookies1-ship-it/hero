@@ -21,8 +21,8 @@ const BADGES: TrustBadge[] = [
   },
   {
     key: "lab",
-    title: "Independent Lab Reports",
-    text: "Available reports can be viewed directly online.",
+    title: "Lab Tested",
+    text: "Quality checked for purity and consistency.",
   },
   {
     key: "payments",
