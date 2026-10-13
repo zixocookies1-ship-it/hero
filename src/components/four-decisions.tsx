@@ -90,11 +90,11 @@ export default async function FourDecisions() {
             </p>
           </div>
 
-          <ol className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2">
+          <ol className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2 lg:justify-items-center [&>*:last-child]:col-span-full [&>*:last-child]:max-w-xl [&>*:last-child]:justify-self-center">
             {items.map((decision, index) => (
               <li
                 key={`${index}-${decision.title}`}
-                className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(240,247,235,0.88))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(26,18,8,0.4)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(26,18,8,0.5)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7"
+                className="group relative flex gap-5 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(240,247,235,0.88))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_32px_-20px_rgba(26,18,8,0.4)] backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_52px_-24px_rgba(26,18,8,0.5)] motion-reduce:transform-none motion-reduce:transition-none sm:p-7 w-full"
               >
                 {/* Warm wash that fades up on hover, under the text. */}
                 <span
