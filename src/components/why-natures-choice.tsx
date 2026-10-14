@@ -4,7 +4,7 @@ import { loadSections, type Section, type SectionItem } from "@/lib/cms";
 const FALLBACK_ITEMS: SectionItem[] = [
   {
     title: "Pure & Natural",
-    text: "No additives, no preservatives, no chemicals - just sugarcane jaggery.",
+    text: "No additives, no preservatives - just sugarcane jaggery.",
   },
   {
     title: "Traditional Method",

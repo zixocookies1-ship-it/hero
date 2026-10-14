@@ -10,7 +10,7 @@ const FALLBACK_ITEMS: SectionItem[] = [
   {
     subtitle: "Pure & Natural",
     title: "Nothing Added",
-    text: "No preservatives, no chemicals, no artificial colouring. Just sugarcane, slow-cooked.",
+    text: "No preservatives, no artificial colouring. Just sugarcane, slow-cooked.",
   },
   {
     subtitle: "Traditional Method",

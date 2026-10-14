@@ -28,7 +28,7 @@ export default async function ProductsPage() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-[var(--dark-text)]/70">
             Every jar is slow-cooked in pure clay pots over natural wood fire,
-            with no preservatives and no chemicals.
+            with no preservatives.
           </p>
         </div>
 

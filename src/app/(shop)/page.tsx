@@ -16,7 +16,7 @@ import { loadCatalogue, loadCombos, loadSections, type Section } from "@/lib/cms
 export const metadata: Metadata = {
   title: "Authentic Indian Jaggery - Nature's Choice Jaggery",
   description:
-    "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals — Desi Chocolatey, Desi Til and Desi Elaichi, made in Uttar Pradesh.",
+    "Slow-cooked in pure clay pots over natural wood fire. No preservatives — Desi Chocolatey, Desi Til and Desi Elaichi, made in Uttar Pradesh.",
   alternates: { canonical: "/" },
 };
 
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   title: "Authentic Indian Jaggery",
   titleAccent: "Made The Traditional Way",
   body:
-    "Slow-cooked in pure clay pots over natural wood fire. No preservatives, no chemicals, just honest sweetness from sugarcane farms in Uttar Pradesh.",
+    "Slow-cooked in pure clay pots over natural wood fire. No preservatives, just honest sweetness from sugarcane farms in Uttar Pradesh.",
   body2: "",
   image: "/images/hero.jpeg",
   imageMobile: "",
@@ -85,7 +85,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="group relative flex min-h-screen items-center justify-center overflow-hidden">
+      <section className="group relative flex min-h-[75vh] items-center justify-center overflow-hidden bg-[var(--warm-cream)] md:min-h-screen">
         <Link
           href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
           className="absolute inset-0 z-[5]"
@@ -101,7 +101,7 @@ export default async function Home() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100 md:hidden"
+          className="object-contain object-center md:hidden"
         />
         <Image
           src={hero.image || "/images/hero.jpeg"}
@@ -109,7 +109,7 @@ export default async function Home() {
           fill
           priority
           sizes="100vw"
-          className="hidden object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100 md:block"
+          className="hidden object-contain object-center md:block"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
         <div className="relative z-10 w-full px-6 py-28">

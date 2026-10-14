@@ -32,7 +32,7 @@ const process = [
 const values = [
   {
     title: "Pure & Natural",
-    body: "No additives, no preservatives, no chemicals - just sugarcane jaggery.",
+    body: "No additives, no preservatives - just sugarcane jaggery.",
   },
   {
     title: "Traditional Method",
@@ -55,11 +55,11 @@ export default async function AboutPage() {
   return (
     <main className="pt-40 pb-24">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-16 max-w-2xl">
+        <div className="mb-16">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
             About Nature&apos;s Choice
           </p>
-          <h1 className="mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
+          <h1 className="mt-3 text-2xl md:whitespace-nowrap md:text-3xl lg:text-4xl font-bold text-[var(--dark-text)]">
             Jaggery The Way It Was Always Meant To Taste
           </h1>
         </div>

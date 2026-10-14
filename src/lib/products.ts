@@ -49,7 +49,7 @@ export const products: Product[] = [
       "Organic sugarcane juice, jaggery, cocoa, natural colour.",
     highlights: [
       "Pure, natural and unadulterated",
-      "No preservatives or chemicals",
+      "No preservatives",
       "Gold-kettle method in pure clay pots",
       "Naturally rich in iron and minerals",
     ],
@@ -80,7 +80,7 @@ export const products: Product[] = [
       "Organic sugarcane juice, jaggery, roasted sesame (til), cocoa, natural colour.",
     highlights: [
       "Roasted sesame for a nutty finish",
-      "No preservatives or chemicals",
+      "No preservatives",
       "Gold-kettle method in pure clay pots",
       "Naturally rich in minerals",
     ],
@@ -97,6 +97,7 @@ export const products: Product[] = [
       "/images/products/desi-til-chocolatey-jaggery/04.jpeg",
       "/images/products/desi-til-chocolatey-jaggery/05.jpeg",
       "/images/products/desi-til-chocolatey-jaggery/07.jpeg",
+      "/images/desi-til.webp",
     ],
   },
   {
@@ -111,7 +112,7 @@ export const products: Product[] = [
       "Organic sugarcane juice, jaggery, green cardamom, roasted sesame (til), cocoa, natural colour.",
     highlights: [
       "Aromatic cardamom and roasted sesame",
-      "No preservatives or chemicals",
+      "No preservatives",
       "Gold-kettle method in pure clay pots",
       "Suitable for chai and traditional sweets",
     ],
@@ -127,6 +128,7 @@ export const products: Product[] = [
       "/images/products/desi-elaichi-chocolatey-jaggery/04 (1).jpeg",
       "/images/products/desi-elaichi-chocolatey-jaggery/05 (1).jpeg",
       "/images/products/desi-elaichi-chocolatey-jaggery/06 (1).jpeg",
+      "/images/desi-elaichi.webp",
     ],
   },
 ];
