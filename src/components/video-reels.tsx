@@ -23,7 +23,7 @@ const REELS: Reel[] = [
   {
     id: "wood-fire",
     src: "",
-    poster: "/images/hero-banner.png",
+    poster: "/images/gold-kettle-cooking.webp",
     label: "The batch",
     caption: "Slow-cooked over natural wood fire",
   },

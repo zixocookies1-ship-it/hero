@@ -18,7 +18,7 @@ const FALLBACK: Section = {
     "It started with one simple thought - why should jaggery always taste the same? We wanted to keep the goodness and familiarity of traditional jaggery, but give it a new twist that today's generation would genuinely enjoy.",
   body2:
     "That simple idea became Nature's Choice Jaggery - traditional Indian jaggery with a delicious chocolatey twist. What started as an idea is slowly becoming a brand we're truly proud of. And honestly, this is just the beginning.",
-  image: "/images/hero-banner.png",
+  image: "/images/jaggery-blocks.webp",
   imageMobile: "",
   items: FALLBACK_ITEMS,
   links: [{ label: "READ OUR STORY", href: "/about" }],
@@ -82,7 +82,7 @@ export default async function OurStoryPreview() {
             <div className="overflow-hidden rounded-2xl bg-[var(--warm-cream)] p-3">
               <div className="relative aspect-[3/2] w-full overflow-hidden rounded-xl">
                 <Image
-                  src={section.image || "/images/hero-banner.png"}
+                  src={section.image || "/images/jaggery-blocks.webp"}
                   alt="Nature's Choice Jaggery"
                   fill
                   sizes="(max-width: 1024px) calc(100vw - 4rem), 600px"
