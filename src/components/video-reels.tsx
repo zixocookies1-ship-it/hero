@@ -13,17 +13,12 @@ import { useEffect, useRef, useState } from "react";
  */
 type Reel = {
   id: string;
-  /** Absolute path under `public`, e.g. "/videos/customer-review-1.mp4". */
+  /** Absolute path under `public`, e.g. "/videos/customer-review-2.mp4". */
   src: string;
   label: string;
 };
 
 const REELS: Reel[] = [
-  {
-    id: "customer-review-1",
-    src: "/videos/customer-review-1.mp4",
-    label: "Customer review",
-  },
   {
     id: "customer-review-2",
     src: "/videos/customer-review-2.mp4",
