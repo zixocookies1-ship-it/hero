@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--dark-text)]/10 bg-[var(--white)] shadow-sm transition-all duration-500 ease-out hover:-translate-y-2 hover:border-[var(--mint-soft)] hover:shadow-xl">
-      <div className="relative aspect-[4/3] w-full bg-[linear-gradient(135deg,var(--warm-cream),var(--mint-soft))]">
+      <div className="relative">
         <Link
           href={`/products/${product.slug}`}
           className="block"
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <div
             ref={stripRef}
             onScroll={onStripScroll}
-            className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex aspect-[4/3] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {images.length > 0 ? (
               images.map((src, index) => (
