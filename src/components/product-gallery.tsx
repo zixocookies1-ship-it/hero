@@ -62,7 +62,7 @@ export default function ProductGallery({
           alt={`${alt} - view ${activeIndex + 1}`}
           fill
           sizes="(max-width: 1024px) 90vw, 458px"
-          className="scale-100 object-cover transition-transform duration-300"
+          className="scale-100 object-contain object-center transition-transform duration-300"
           priority
         />
       </div>
@@ -91,7 +91,7 @@ export default function ProductGallery({
                 alt=""
                 fill
                 sizes="64px"
-                className="scale-110 object-cover"
+                className="object-contain object-center"
               />
             </button>
           ))}

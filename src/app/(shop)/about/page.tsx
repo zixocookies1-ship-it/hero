@@ -121,13 +121,15 @@ export default async function AboutPage() {
           </div>
 
           <div className="overflow-hidden rounded-2xl bg-[var(--white)] p-6 shadow-sm">
-            <Image
-              src="/images/farm-to-jar.png"
-              alt="Traditional jaggery making"
-              width={1200}
-              height={800}
-              className="h-full w-full rounded-xl object-cover"
-            />
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
+              <Image
+                src="/images/farm-to-jar.png"
+                alt="Traditional jaggery making"
+                fill
+                sizes="(max-width: 1024px) calc(100vw - 5rem), 600px"
+                className="object-cover object-center"
+              />
+            </div>
           </div>
           </div>
         </section>

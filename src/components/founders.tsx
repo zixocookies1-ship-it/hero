@@ -41,13 +41,13 @@ export default function Founders() {
             key={founder.name}
             className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-7 shadow-sm"
           >
-            <div className="flex items-center gap-5">
-              <span className="relative h-48 w-48 shrink-0 overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)]">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-5">
+              <span className="relative h-40 w-40 shrink-0 overflow-hidden rounded-2xl border border-black/5 bg-[var(--warm-cream)] sm:h-44 sm:w-44 lg:h-48 lg:w-48">
                 <Image
                   src={founder.image}
                   alt={founder.name}
                   fill
-                  sizes="192px"
+                  sizes="(max-width: 640px) 160px, (max-width: 1024px) 176px, 192px"
                   className="object-cover object-top"
                 />
               </span>

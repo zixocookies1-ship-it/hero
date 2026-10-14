@@ -72,14 +72,16 @@ export default async function WhyNaturesChoice() {
             </ul>
           </div>
 
-          <div className="overflow-hidden rounded-2xl bg-[var(--warm-cream)]/10 p-8">
-            <Image
-              src={section.image || "/images/farm-to-jar.png"}
-              alt="Traditional jaggery preparation"
-              width={600}
-              height={400}
-              className="rounded-2xl object-cover"
-            />
+          <div className="overflow-hidden rounded-2xl bg-[var(--warm-cream)]/10 p-6 sm:p-8">
+            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl">
+              <Image
+                src={section.image || "/images/farm-to-jar.png"}
+                alt="Traditional jaggery preparation"
+                fill
+                sizes="(max-width: 1024px) calc(100vw - 5rem), 560px"
+                className="object-cover object-center"
+              />
+            </div>
           </div>
         </div>
 

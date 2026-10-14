@@ -51,13 +51,15 @@ export default async function FarmToJar() {
         <div className="rounded-3xl border border-[var(--natural-green)]/10 bg-[var(--mint-soft)] p-6 sm:p-10 lg:p-12">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
             <div className="overflow-hidden rounded-2xl bg-[var(--white)] p-4">
-              <Image
-                src={section.image || "/images/farm-to-jar.png"}
-                alt="From sugarcane farm to jar"
-                width={1200}
-                height={800}
-                className="h-full w-full rounded-xl object-cover"
-              />
+              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-xl bg-[var(--warm-cream)]">
+                <Image
+                  src={section.image || "/images/farm-to-jar.png"}
+                  alt="From sugarcane farm to jar"
+                  fill
+                  sizes="(max-width: 1024px) calc(100vw - 4rem), 600px"
+                  className="object-cover object-center"
+                />
+              </div>
             </div>
 
             <div>

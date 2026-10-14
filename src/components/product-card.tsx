@@ -67,8 +67,8 @@ export default function ProductCard({ product }: { product: Product }) {
                      src={src}
                      alt={index === active ? `${product.name} ${product.weight}` : ""}
                      fill
-                     sizes="(max-width: 768px) 80vw, 280px"
-                     className="object-cover object-center"
+                     sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 50vw, 33vw"
+                     className="object-contain object-center"
                      loading="lazy"
                    />
                 </div>

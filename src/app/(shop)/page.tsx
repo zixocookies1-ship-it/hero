@@ -85,7 +85,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="group relative flex min-h-[75vh] items-center justify-center overflow-hidden bg-[var(--warm-cream)] md:aspect-[3/2] md:min-h-0">
+      <section className="group relative flex min-h-[58svh] items-center justify-center overflow-hidden bg-[var(--warm-cream)] md:aspect-[3/2] md:min-h-0">
         <Link
           href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
           className="absolute inset-0 z-[5]"
@@ -112,7 +112,7 @@ export default async function Home() {
           className="hidden object-contain object-center md:block"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
-        <div className="relative z-10 w-full px-6 py-28">
+        <div className="relative z-10 w-full px-6 py-16 sm:py-20 md:py-28">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-xl">
               <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

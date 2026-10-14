@@ -80,13 +80,15 @@ export default async function OurStoryPreview() {
             </div>
 
             <div className="overflow-hidden rounded-2xl bg-[var(--warm-cream)] p-3">
-              <Image
-                src={section.image || "/images/hero-banner.png"}
-                alt="Nature's Choice Jaggery"
-                width={1200}
-                height={800}
-                className="h-full w-full rounded-xl object-cover"
-              />
+              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-xl">
+                <Image
+                  src={section.image || "/images/hero-banner.png"}
+                  alt="Nature's Choice Jaggery"
+                  fill
+                  sizes="(max-width: 1024px) calc(100vw - 4rem), 600px"
+                  className="object-cover object-center"
+                />
+              </div>
             </div>
           </div>
         </div>
