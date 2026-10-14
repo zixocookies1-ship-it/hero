@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Customer review wall. Each card is a vertical 9:16 clip with its label pinned
  * bottom-left, matching the reels shelves the brand already posts.
  *
  * The clips ship with the site under `public/videos`, so nothing is fetched from
- * a third party. They are only wired up lazily: a card gets its `src` the first
- * time it scrolls into view and pauses again once it leaves, so a shelf of
- * multi-megabyte phone footage never downloads all at once.
+ * a third party. `preload="none"` keeps a shelf of multi-megabyte phone footage
+ * from downloading before anyone presses play: a card only starts fetching when
+ * it scrolls into view, and pauses again once it leaves.
  */
 type Reel = {
   id: string;
@@ -43,48 +43,79 @@ const REELS: Reel[] = [
 
 function ReelCard({ reel }: { reel: Reel }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || typeof IntersectionObserver === "undefined") return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!video.getAttribute("src")) {
-            video.setAttribute("src", reel.src);
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            // Autoplay is allowed because the element is muted, but the promise
+            // still rejects if the browser declines, so it is swallowed rather
+            // than left unhandled.
+            void video.play().catch(() => {});
+          } else if (!video.paused) {
+            video.pause();
           }
-          void video.play().catch(() => {});
-        } else {
-          video.pause();
         }
       },
-      { threshold: 0.6 },
+      { threshold: 0.25 },
     );
 
     observer.observe(video);
     return () => observer.disconnect();
-  }, [reel.src]);
+  }, []);
+
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      void video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  };
 
   return (
     <figure className="group relative aspect-[9/16] overflow-hidden rounded-2xl bg-[var(--warm-cream)] shadow-sm transition-shadow hover:shadow-xl">
       <video
         ref={videoRef}
         className="h-full w-full object-cover"
+        src={reel.src}
         muted
         loop
         playsInline
         preload="none"
         aria-label={reel.label}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
       />
 
-      <span className="absolute left-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={playing ? "Pause review" : "Play review"}
+        className={`absolute inset-0 z-10 flex items-center justify-center bg-black/30 transition-opacity duration-300 ${
+          playing ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
+      >
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-[var(--jaggery-brown)] shadow-lg">
+          <svg viewBox="0 0 24 24" className="ml-0.5 h-6 w-6 fill-current" aria-hidden="true">
+            <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86A1 1 0 008 5.14z" />
+          </svg>
+        </span>
+      </button>
+
+      <span className="absolute left-3 top-3 z-20 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
         Video review
       </span>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
 
-      <figcaption className="absolute inset-x-0 bottom-0 p-4">
+      <figcaption className="absolute inset-x-0 bottom-0 z-20 p-4">
         <span className="block text-sm font-semibold leading-snug text-white">
           {reel.label}
         </span>

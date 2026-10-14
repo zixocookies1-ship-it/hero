@@ -60,7 +60,6 @@ export const products: Product[] = [
     discountPercent: 20,
     inStock: true,
     images: [
-      "/images/jaggery-blocks.webp",
       "/images/products/desi-chocolatey-jaggery/04.jpg",
       "/images/products/desi-chocolatey-jaggery/02.jpg",
       "/images/products/desi-chocolatey-jaggery/03.jpg",
@@ -123,7 +122,6 @@ export const products: Product[] = [
     discountPercent: 20,
     inStock: true,
     images: [
-      "/images/desi-elaichi.webp",
       "/images/products/desi-elaichi-chocolatey-jaggery/02 (1).jpeg",
       "/images/products/desi-elaichi-chocolatey-jaggery/03 (1).jpeg",
       "/images/products/desi-elaichi-chocolatey-jaggery/04 (1).jpeg",
