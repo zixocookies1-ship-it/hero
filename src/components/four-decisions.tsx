@@ -30,6 +30,40 @@ const FALLBACK_ITEMS: SectionItem[] = [
   },
 ];
 
+const PRICE_MARKER = "Every jar is priced at";
+
+/**
+ * The fifth decision ends with a pricing sentence that used to sit flush
+ * against the description. Splitting it out lets us give the price its own
+ * rule and spacing so it reads as a distinct line, while `renderTemplate` still
+ * resolves {{weight}} / {{sellingPrice}} / {{mrp}} from the live catalogue.
+ */
+function renderDecisionBody(
+  text: string,
+  tokens: Record<string, string | number>
+) {
+  const splitAt = text.indexOf(PRICE_MARKER);
+
+  if (splitAt === -1) {
+    return (
+      <p className="mt-4 text-sm leading-relaxed text-[var(--dark-text)]/70">
+        {renderTemplate(text, tokens)}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <p className="mt-4 text-sm leading-relaxed text-[var(--dark-text)]/70">
+        {renderTemplate(text.slice(0, splitAt).trimEnd(), tokens)}
+      </p>
+      <p className="mt-4 border-t border-[var(--dark-text)]/10 pt-4 text-sm font-semibold leading-relaxed text-[var(--dark-text)]">
+        {renderTemplate(text.slice(splitAt).trim(), tokens)}
+      </p>
+    </>
+  );
+}
+
 const FALLBACK: Section = {
   key: "home_decisions",
   label: "Home - Five decisions",
@@ -113,9 +147,7 @@ export default async function FourDecisions() {
                   <h3 className="font-serif text-xl font-bold text-[var(--natural-green)]">
                     {decision.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--dark-text)]/70">
-                    {renderTemplate(decision.text ?? "", tokens)}
-                  </p>
+                  {renderDecisionBody(decision.text ?? "", tokens)}
                 </div>
               </li>
             ))}

@@ -110,10 +110,10 @@ export default async function Home() {
           fill
           priority
           sizes="100vw"
-          className="hidden object-cover object-center md:block"
+          className="hidden object-cover object-center md:block md:scale-[0.96]"
         />
         <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent md:block" />
-        <div className="relative z-10 w-full px-6 py-10 md:py-28">
+        <div className="relative z-10 w-full px-6 py-10 md:pt-14 md:pb-32">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-xl">
               <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

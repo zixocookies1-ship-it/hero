@@ -55,7 +55,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <div
             ref={stripRef}
             onScroll={onStripScroll}
-            className="flex aspect-[4/3] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex aspect-square w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {images.length > 0 ? (
               images.map((src, index) => (

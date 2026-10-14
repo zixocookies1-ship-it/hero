@@ -123,8 +123,8 @@ export default async function AboutPage() {
           <div className="overflow-hidden rounded-2xl bg-[var(--white)] p-6 shadow-sm">
             <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
               <Image
-                src="/images/farm-to-jar.png"
-                alt="Traditional jaggery making"
+                src="/images/gold-kettle-cooking.webp"
+                alt="Jaggery being cooked in an open pan"
                 fill
                 sizes="(max-width: 1024px) calc(100vw - 5rem), 600px"
                 className="object-cover object-center"
@@ -224,24 +224,6 @@ export default async function AboutPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="mt-20 rounded-2xl border border-black/5 bg-[var(--white)] p-8 shadow-sm">
-          <h2 className="text-xl font-bold text-[var(--dark-text)]">
-            Food Safety &amp; Compliance
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--dark-text)]/70">
-            We are currently finalising our FSSAI licence details and will publish
-            the licence number here as soon as it is available. If you need our
-            current licence details for your records, please contact us and we
-            will share them directly.
-          </p>
-          <Link
-            href="/contact"
-            className="mt-6 inline-block rounded-full border border-[var(--jaggery-brown)] px-6 py-3 text-sm font-semibold text-[var(--jaggery-brown)] transition-colors hover:bg-[var(--jaggery-brown)] hover:text-[var(--white)]"
-          >
-            REQUEST LICENCE DETAILS
-          </Link>
         </section>
 
         <section className="mt-20 rounded-2xl border border-black/5 bg-[var(--warm-cream)] p-8 shadow-sm">

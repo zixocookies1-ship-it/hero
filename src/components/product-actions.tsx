@@ -50,7 +50,7 @@ export default function ProductActions({
   };
 
   const base =
-    "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ginger-terracotta)]";
+    "cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ginger-terracotta)]";
 
   const addLabel = inCart ? "ADDED TO CART" : "ADD TO CART";
 
