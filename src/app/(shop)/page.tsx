@@ -85,7 +85,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="group relative flex min-h-[75vh] items-center justify-center overflow-hidden bg-[var(--warm-cream)] md:min-h-screen">
+      <section className="group relative flex min-h-[75vh] items-center justify-center overflow-hidden bg-[var(--warm-cream)] md:aspect-[3/2] md:min-h-0">
         <Link
           href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
           className="absolute inset-0 z-[5]"
