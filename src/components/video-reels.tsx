@@ -34,6 +34,11 @@ const REELS: Reel[] = [
     src: "/videos/customer-review-4.mp4",
     label: "Customer review",
   },
+  {
+    id: "customer-review-5",
+    src: "/videos/customer-review-5.mp4",
+    label: "Customer review",
+  },
 ];
 
 function ReelCard({ reel }: { reel: Reel }) {
