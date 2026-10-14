@@ -55,3 +55,6 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Raw footage too large for GitHub (100 MB hard limit); not deployed
+public/videos/IMG_4920.MOV

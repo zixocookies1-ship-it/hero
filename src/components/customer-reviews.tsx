@@ -119,11 +119,11 @@ export default async function CustomerReviews() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2 [scrollbar-width:thin]">
           {reviews.map((review) => (
             <article
               key={review.name}
-              className="flex flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-6 shadow-sm"
+              className="flex w-[78vw] shrink-0 snap-start flex-col rounded-2xl border border-black/5 bg-[var(--white)] p-6 shadow-sm sm:w-[44vw] lg:w-[30vw]"
             >
               <div className="flex items-center gap-3">
                 <span

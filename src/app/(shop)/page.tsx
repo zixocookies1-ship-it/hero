@@ -85,34 +85,35 @@ export default async function Home() {
 
   return (
     <>
-      <section className="group relative flex min-h-[58svh] items-center justify-center overflow-hidden bg-[var(--warm-cream)] md:aspect-[3/2] md:min-h-0">
+      <section className="relative overflow-hidden bg-[var(--warm-cream)] md:aspect-[3/2] md:flex md:items-center md:justify-center">
         <Link
           href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
-          className="absolute inset-0 z-[5]"
+          className="relative block aspect-[3/2] w-full md:absolute md:inset-0 md:z-[5]"
           aria-label={
             heroProduct
               ? `Shop ${heroProduct.name}`
               : "Shop our jaggery"
           }
-        />
-        <Image
-          src={hero.imageMobile || hero.image || "/images/hero.jpeg"}
-          alt={hero.title || "Nature's Choice Jaggery"}
-          fill
-          priority
-          sizes="100vw"
-          className="object-contain object-center md:hidden"
-        />
+        >
+          <Image
+            src={hero.imageMobile || hero.image || "/images/hero.jpeg"}
+            alt={hero.title || "Nature's Choice Jaggery"}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center md:hidden"
+          />
+        </Link>
         <Image
           src={hero.image || "/images/hero.jpeg"}
           alt={hero.title || "Nature's Choice Jaggery"}
           fill
           priority
           sizes="100vw"
-          className="hidden object-contain object-center md:block"
+          className="hidden object-cover object-center md:block"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent" />
-        <div className="relative z-10 w-full px-6 py-16 sm:py-20 md:py-28">
+        <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent md:block" />
+        <div className="relative z-10 w-full px-6 py-10 md:py-28">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-xl">
               <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">

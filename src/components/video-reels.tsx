@@ -1,91 +1,92 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef } from "react";
 
 /**
- * Short-form video wall. Each card is a vertical 9:16 reel with its caption
- * pinned bottom-left, styled after the reels shelves the brand already posts.
+ * Customer review wall. Each card is a vertical 9:16 clip with its label pinned
+ * bottom-left, matching the reels shelves the brand already posts.
  *
- * Clips are referenced by `src`. When `src` is empty the card falls back to a
- * still, so the shelf reads as intended before the footage lands; drop the
- * files into `public/videos/` and fill in the paths to switch a card over to a
- * playing reel. Nothing here is fetched from a third party — the videos ship
- * with the site.
+ * The clips ship with the site under `public/videos`, so nothing is fetched from
+ * a third party. They are only wired up lazily: a card gets its `src` the first
+ * time it scrolls into view and pauses again once it leaves, so a shelf of
+ * multi-megabyte phone footage never downloads all at once.
  */
 type Reel = {
   id: string;
-  /** Absolute path under `public`, e.g. "/videos/gold-kettle.mp4". */
+  /** Absolute path under `public`, e.g. "/videos/customer-review-1.mp4". */
   src: string;
-  poster: string;
   label: string;
-  caption: string;
 };
 
 const REELS: Reel[] = [
   {
-    id: "wood-fire",
-    src: "",
-    poster: "/images/gold-kettle-cooking.webp",
-    label: "The batch",
-    caption: "Slow-cooked over natural wood fire",
+    id: "customer-review-1",
+    src: "/videos/customer-review-1.mp4",
+    label: "Customer review",
   },
   {
-    id: "clay-pots",
-    src: "",
-    poster: "/images/farm-to-jar.png",
-    label: "The vessel",
-    caption: "Clay pots, the traditional way",
+    id: "customer-review-2",
+    src: "/videos/customer-review-2.mp4",
+    label: "Customer review",
   },
   {
-    id: "hand-packed",
-    src: "",
-    poster: "/images/products/desi-til-chocolatey-jaggery/06.jpeg",
-    label: "The pack",
-    caption: "Filled and sealed by hand",
+    id: "customer-review-3",
+    src: "/videos/customer-review-3.mp4",
+    label: "Customer review",
   },
   {
-    id: "real-elaichi",
-    src: "",
-    poster: "/images/products/desi-elaichi-chocolatey-jaggery/03 (1).jpeg",
-    label: "The flavour",
-    caption: "Real elaichi, ground in-house",
+    id: "customer-review-4",
+    src: "/videos/customer-review-4.mp4",
+    label: "Customer review",
   },
 ];
 
 function ReelCard({ reel }: { reel: Reel }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!video.getAttribute("src")) {
+            video.setAttribute("src", reel.src);
+          }
+          void video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.6 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [reel.src]);
+
   return (
     <figure className="group relative aspect-[9/16] overflow-hidden rounded-2xl bg-[var(--warm-cream)] shadow-sm transition-shadow hover:shadow-xl">
-      {reel.src ? (
-        <video
-          className="h-full w-full object-cover"
-          src={reel.src}
-          poster={reel.poster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-        />
-      ) : (
-        <Image
-          src={reel.poster}
-          alt={reel.caption}
-          fill
-          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100"
-        />
-      )}
+      <video
+        ref={videoRef}
+        className="h-full w-full object-cover"
+        muted
+        loop
+        playsInline
+        preload="none"
+        aria-label={reel.label}
+      />
 
       <span className="absolute left-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
-        Reel
+        Video review
       </span>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
 
       <figcaption className="absolute inset-x-0 bottom-0 p-4">
-        <span className="block text-[10px] font-semibold uppercase tracking-widest text-white/70">
+        <span className="block text-sm font-semibold leading-snug text-white">
           {reel.label}
-        </span>
-        <span className="mt-1 block text-sm font-semibold leading-snug text-white">
-          {reel.caption}
         </span>
       </figcaption>
     </figure>
@@ -98,20 +99,25 @@ export default function VideoReels() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-10 max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
-            From the kitchen
+            Customer reviews
           </p>
           <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[var(--dark-text)]">
-            Real Ingredients. Real Work
+            Straight From Our Customers
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-[var(--dark-text)]/65">
-            No studio, no stand-ins — the same sugarcane, clay pots and wood fire
-            behind every jar, captured the way it happens.
+            Real clips shared by the people who buy our jaggery, in their own
+            words and their own kitchens.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:thin] sm:gap-5">
           {REELS.map((reel) => (
-            <ReelCard key={reel.id} reel={reel} />
+            <div
+              key={reel.id}
+              className="w-[45vw] shrink-0 snap-start sm:w-[32vw] lg:w-[22.5vw]"
+            >
+              <ReelCard reel={reel} />
+            </div>
           ))}
         </div>
       </div>
