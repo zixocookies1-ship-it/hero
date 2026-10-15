@@ -95,26 +95,26 @@ export default async function Home() {
               : "Shop our jaggery"
           }
         >
+<Image
+              src={hero.imageMobile || hero.image || "/images/hero.jpeg"}
+              alt={hero.title || "Nature's Choice Jaggery"}
+              fill
+              priority
+              sizes="100vw"
+              className="object-contain object-center md:hidden"
+            />
+          </Link>
           <Image
-            src={hero.imageMobile || hero.image || "/images/hero.jpeg"}
+            src={hero.image || "/images/hero.jpeg"}
             alt={hero.title || "Nature's Choice Jaggery"}
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center md:hidden"
+            className="hidden object-contain object-center md:block md:scale-[0.96]"
           />
-        </Link>
-        <Image
-          src={hero.image || "/images/hero.jpeg"}
-          alt={hero.title || "Nature's Choice Jaggery"}
-          fill
-          priority
-          sizes="100vw"
-          className="hidden object-cover object-center md:block md:scale-[0.96]"
-        />
-        <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--warm-cream)]/85 via-[var(--warm-cream)]/55 to-transparent md:block" />
-        <div className="relative z-10 w-full px-6 py-10 md:pt-14 md:pb-32">
-          <div className="mx-auto max-w-7xl">
+        <div className="pointer-events-none absolute inset-0 hidden md:block" />
+<div className="relative z-10 w-full px-6 py-20 md:pt-14 md:pb-32">
+          <div className="max-w-7xl">
             <div className="max-w-xl">
               <p className="text-xs font-medium uppercase tracking-widest text-[var(--ginger-terracotta)]">
                 {hero.eyebrow}
