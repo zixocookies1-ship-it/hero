@@ -101,7 +101,7 @@ export default async function Home() {
               fill
               priority
               sizes="100vw"
-              className="object-cover object-top md:hidden"
+              className="object-cover object-[center_30%] md:hidden"
             />
           </Link>
           <Image
