@@ -85,7 +85,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-[var(--warm-cream)] md:aspect-[3/2] md:flex md:items-center md:justify-center">
+      <section className="relative overflow-hidden bg-[var(--warm-cream)] pt-32 md:pt-0 md:aspect-[3/2] md:flex md:items-center md:justify-center">
         <Link
           href={heroProduct ? `/products/${heroProduct.slug}` : "/products"}
           className="relative block aspect-[3/2] w-full md:absolute md:inset-0 md:z-[5]"
