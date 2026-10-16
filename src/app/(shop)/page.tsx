@@ -95,13 +95,13 @@ export default async function Home() {
               : "Shop our jaggery"
           }
         >
-<Image
+          <Image
               src={hero.imageMobile || hero.image || "/images/hero.jpeg"}
               alt={hero.title || "Nature's Choice Jaggery"}
               fill
               priority
               sizes="100vw"
-              className="object-contain object-center md:hidden"
+              className="object-cover object-top md:hidden"
             />
           </Link>
           <Image
@@ -110,7 +110,7 @@ export default async function Home() {
             fill
             priority
             sizes="100vw"
-            className="hidden object-contain object-center md:block md:scale-[0.96]"
+            className="hidden object-cover object-center md:block"
           />
         <div className="pointer-events-none absolute inset-0 hidden md:block" />
 <div className="relative z-10 w-full px-6 py-20 md:pt-14 md:pb-32">
